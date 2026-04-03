@@ -1,0 +1,365 @@
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import {
+  Home,
+  Dumbbell,
+  Apple,
+  TrendingUp,
+  MessageSquare,
+  Users,
+  Settings,
+  Activity,
+  ShoppingBag,
+  FlaskConical,
+  FolderOpen,
+  CreditCard,
+  UserCircle,
+  CalendarDays,
+  Pill,
+  Gift,
+  Trophy,
+  Moon,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { api } from "@/api/client";
+import { useEnvironment } from "@/lib/EnvironmentContext";
+import { useViewMode } from "@/lib/ViewModeContext";
+import GymSwitcher from "@/components/env/GymSwitcher";
+import AIAssistantBar from "@/components/env/AIAssistantBar";
+import { Watch, BarChart3, Dna } from "lucide-react";
+
+// Apex MD (medical) client nav - full set including clinical items
+const apexClientNavItems = [
+  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
+  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
+  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
+  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
+  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
+  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
+  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
+  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
+  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
+  { title: "Health", url: createPageUrl("Health"), icon: Activity },
+  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
+  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
+  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
+  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
+  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
+  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
+];
+
+// Gym portals (OneLife, Planet Fitness, Gold's Gym) - fitness-focused nav
+const gymClientNavItems = [
+  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
+  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
+  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
+  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
+  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
+  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
+  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
+  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
+  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
+  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
+  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
+  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
+  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
+  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
+  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
+];
+
+// Apex MD admin nav
+const apexAdminNavItems = [
+  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
+  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
+  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
+  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
+  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
+  { title: "Messages", url: createPageUrl("AdminChat"), icon: MessageSquare },
+  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
+];
+
+// Gym admin nav
+const gymAdminNavItems = [
+  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
+  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
+  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
+  { title: "Store", url: createPageUrl("AdminMarketplace"), icon: ShoppingBag },
+  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
+];
+
+export default function Layout({ children }) {
+  const location = useLocation();
+  const { environment } = useEnvironment();
+  const { viewMode, toggleViewMode } = useViewMode();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    const user = await api.auth.me();
+    setCurrentUser(user);
+  };
+
+  const isAdmin = currentUser?.role === "admin";
+  const isGymEnv = environment.id !== "apex-md";
+  // Admins can toggle to patient view
+  const effectiveIsAdmin = isAdmin && viewMode === "admin";
+  const navItems = effectiveIsAdmin
+    ? (isGymEnv ? gymAdminNavItems : apexAdminNavItems)
+    : (isGymEnv ? gymClientNavItems : apexClientNavItems);
+
+  const isDark = environment.themeMode === "dark" || environment.id === "apex-md";
+  const activeItemBg = environment.primaryColor;
+  const activeItemTextColor =
+    environment.id === "planet-fitness" || environment.id === "golds-gym"
+      ? "#000000"
+      : "#FFFFFF";
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full" style={{ backgroundColor: environment.backgroundColor }}>
+        {/* Sidebar */}
+        <Sidebar
+          className="border-r"
+          style={{
+            backgroundColor: environment.sidebarBg,
+            borderColor: environment.borderColor,
+          }}
+        >
+          <SidebarHeader
+            className="border-b p-4"
+            style={{ borderColor: environment.borderColor }}
+          >
+            <Link to={createPageUrl("Dashboard")} className="block">
+              <div className="bg-white rounded-sm px-3 py-2 inline-block">
+                <img
+                  src={environment.logoUrl}
+                  alt={environment.name}
+                  className="h-20 w-auto object-contain"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "block";
+                  }}
+                />
+                <span
+                  className="hidden text-sm font-bold"
+                  style={{ color: environment.primaryColor }}
+                >
+                  {environment.name}
+                </span>
+              </div>
+              {isGymEnv && (
+                <p className="text-xs mt-1 font-semibold text-center" style={{ color: environment.mutedTextColor }}>
+                  Powered by Apex MD
+                </p>
+              )}
+            </Link>
+          </SidebarHeader>
+
+          <SidebarContent className="p-3">
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navItems.map((item) => {
+                    const isActive = location.pathname === item.url;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          className="mb-1 transition-all duration-200"
+                          style={
+                            isActive
+                              ? { backgroundColor: activeItemBg, color: activeItemTextColor }
+                              : { color: environment.sidebarText, opacity: 0.75 }
+                          }
+                        >
+                          <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
+                            <item.icon className="w-5 h-5" />
+                            <span className="font-semibold">{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {!isAdmin && currentUser?.health_score && (
+              <div
+                className="mt-6 mx-3 p-4 rounded-lg border"
+                style={{
+                  backgroundColor: isDark ? "#1a1a2e" : environment.surfaceColor,
+                  borderColor: environment.borderColor,
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className="text-sm font-bold uppercase tracking-wide"
+                    style={{ color: environment.sidebarText }}
+                  >
+                    Health Score
+                  </span>
+                  <Activity className="w-4 h-4" style={{ color: environment.primaryColor }} />
+                </div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className="text-4xl font-bold" style={{ color: environment.sidebarText }}>
+                    {Math.round(currentUser.health_score)}
+                  </span>
+                  <span className="text-lg font-semibold" style={{ color: environment.mutedTextColor }}>
+                    /100
+                  </span>
+                </div>
+                <div
+                  className="h-3 rounded-full overflow-hidden"
+                  style={{ backgroundColor: environment.borderColor }}
+                >
+                  <div
+                    className="h-full transition-all duration-500 rounded-full"
+                    style={{
+                      width: `${currentUser.health_score}%`,
+                      backgroundColor: environment.primaryColor,
+                    }}
+                  />
+                </div>
+                <p className="text-xs mt-2 font-semibold" style={{ color: environment.mutedTextColor }}>
+                  Powered by {environment.name}
+                </p>
+              </div>
+            )}
+          </SidebarContent>
+
+          {/* User footer */}
+          <div className="border-t p-4" style={{ borderColor: environment.borderColor }}>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center border-2"
+                style={{
+                  backgroundColor: isDark ? "#333" : environment.surfaceColor,
+                  borderColor: environment.primaryColor,
+                }}
+              >
+                <span
+                  className="font-bold text-sm"
+                  style={{ color: environment.primaryColor }}
+                >
+                  {currentUser?.full_name?.[0]?.toUpperCase() || "U"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm truncate" style={{ color: environment.sidebarText }}>
+                  {currentUser?.full_name || "User"}
+                </p>
+                <p className="text-xs truncate" style={{ color: environment.mutedTextColor }}>
+                  {currentUser?.email}
+                </p>
+              </div>
+              <Link to={createPageUrl("Profile")}>
+                <Settings
+                  className="w-5 h-5 transition-colors"
+                  style={{ color: environment.mutedTextColor }}
+                />
+              </Link>
+            </div>
+          </div>
+        </Sidebar>
+
+        {/* Main area */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {/* Top header */}
+          <header
+            className="border-b px-6 py-3 sticky top-0 z-10 flex items-center justify-between"
+            style={{
+              backgroundColor: environment.sidebarBg,
+              borderColor: environment.borderColor,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <SidebarTrigger
+                className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden"
+                style={{ color: environment.sidebarText }}
+              />
+              {/* Environment name pill */}
+              <div
+                className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border"
+                style={{
+                  borderColor: environment.primaryColor,
+                  color: environment.primaryColor,
+                  backgroundColor: "transparent",
+                }}
+              >
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: environment.primaryColor }}
+                />
+                {environment.name}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* View mode toggle — admin only */}
+              {isAdmin && (
+                <button
+                  onClick={toggleViewMode}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 text-xs font-bold transition-all hover:opacity-80"
+                  style={{
+                    borderColor: viewMode === "patient" ? environment.primaryColor : environment.borderColor,
+                    backgroundColor: viewMode === "patient" ? environment.primaryColor + "15" : "transparent",
+                    color: viewMode === "patient" ? environment.primaryColor : environment.mutedTextColor,
+                  }}
+                >
+                  {viewMode === "admin" ? (
+                    <><Users className="w-3.5 h-3.5" /> Patient View</>
+                  ) : (
+                    <><Settings className="w-3.5 h-3.5" /> Admin View</>
+                  )}
+                </button>
+              )}
+              {/* Admin gym switcher — hidden in patient view mode */}
+              {isAdmin && viewMode === "admin" && <GymSwitcher />}
+            </div>
+          </header>
+
+          {/* Patient view banner */}
+          {isAdmin && viewMode === "patient" && (
+            <div
+              className="px-4 py-2 text-xs font-bold text-center"
+              style={{ backgroundColor: environment.primaryColor + "20", color: environment.primaryColor, borderBottom: `1px solid ${environment.primaryColor}40` }}
+            >
+              👁 Previewing as Patient — click "Admin View" to return to admin mode
+            </div>
+          )}
+
+          {/* Page content */}
+          <div
+            className="flex-1 overflow-auto pb-20"
+            style={{ backgroundColor: environment.backgroundColor }}
+          >
+            {children}
+          </div>
+        </main>
+      </div>
+
+      {/* AI Assistant Bar - always at bottom for patients */}
+      <AIAssistantBar />
+    </SidebarProvider>
+  );
+}
