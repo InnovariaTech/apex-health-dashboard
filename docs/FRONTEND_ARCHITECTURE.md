@@ -20,9 +20,11 @@
 
 ## Folder conventions
 
+- `src/views/patient/` — patient portal: `pages/`, `components/home/` (patient dashboard widgets), `hooks/`, `config/patientNavigation.js`.
+- `src/views/staff/` — staff dashboard: `pages/`, `config/staffNavigation.js`.
 - `src/layouts/` — route shells (e.g. `AppLayout.jsx`).
 - `src/app/providers/` — root provider composition.
-- `src/features/<domain>/` — feature-specific hooks and (future) components moved out of `pages/`.
+- `src/components/` — shared UI (workouts, marketplace, env chrome) — not split by view unless patient-only (see `views/patient/components/home`).
 - `src/components/ui/` — shadcn primitives (do not mix with domain logic).
 
 ## Anti-patterns to avoid

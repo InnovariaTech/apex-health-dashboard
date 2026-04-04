@@ -1,13 +1,13 @@
 import React from "react";
 import { format } from "date-fns";
-import { useDashboardPageData } from "@/features/dashboard/hooks/useDashboardPageData";
+import { usePatientHomeData } from "@/views/patient/hooks/usePatientHomeData";
 
-import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
-import TreatmentsGlance from "@/components/dashboard/TreatmentsGlance";
-import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
-import QuickActionTiles from "@/components/dashboard/QuickActionTiles";
-import HabitTracker from "@/components/dashboard/HabitTracker";
-import WeeklyProgress from "@/components/dashboard/WeeklyProgress";
+import HealthScoreCard from "@/views/patient/components/home/HealthScoreCard";
+import TreatmentsGlance from "@/views/patient/components/home/TreatmentsGlance";
+import UpcomingTasks from "@/views/patient/components/home/UpcomingTasks";
+import QuickActionTiles from "@/views/patient/components/home/QuickActionTiles";
+import HabitTracker from "@/views/patient/components/home/HabitTracker";
+import WeeklyProgress from "@/views/patient/components/home/WeeklyProgress";
 
 export default function Dashboard() {
   const {
@@ -17,7 +17,7 @@ export default function Dashboard() {
     recentCheckIn,
     isLoading,
     reload,
-  } = useDashboardPageData();
+  } = usePatientHomeData();
 
   if (isLoading) {
     return (

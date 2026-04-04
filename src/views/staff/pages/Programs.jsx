@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dumbbell, Calendar, Target, Users, Search, Library, ListChecks, CheckCircle } from "lucide-react";
-import ExerciseLibraryTab from "../components/workouts/ExerciseLibraryTab";
+import ExerciseLibraryTab from "@/components/workouts/ExerciseLibraryTab";
 
 export default function Programs() {
   const [programs, setPrograms] = useState([]);

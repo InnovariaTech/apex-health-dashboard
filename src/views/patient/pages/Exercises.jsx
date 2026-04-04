@@ -24,9 +24,9 @@ import {
   Search
 } from "lucide-react";
 
-import ExerciseCard from "../components/exercises/ExerciseCard";
-import ExerciseForm from "../components/exercises/ExerciseForm";
-import ExerciseDetails from "../components/exercises/ExerciseDetails";
+import ExerciseCard from "@/components/exercises/ExerciseCard";
+import ExerciseForm from "@/components/exercises/ExerciseForm";
+import ExerciseDetails from "@/components/exercises/ExerciseDetails";
 
 export default function Exercises() {
   const [exercises, setExercises] = useState([]);

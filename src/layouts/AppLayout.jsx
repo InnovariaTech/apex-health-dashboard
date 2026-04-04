@@ -2,24 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  Home,
-  Dumbbell,
-  Apple,
-  TrendingUp,
-  MessageSquare,
   Users,
   Settings,
   Activity,
-  ShoppingBag,
-  FlaskConical,
-  FolderOpen,
-  CreditCard,
-  UserCircle,
-  CalendarDays,
-  Pill,
-  Gift,
-  Trophy,
-  Moon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,70 +23,8 @@ import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useViewMode } from "@/lib/ViewModeContext";
 import GymSwitcher from "@/components/env/GymSwitcher";
 import AIAssistantBar from "@/components/env/AIAssistantBar";
-import { Watch, BarChart3, Dna } from "lucide-react";
-
-// Apex MD (medical) client nav - full set including clinical items
-const apexClientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
-  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
-  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
-  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
-  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
-  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Health", url: createPageUrl("Health"), icon: Activity },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
-  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
-];
-
-// Gym portals (OneLife, Planet Fitness, Gold's Gym) - fitness-focused nav
-const gymClientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
-  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
-  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
-  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
-  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
-  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
-  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
-];
-
-// Apex MD admin nav
-const apexAdminNavItems = [
-  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
-  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
-  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Messages", url: createPageUrl("AdminChat"), icon: MessageSquare },
-  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
-];
-
-// Gym admin nav
-const gymAdminNavItems = [
-  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
-  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
-  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
-  { title: "Store", url: createPageUrl("AdminMarketplace"), icon: ShoppingBag },
-  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
-];
+import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
+import { getStaffNavItems } from "@/views/staff/config/staffNavigation";
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -123,8 +46,8 @@ export default function Layout({ children }) {
   // Admins can toggle to patient view
   const effectiveIsAdmin = isAdmin && viewMode === "admin";
   const navItems = effectiveIsAdmin
-    ? (isGymEnv ? gymAdminNavItems : apexAdminNavItems)
-    : (isGymEnv ? gymClientNavItems : apexClientNavItems);
+    ? getStaffNavItems(isGymEnv)
+    : getPatientNavItems(isGymEnv);
 
   const isDark = environment.themeMode === "dark" || environment.id === "apex-md";
   const activeItemBg = environment.primaryColor;
