@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import {
-  Home,
-  Dumbbell,
-  Apple,
-  TrendingUp,
-  MessageSquare,
-  Users,
-  Settings,
-  Activity,
-  ShoppingBag,
-  FlaskConical,
-  FolderOpen,
-  CreditCard,
-  UserCircle,
-  CalendarDays,
-  Pill,
-  Gift,
-  Trophy,
-  Moon,
-} from "lucide-react";
+import { Settings, Activity } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -35,78 +16,13 @@ import {
 } from "@/components/ui/sidebar";
 import { api } from "@/api/client";
 import { useEnvironment } from "@/lib/EnvironmentContext";
-import { useViewMode } from "@/lib/ViewModeContext";
-import GymSwitcher from "@/components/env/GymSwitcher";
 import AIAssistantBar from "@/components/env/AIAssistantBar";
-import { Watch, BarChart3, Dna } from "lucide-react";
-
-// Apex MD (medical) client nav - full set including clinical items
-const apexClientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
-  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
-  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
-  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
-  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
-  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Health", url: createPageUrl("Health"), icon: Activity },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
-  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
-];
-
-// Gym portals (OneLife, Planet Fitness, Gold's Gym) - fitness-focused nav
-const gymClientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
-  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-  { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
-  { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
-  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
-  { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
-  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
-  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
-];
-
-// Apex MD admin nav
-const apexAdminNavItems = [
-  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
-  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
-  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
-  { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  { title: "Messages", url: createPageUrl("AdminChat"), icon: MessageSquare },
-  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
-];
-
-// Gym admin nav
-const gymAdminNavItems = [
-  { title: "Dashboard", url: createPageUrl("AdminDashboard"), icon: Activity },
-  { title: "Clients", url: createPageUrl("Clients"), icon: Users },
-  { title: "Programs", url: createPageUrl("Programs"), icon: Dumbbell },
-  { title: "Store", url: createPageUrl("AdminMarketplace"), icon: ShoppingBag },
-  { title: "Business Analytics", url: createPageUrl("BusinessAnalytics"), icon: BarChart3 },
-];
+import GymSwitcher from "@/components/env/GymSwitcher";
+import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
 
 export default function Layout({ children }) {
   const location = useLocation();
   const { environment } = useEnvironment();
-  const { viewMode, toggleViewMode } = useViewMode();
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -118,13 +34,8 @@ export default function Layout({ children }) {
     setCurrentUser(user);
   };
 
-  const isAdmin = currentUser?.role === "admin";
   const isGymEnv = environment.id !== "apex-md";
-  // Admins can toggle to patient view
-  const effectiveIsAdmin = isAdmin && viewMode === "admin";
-  const navItems = effectiveIsAdmin
-    ? (isGymEnv ? gymAdminNavItems : apexAdminNavItems)
-    : (isGymEnv ? gymClientNavItems : apexClientNavItems);
+  const navItems = getPatientNavItems(isGymEnv);
 
   const isDark = environment.themeMode === "dark" || environment.id === "apex-md";
   const activeItemBg = environment.primaryColor;
@@ -136,7 +47,6 @@ export default function Layout({ children }) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full" style={{ backgroundColor: environment.backgroundColor }}>
-        {/* Sidebar */}
         <Sidebar
           className="border-r"
           style={{
@@ -203,7 +113,7 @@ export default function Layout({ children }) {
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {!isAdmin && currentUser?.health_score && (
+            {currentUser?.health_score != null && (
               <div
                 className="mt-6 mx-3 p-4 rounded-lg border"
                 style={{
@@ -247,7 +157,6 @@ export default function Layout({ children }) {
             )}
           </SidebarContent>
 
-          {/* User footer */}
           <div className="border-t p-4" style={{ borderColor: environment.borderColor }}>
             <div className="flex items-center gap-3">
               <div
@@ -282,9 +191,7 @@ export default function Layout({ children }) {
           </div>
         </Sidebar>
 
-        {/* Main area */}
         <main className="flex-1 flex flex-col min-w-0">
-          {/* Top header */}
           <header
             className="border-b px-6 py-3 sticky top-0 z-10 flex items-center justify-between"
             style={{
@@ -297,7 +204,6 @@ export default function Layout({ children }) {
                 className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden"
                 style={{ color: environment.sidebarText }}
               />
-              {/* Environment name pill */}
               <div
                 className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border"
                 style={{
@@ -314,41 +220,11 @@ export default function Layout({ children }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* View mode toggle — admin only */}
-              {isAdmin && (
-                <button
-                  onClick={toggleViewMode}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 text-xs font-bold transition-all hover:opacity-80"
-                  style={{
-                    borderColor: viewMode === "patient" ? environment.primaryColor : environment.borderColor,
-                    backgroundColor: viewMode === "patient" ? environment.primaryColor + "15" : "transparent",
-                    color: viewMode === "patient" ? environment.primaryColor : environment.mutedTextColor,
-                  }}
-                >
-                  {viewMode === "admin" ? (
-                    <><Users className="w-3.5 h-3.5" /> Patient View</>
-                  ) : (
-                    <><Settings className="w-3.5 h-3.5" /> Admin View</>
-                  )}
-                </button>
-              )}
-              {/* Admin gym switcher — hidden in patient view mode */}
-              {isAdmin && viewMode === "admin" && <GymSwitcher />}
+            <div className="flex items-center gap-2 shrink-0">
+              <GymSwitcher />
             </div>
           </header>
 
-          {/* Patient view banner */}
-          {isAdmin && viewMode === "patient" && (
-            <div
-              className="px-4 py-2 text-xs font-bold text-center"
-              style={{ backgroundColor: environment.primaryColor + "20", color: environment.primaryColor, borderBottom: `1px solid ${environment.primaryColor}40` }}
-            >
-              👁 Previewing as Patient — click "Admin View" to return to admin mode
-            </div>
-          )}
-
-          {/* Page content */}
           <div
             className="flex-1 overflow-auto pb-20"
             style={{ backgroundColor: environment.backgroundColor }}
@@ -358,7 +234,6 @@ export default function Layout({ children }) {
         </main>
       </div>
 
-      {/* AI Assistant Bar - always at bottom for patients */}
       <AIAssistantBar />
     </SidebarProvider>
   );

@@ -8,10 +8,10 @@ import {
 } from "@/mocks/static/dashboardFallbacks";
 
 /**
- * Loads patient dashboard aggregates (sessions, habits, check-ins).
+ * Loads patient home (dashboard) aggregates: sessions, habits, check-ins.
  * Falls back to static mock rows when the in-memory store is empty or on error.
  */
-export function useDashboardPageData() {
+export function usePatientHomeData() {
   const [currentUser, setCurrentUser] = useState(null);
   const [weekSessions, setWeekSessions] = useState([]);
   const [todayHabits, setTodayHabits] = useState(null);

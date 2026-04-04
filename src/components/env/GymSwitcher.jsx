@@ -1,55 +1,47 @@
-import React from "react";
-import { portalEnvironments } from "@/lib/environments";
+import { Building2, ChevronDown } from "lucide-react";
 import { useEnvironment } from "@/lib/EnvironmentContext";
+import { portalEnvironments } from "@/lib/environments";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, CheckCircle2 } from "lucide-react";
 
+/**
+ * Switches branded portal theme (gym / Apex MD). Persists in session via `EnvironmentProvider`.
+ */
 export default function GymSwitcher() {
   const { environment, setEnvironment } = useEnvironment();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all hover:opacity-80"
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-1.5 font-semibold border-2 bg-background/80 h-9 px-3"
           style={{
-            backgroundColor: environment.primaryColor,
-            borderColor: environment.primaryColor,
-            color: ["planet-fitness", "golds-gym"].includes(environment.id) ? "#000000" : "#ffffff",
+            borderColor: environment.borderColor,
+            color: environment.sidebarText,
           }}
         >
-          <span>Switch Gym</span>
-          <ChevronDown className="w-3 h-3" />
-        </button>
+          <Building2 className="h-4 w-4 shrink-0" aria-hidden />
+          <span className="hidden sm:inline truncate max-w-[10rem]">Switch gym</span>
+          <ChevronDown className="h-4 w-4 opacity-60 shrink-0" aria-hidden />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52 shadow-xl border-2" style={{ borderColor: environment.borderColor }}>
-        <DropdownMenuLabel className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-          Partner Environments
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {portalEnvironments.map((env) => (
-          <DropdownMenuItem
-            key={env.id}
-            onClick={() => setEnvironment(env.id)}
-            className="flex items-center gap-3 cursor-pointer py-2.5 px-3"
-          >
-            <div
-              className="w-3 h-3 rounded-full flex-shrink-0"
-              style={{ backgroundColor: env.primaryColor, border: `2px solid ${env.borderColor || '#ccc'}` }}
-            />
-            <span className="flex-1 font-semibold text-sm">{env.name}</span>
-            {environment.id === env.id && (
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-            )}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent align="end" className="w-[min(100vw-2rem,18rem)] max-h-[min(70vh,20rem)] overflow-y-auto">
+        <DropdownMenuRadioGroup value={environment.id} onValueChange={setEnvironment}>
+          {portalEnvironments.map((env) => (
+            <DropdownMenuRadioItem key={env.id} value={env.id} className="font-medium cursor-pointer">
+              {env.name}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

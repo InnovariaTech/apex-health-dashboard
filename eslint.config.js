@@ -11,6 +11,7 @@ export default [
       "src/pages/**/*.{js,mjs,cjs,jsx}",
       "src/layouts/**/*.{js,mjs,cjs,jsx}",
       "src/features/**/*.{js,mjs,cjs,jsx}",
+      "src/views/**/*.{js,mjs,cjs,jsx}",
       "src/app/**/*.{js,mjs,cjs,jsx}",
       "src/api/**/*.{js,mjs,cjs,jsx}",
     ],

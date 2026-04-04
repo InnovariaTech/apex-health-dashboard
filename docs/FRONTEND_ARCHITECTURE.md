@@ -9,7 +9,7 @@
 | **Mocks** | `src/mocks/in-memory/mockApi.js` | In-memory stores + integrations. |
 | **Static fallbacks** | `src/mocks/static/` | Dashboard-only placeholder rows when the store is empty. |
 | **Hooks** | `src/features/*/hooks/` | Async orchestration, derived state (e.g. `useDashboardPageData`). |
-| **Contexts** | `src/lib/*Context.jsx` | Cross-cutting UI state (auth shell, environment, view mode). |
+| **Contexts** | `src/lib/*Context.jsx` | Cross-cutting UI state (auth shell, environment). |
 
 ## Switching to a MERN backend
 
@@ -20,9 +20,10 @@
 
 ## Folder conventions
 
+- `src/views/patient/` — patient portal: `pages/`, `components/home/` (patient dashboard widgets), `hooks/`, `config/patientNavigation.js`.
 - `src/layouts/` — route shells (e.g. `AppLayout.jsx`).
 - `src/app/providers/` — root provider composition.
-- `src/features/<domain>/` — feature-specific hooks and (future) components moved out of `pages/`.
+- `src/components/` — shared UI (workouts, marketplace, env chrome) — not split by view unless patient-only (see `views/patient/components/home`).
 - `src/components/ui/` — shadcn primitives (do not mix with domain logic).
 
 ## Anti-patterns to avoid

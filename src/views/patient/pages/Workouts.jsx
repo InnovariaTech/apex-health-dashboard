@@ -7,11 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Dumbbell, Play, CheckCircle, Calendar, TrendingUp, Clock, Flame, Library, BarChart2 } from "lucide-react";
 import { format } from "date-fns";
-import WorkoutPlanCard from "../components/workouts/WorkoutPlanCard";
-import ActiveWorkout from "../components/workouts/ActiveWorkout";
-import WorkoutHistory from "../components/workouts/WorkoutHistory";
-import ExerciseLibraryTab from "../components/workouts/ExerciseLibraryTab";
-import WorkoutStatsPanel from "../components/workouts/WorkoutStatsPanel";
+import WorkoutPlanCard from "@/components/workouts/WorkoutPlanCard";
+import ActiveWorkout from "@/components/workouts/ActiveWorkout";
+import WorkoutHistory from "@/components/workouts/WorkoutHistory";
+import ExerciseLibraryTab from "@/components/workouts/ExerciseLibraryTab";
+import WorkoutStatsPanel from "@/components/workouts/WorkoutStatsPanel";
 
 export default function Workouts() {
   const [currentUser, setCurrentUser] = useState(null);

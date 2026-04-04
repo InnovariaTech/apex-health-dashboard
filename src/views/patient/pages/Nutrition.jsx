@@ -75,43 +75,29 @@ export default function Nutrition() {
   const [showScanOptions, setShowScanOptions] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState([]);
-  const [selectedClientId, setSelectedClientId] = useState(null);
 
   useEffect(() => {
     loadData();
   }, []);
 
   useEffect(() => {
-    if (selectedClientId) {
-      loadClientNutrition();
+    if (currentUser?.email) {
+      loadClientNutrition(currentUser.email);
     }
-  }, [selectedClientId, selectedDate]);
+  }, [currentUser, selectedDate]);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
       const user = await User.me();
       setCurrentUser(user);
-
-      if (user.role === "admin") {
-        const allUsers = await User.list();
-        const clientList = allUsers.filter(u => u.role !== "admin");
-        setClients(clientList);
-        if (clientList.length > 0) {
-          setSelectedClientId(clientList[0].email);
-        }
-      } else {
-        setSelectedClientId(user.email);
-        loadClientNutrition(user.email);
-      }
     } catch (error) {
       console.error("Error loading data:", error);
     }
     setIsLoading(false);
   };
 
-  const loadClientNutrition = async (userId = selectedClientId) => {
+  const loadClientNutrition = async (userId) => {
     if (!userId) return;
 
     try {
@@ -129,7 +115,7 @@ export default function Nutrition() {
 
   const handlePhotoScan = async (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !currentUser?.email) return;
 
     setIsScanning(true);
     try {
@@ -153,7 +139,7 @@ export default function Nutrition() {
       });
 
       await FoodLog.create({
-        user_id: selectedClientId,
+        user_id: currentUser.email,
         date: selectedDate,
         meal_type: "snack",
         image_url: file_url,
@@ -161,7 +147,7 @@ export default function Nutrition() {
       });
 
       setShowScanOptions(false);
-      loadClientNutrition();
+      if (currentUser?.email) loadClientNutrition(currentUser.email);
     } catch (error) {
       console.error("Error scanning photo:", error);
       alert("Error analyzing image. Please try again.");
@@ -170,6 +156,7 @@ export default function Nutrition() {
   };
 
   const handleBarcodeInput = async (barcode) => {
+    if (!currentUser?.email) return;
     setIsScanning(true);
     try {
       const response = await InvokeLLM({
@@ -190,14 +177,14 @@ export default function Nutrition() {
       });
 
       await FoodLog.create({
-        user_id: selectedClientId,
+        user_id: currentUser.email,
         date: selectedDate,
         meal_type: "snack",
         ...response
       });
 
       setShowScanOptions(false);
-      loadClientNutrition();
+      if (currentUser?.email) loadClientNutrition(currentUser.email);
     } catch (error) {
       console.error("Error looking up barcode:", error);
       alert("Error finding product. Please enter manually.");
@@ -207,7 +194,7 @@ export default function Nutrition() {
 
   const handleUploadPDF = async (e) => {
     const file = e.target.files?.[0];
-    if (!file || !selectedClientId) return;
+    if (!file || !currentUser?.email) return;
 
     try {
       const { file_url } = await UploadFile({ file });
@@ -218,7 +205,7 @@ export default function Nutrition() {
         });
       } else {
         await NutritionPlan.create({
-          user_id: selectedClientId,
+          user_id: currentUser.email,
           plan_name: "Custom Meal Plan",
           daily_calories: 2000,
           protein_grams: 150,
@@ -229,7 +216,7 @@ export default function Nutrition() {
         });
       }
 
-      loadClientNutrition();
+      if (currentUser?.email) loadClientNutrition(currentUser.email);
       alert("Meal plan PDF uploaded successfully!");
     } catch (error) {
       console.error("Error uploading PDF:", error);
@@ -240,7 +227,7 @@ export default function Nutrition() {
   const handleDeleteLog = async (logId) => {
     if (confirm("Delete this meal entry?")) {
       await FoodLog.delete(logId);
-      loadClientNutrition();
+      if (currentUser?.email) loadClientNutrition(currentUser.email);
     }
   };
 
@@ -255,7 +242,6 @@ export default function Nutrition() {
   };
 
   const totals = calculateTotals();
-  const isAdmin = currentUser?.role === "admin";
 
   if (isLoading) {
     return (
@@ -278,49 +264,22 @@ export default function Nutrition() {
               Track your daily macronutrients and meals
             </p>
           </div>
-          {isAdmin && (
-            <div className="flex gap-2">
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleUploadPDF}
-                  className="hidden"
-                />
-                <Button className="bg-foreground hover:bg-primary text-background font-bold">
-                  <Upload className="w-5 h-5 mr-2" />
-                  UPLOAD MEAL PLAN PDF
-                </Button>
-              </label>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleUploadPDF}
+                className="hidden"
+              />
+              <Button className="bg-foreground hover:bg-primary text-background font-bold">
+                <Upload className="w-5 h-5 mr-2" />
+                UPLOAD MEAL PLAN PDF
+              </Button>
+            </label>
+          </div>
         </div>
       </div>
-
-      {/* Client Selector (Admin Only) */}
-      {isAdmin && clients.length > 0 && (
-        <Card className="mb-6 border-2 border-border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-bold text-foreground uppercase">
-                Select Client:
-              </label>
-              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                <SelectTrigger className="max-w-xs border-2 border-border font-semibold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.email} value={client.email}>
-                      {client.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Date Selector */}
       <Card className="mb-6 border-2 border-border">
@@ -624,11 +583,11 @@ export default function Nutrition() {
       <AddMealDialog
         open={showAddMeal}
         onOpenChange={setShowAddMeal}
-        userId={selectedClientId}
+        userId={currentUser?.email}
         date={selectedDate}
         onSuccess={() => {
           setShowAddMeal(false);
-          loadClientNutrition();
+          if (currentUser?.email) loadClientNutrition(currentUser.email);
         }}
       />
 

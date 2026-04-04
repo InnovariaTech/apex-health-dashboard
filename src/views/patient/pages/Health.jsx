@@ -31,8 +31,8 @@ import {
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-import PatientSupportChat from "../components/health/PatientSupportChat";
-import MyTreatments from "../components/health/MyTreatments";
+import PatientSupportChat from "@/components/health/PatientSupportChat";
+import MyTreatments from "@/components/health/MyTreatments";
 
 export default function Health() {
   const [currentUser, setCurrentUser] = useState(null);

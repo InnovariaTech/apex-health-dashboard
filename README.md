@@ -2,6 +2,8 @@
 
 React + Vite SPA. Data access goes through `src/api/client.js` (`api`); the default implementation is in-memory (`src/mocks/in-memory/mockApi.js`).
 
+**Scope:** patient (member) experience only — screens live under `src/views/patient/`. Routing is registered in `pages.config.js`.
+
 See [`docs/FRONTEND_ARCHITECTURE.md`](docs/FRONTEND_ARCHITECTURE.md) for layers and MERN integration steps.
 
 ## Local development
