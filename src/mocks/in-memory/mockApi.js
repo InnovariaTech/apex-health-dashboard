@@ -83,7 +83,7 @@ const initialUsers = [
   {
     email: DEMO_EMAIL,
     full_name: "Demo User",
-    role: "admin",
+    role: "user",
     current_program_id: "wp1",
     health_score: 78,
     idevaffiliate_id: "AFF-DEMO-001",
@@ -92,18 +92,10 @@ const initialUsers = [
   {
     email: "dr.care@apexhealth.local",
     full_name: "Dr. Care Team",
-    role: "admin",
+    role: "provider",
     current_program_id: null,
-    health_score: 90,
+    health_score: null,
     created_date: "2024-01-02T00:00:00.000Z",
-  },
-  {
-    email: "client@example.com",
-    full_name: "Jane Client",
-    role: "user",
-    current_program_id: "wp1",
-    health_score: 72,
-    created_date: "2024-01-03T00:00:00.000Z",
   },
 ];
 
@@ -207,7 +199,7 @@ const workoutSessions = createStore("WorkoutSession", [
   },
   {
     id: "ws3",
-    user_id: "client@example.com",
+    user_id: DEMO_EMAIL,
     date: todayStr,
     workout_name: "Cardio",
     duration_minutes: 35,
@@ -354,7 +346,7 @@ const foodLogs = createStore("FoodLog", [
 
 // ─── Messaging ─────────────────────────────────────────────────────────────
 const threadProvider = [DEMO_EMAIL, "dr.care@apexhealth.local", "provider"].sort().join("-");
-const threadAdminClient = [DEMO_EMAIL, "client@example.com"].sort().join("-");
+const threadSupport = [DEMO_EMAIL, "dr.care@apexhealth.local", "support"].sort().join("-");
 const messages = createStore("Message", [
   {
     id: "m1",
@@ -376,12 +368,12 @@ const messages = createStore("Message", [
   },
   {
     id: "m3",
-    from_user_id: "client@example.com",
-    to_user_id: DEMO_EMAIL,
-    thread_id: threadAdminClient,
-    message_text: "Can we review my program this week?",
-    is_read: false,
-    created_date: new Date(Date.now() - 900000).toISOString(),
+    from_user_id: DEMO_EMAIL,
+    to_user_id: "dr.care@apexhealth.local",
+    thread_id: threadSupport,
+    message_text: "Question about my last invoice.",
+    is_read: true,
+    created_date: new Date(Date.now() - 7200000).toISOString(),
   },
 ]);
 
@@ -432,24 +424,6 @@ const referrals = createStore("Referral", [
     status: "converted",
     points_awarded: 200,
     created_date: new Date().toISOString(),
-  },
-]);
-
-// ─── Orders & documents ───────────────────────────────────────────────────
-const orders = createStore("Order", [
-  {
-    id: "o1",
-    user_id: DEMO_EMAIL,
-    total: 129.0,
-    status: "fulfilled",
-    created_date: new Date().toISOString(),
-  },
-  {
-    id: "o2",
-    user_id: "client@example.com",
-    total: 89.5,
-    status: "processing",
-    created_date: new Date(Date.now() - 86400000).toISOString(),
   },
 ]);
 
@@ -600,7 +574,6 @@ export const api = {
     ChallengeEntry: challengeEntries,
     RewardPoints: rewardPoints,
     Referral: referrals,
-    Order: orders,
     PatientDocument: patientDocuments,
     PatientSupportMessage: patientSupportMessages,
     GenomicData: genomicData,

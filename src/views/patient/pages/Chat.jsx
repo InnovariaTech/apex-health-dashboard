@@ -16,7 +16,6 @@ const THREAD_TYPES = [
     sub: "Message your doctor or care team",
     icon: Stethoscope,
     color: "#2563eb",
-    role: "admin",
     placeholder: "Message your provider...",
     badge: "Medical",
     badgeColor: "bg-blue-100 text-blue-700",
@@ -27,7 +26,6 @@ const THREAD_TYPES = [
     sub: "Billing, scheduling, and general help",
     icon: HeartHandshake,
     color: "#7c3aed",
-    role: "admin",
     placeholder: "Message patient support...",
     badge: "Support",
     badgeColor: "bg-purple-100 text-purple-700",
@@ -37,7 +35,6 @@ const THREAD_TYPES = [
 export default function Chat() {
   const { environment } = useEnvironment();
   const [currentUser, setCurrentUser] = useState(null);
-  const [adminUsers, setAdminUsers] = useState([]);
   const [activeThread, setActiveThread] = useState("provider");
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -55,9 +52,10 @@ export default function Chat() {
     const user = await api.auth.me();
     setCurrentUser(user);
     const allUsers = await api.entities.User.list();
-    const admins = allUsers.filter(u => u.role === "admin");
-    setAdminUsers(admins);
-    if (admins.length > 0) setSelectedRecipient(admins[0]);
+    const careTeam = allUsers.filter(
+      (u) => u.email !== user.email && u.role !== "user"
+    );
+    if (careTeam.length > 0) setSelectedRecipient(careTeam[0]);
     setIsLoading(false);
   };
 

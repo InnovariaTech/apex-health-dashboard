@@ -15,7 +15,7 @@ function applyEnvironmentTokens(env) {
   const root = document.documentElement;
   const light = env.themeMode === "light";
 
-  // ── Custom env vars (used in Layout, AI bar, GymSwitcher) ──────────────────
+  // ── Custom env vars (used in Layout, AI bar, GymSwitcher) ─────────────────
   root.style.setProperty("--env-primary",      env.primaryColor);
   root.style.setProperty("--env-secondary",    env.secondaryColor);
   root.style.setProperty("--env-accent",       env.accentColor);

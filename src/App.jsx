@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/AuthContext";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
 import SyncDevices from "@/views/patient/pages/SyncDevices";
-import BusinessAnalytics from "@/views/staff/pages/BusinessAnalytics";
 import Progress from "@/views/patient/pages/Progress";
 import Schedule from "@/views/patient/pages/Schedule";
 import AdvancedBiomarkers from "@/views/patient/pages/AdvancedBiomarkers.jsx";
@@ -14,7 +13,6 @@ import MyTreatments from "@/views/patient/pages/MyTreatments.jsx";
 import Referral from "@/views/patient/pages/Referral.jsx";
 import Rewards from "@/views/patient/pages/Rewards.jsx";
 import Sleep from "@/views/patient/pages/Sleep.jsx";
-import AdminMarketplace from "@/views/staff/pages/AdminMarketplace.jsx";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -96,14 +94,6 @@ const AuthenticatedApp = () => {
         }
       />
       <Route
-        path="/BusinessAnalytics"
-        element={
-          <LayoutWrapper currentPageName="BusinessAnalytics">
-            <BusinessAnalytics />
-          </LayoutWrapper>
-        }
-      />
-      <Route
         path="/Progress"
         element={
           <LayoutWrapper currentPageName="Progress">
@@ -156,14 +146,6 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper currentPageName="Sleep">
             <Sleep />
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/AdminMarketplace"
-        element={
-          <LayoutWrapper currentPageName="AdminMarketplace">
-            <AdminMarketplace />
           </LayoutWrapper>
         }
       />
