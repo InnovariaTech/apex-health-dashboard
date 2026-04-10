@@ -1,8 +1,10 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AppProviders } from "@/app/providers/AppProviders";
 import { pagesConfig } from "./pages.config";
 import PageNotFound from "./lib/PageNotFound";
 import { useAuth } from "@/lib/AuthContext";
+import Login from "@/views/auth/pages/Login";
+import Signup from "@/views/auth/pages/Signup";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
 import SyncDevices from "@/views/patient/pages/SyncDevices";
@@ -19,15 +21,10 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) =>
-  Layout ? (
-    <Layout currentPageName={currentPageName}>{children}</Layout>
-  ) : (
-    <>{children}</>
-  );
+const LayoutWrapper = ({ children }) => (Layout ? <Layout>{children}</Layout> : <>{children}</>);
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } =
+  const { isLoadingAuth, isLoadingPublicSettings, isAuthenticated, authError } =
     useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -38,22 +35,30 @@ const AuthenticatedApp = () => {
     );
   }
 
+  if (authError?.type === "auth_required" || !isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
   if (authError) {
     if (authError.type === "user_not_registered") {
       return <UserNotRegisteredError />;
-    }
-    if (authError.type === "auth_required") {
-      navigateToLogin();
-      return null;
     }
   }
 
   return (
     <Routes>
+      <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route
         path="/"
         element={
-          <LayoutWrapper currentPageName={mainPageKey}>
+          <LayoutWrapper>
             <MainPage />
           </LayoutWrapper>
         }
@@ -63,7 +68,7 @@ const AuthenticatedApp = () => {
           key={path}
           path={`/${path}`}
           element={
-            <LayoutWrapper currentPageName={path}>
+            <LayoutWrapper>
               <Page />
             </LayoutWrapper>
           }
@@ -72,7 +77,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Profile"
         element={
-          <LayoutWrapper currentPageName="Profile">
+          <LayoutWrapper>
             <Profile />
           </LayoutWrapper>
         }
@@ -80,7 +85,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Billing"
         element={
-          <LayoutWrapper currentPageName="Billing">
+          <LayoutWrapper>
             <Billing />
           </LayoutWrapper>
         }
@@ -88,7 +93,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/SyncDevices"
         element={
-          <LayoutWrapper currentPageName="SyncDevices">
+          <LayoutWrapper>
             <SyncDevices />
           </LayoutWrapper>
         }
@@ -96,7 +101,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Progress"
         element={
-          <LayoutWrapper currentPageName="Progress">
+          <LayoutWrapper>
             <Progress />
           </LayoutWrapper>
         }
@@ -104,7 +109,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Schedule"
         element={
-          <LayoutWrapper currentPageName="Schedule">
+          <LayoutWrapper>
             <Schedule />
           </LayoutWrapper>
         }
@@ -112,7 +117,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/AdvancedBiomarkers"
         element={
-          <LayoutWrapper currentPageName="AdvancedBiomarkers">
+          <LayoutWrapper>
             <AdvancedBiomarkers />
           </LayoutWrapper>
         }
@@ -120,7 +125,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/MyTreatments"
         element={
-          <LayoutWrapper currentPageName="MyTreatments">
+          <LayoutWrapper>
             <MyTreatments />
           </LayoutWrapper>
         }
@@ -128,7 +133,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Referral"
         element={
-          <LayoutWrapper currentPageName="Referral">
+          <LayoutWrapper>
             <Referral />
           </LayoutWrapper>
         }
@@ -136,7 +141,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Rewards"
         element={
-          <LayoutWrapper currentPageName="Rewards">
+          <LayoutWrapper>
             <Rewards />
           </LayoutWrapper>
         }
@@ -144,7 +149,7 @@ const AuthenticatedApp = () => {
       <Route
         path="/Sleep"
         element={
-          <LayoutWrapper currentPageName="Sleep">
+          <LayoutWrapper>
             <Sleep />
           </LayoutWrapper>
         }

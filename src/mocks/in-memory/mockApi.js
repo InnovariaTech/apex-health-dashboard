@@ -4,6 +4,7 @@
 import { format } from "date-fns";
 
 export const DEMO_EMAIL = "demo@apexhealth.local";
+const AUTH_SESSION_KEY = "apex_mock_auth_email";
 
 let idSeq = 1;
 const nextId = (prefix) => `${prefix}_${idSeq++}`;
@@ -112,13 +113,68 @@ const userStore = {
 };
 
 // ─── Auth ───────────────────────────────────────────────────────────────────
+const getStoredEmail = () => {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(AUTH_SESSION_KEY);
+};
+
+const setStoredEmail = (email) => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(AUTH_SESSION_KEY, email);
+};
+
+const clearStoredEmail = () => {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(AUTH_SESSION_KEY);
+};
+
 export const mockAuth = {
-  me: () => Promise.resolve({ ...initialUsers[0] }),
-  updateMe: (form) => {
-    initialUsers[0] = { ...initialUsers[0], ...form };
-    return Promise.resolve({ ...initialUsers[0] });
+  me: () => {
+    const email = getStoredEmail();
+    if (!email) return Promise.reject(new Error("auth_required"));
+    const user = initialUsers.find((u) => u.email === email);
+    if (!user) return Promise.reject(new Error("auth_required"));
+    return Promise.resolve({ ...user });
   },
-  logout: () => {},
+  login: ({ email }) => {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const user =
+      initialUsers.find((u) => u.email.toLowerCase() === normalizedEmail) ||
+      initialUsers[0];
+    setStoredEmail(user.email);
+    return Promise.resolve({ ...user });
+  },
+  signup: ({ full_name, email, phone, password }) => {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail || !full_name) return Promise.reject(new Error("invalid_payload"));
+    const exists = initialUsers.some((u) => u.email.toLowerCase() === normalizedEmail);
+    if (exists) return Promise.reject(new Error("email_exists"));
+
+    const newUser = {
+      email: normalizedEmail,
+      full_name: String(full_name).trim(),
+      phone: phone || "",
+      password: password || "",
+      role: "user",
+      current_program_id: "wp1",
+      health_score: 70,
+      idevaffiliate_id: `AFF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+      created_date: new Date().toISOString(),
+    };
+    initialUsers.unshift(newUser);
+    setStoredEmail(newUser.email);
+    return Promise.resolve({ ...newUser });
+  },
+  updateMe: (form) => {
+    const email = getStoredEmail();
+    const idx = initialUsers.findIndex((u) => u.email === email);
+    if (idx < 0) return Promise.reject(new Error("auth_required"));
+    initialUsers[idx] = { ...initialUsers[idx], ...form };
+    return Promise.resolve({ ...initialUsers[idx] });
+  },
+  logout: () => {
+    clearStoredEmail();
+  },
   redirectToLogin: () => {},
 };
 

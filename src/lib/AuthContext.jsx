@@ -19,8 +19,12 @@ export const AuthProvider = ({ children }) => {
         setUser(currentUser);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Auth bootstrap failed:', error);
-        setAuthError({ type: 'unknown', message: error?.message || 'Failed to load' });
+        if (error?.message === 'auth_required') {
+          setAuthError({ type: 'auth_required', message: 'Please login to continue' });
+        } else {
+          console.error('Auth bootstrap failed:', error);
+          setAuthError({ type: 'unknown', message: error?.message || 'Failed to load' });
+        }
       } finally {
         setIsLoadingAuth(false);
       }
@@ -31,11 +35,28 @@ export const AuthProvider = ({ children }) => {
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
+    setAuthError({ type: 'auth_required', message: 'Please login to continue' });
     mockAuth.logout();
   };
 
   const navigateToLogin = () => {
     mockAuth.redirectToLogin();
+  };
+
+  const login = async ({ email, password }) => {
+    const currentUser = await mockAuth.login({ email, password });
+    setUser(currentUser);
+    setIsAuthenticated(true);
+    setAuthError(null);
+    return currentUser;
+  };
+
+  const signup = async ({ full_name, email, phone, password }) => {
+    const currentUser = await mockAuth.signup({ full_name, email, phone, password });
+    setUser(currentUser);
+    setIsAuthenticated(true);
+    setAuthError(null);
+    return currentUser;
   };
 
   const checkAppState = async () => {
@@ -58,6 +79,8 @@ export const AuthProvider = ({ children }) => {
       authError,
       appPublicSettings,
       logout,
+      login,
+      signup,
       navigateToLogin,
       checkAppState
     }}>
