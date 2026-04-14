@@ -1,18 +1,18 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
-import { useAuth } from "@/lib/AuthContext";
+import { useSignupMutation } from "@/hooks/auth/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { isApiError } from "@/types/error";
+import { extractApiErrorDetails, extractDisplayErrorMessage } from "@/utils/errorHandler";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const signupMutation = useSignupMutation();
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -21,7 +21,6 @@ export default function Signup() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,19 +33,18 @@ export default function Signup() {
       setError("Passwords do not match.");
       return;
     }
-    setIsSubmitting(true);
     try {
-      await signup(form);
+      await signupMutation.mutateAsync(form);
       navigate("/");
     } catch (err: unknown) {
-      const message = isApiError(err) ? err.message : err instanceof Error ? err.message : "";
+      const details = extractApiErrorDetails(err);
+      console.error("Signup failed", details);
+      const message = extractDisplayErrorMessage(err);
       if (message.toLowerCase().includes("already")) {
         setError("That email is already registered.");
       } else {
         setError(message || "Unable to create account right now.");
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -135,8 +133,8 @@ export default function Signup() {
                 required
               />
             </div>
-            <Button className="w-full font-semibold" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create account"}
+            <Button className="w-full font-semibold" type="submit" disabled={signupMutation.isPending}>
+              {signupMutation.isPending ? "Creating account..." : "Create account"}
             </Button>
           </form>
 

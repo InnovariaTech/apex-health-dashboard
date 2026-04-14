@@ -1,7 +1,10 @@
 // @ts-nocheck
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { api } from "@/api/client";
+import { usePatientData } from "@/hooks/patients/usePatientData";
+import { queryKeys } from "@/hooks/queryKeys";
 import {
   mockWeekSessions,
   mockTodayHabits,
@@ -13,64 +16,65 @@ import {
  * Falls back to static mock rows when the in-memory store is empty or on error.
  */
 export function usePatientHomeData() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [weekSessions, setWeekSessions] = useState([]);
-  const [todayHabits, setTodayHabits] = useState(null);
-  const [recentCheckIn, setRecentCheckIn] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const currentUserQuery = usePatientData();
+  const currentUser = currentUserQuery.data ?? null;
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const user = await api.auth.me();
-      setCurrentUser(user);
-
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.patients.home(currentUser?.email),
+    enabled: Boolean(currentUser?.email),
+    queryFn: async () => {
       const weekStart = format(startOfWeek(new Date()), "yyyy-MM-dd");
       const weekEnd = format(endOfWeek(new Date()), "yyyy-MM-dd");
 
-      const sessions = await api.entities.WorkoutSession.filter(
-        { user_id: user.email },
+      const entities = api.entities as any;
+      const sessions = await entities.WorkoutSession.filter(
+        { user_id: currentUser.email },
         "-date",
         100
       );
       const thisWeekSessions = sessions.filter(
         (s) => s.date >= weekStart && s.date <= weekEnd
       );
-      setWeekSessions(
-        thisWeekSessions.length > 0 ? thisWeekSessions : mockWeekSessions
-      );
+      const weekSessions = thisWeekSessions.length > 0 ? thisWeekSessions : mockWeekSessions;
 
-      const habits = await api.entities.HabitLog.filter({
-        user_id: user.email,
+      const habits = await entities.HabitLog.filter({
+        user_id: currentUser.email,
         date: format(new Date(), "yyyy-MM-dd"),
       });
-      setTodayHabits(habits[0] || mockTodayHabits);
+      const todayHabits = habits[0] || mockTodayHabits;
 
-      const checkIns = await api.entities.CheckIn.filter(
-        { user_id: user.email },
+      const checkIns = await entities.CheckIn.filter(
+        { user_id: currentUser.email },
         "-check_in_date",
         1
       );
-      setRecentCheckIn(checkIns[0] || mockRecentCheckIn);
-    } catch (error) {
-      console.error("Error loading dashboard:", error);
-      setWeekSessions(mockWeekSessions);
-      setTodayHabits(mockTodayHabits);
-      setRecentCheckIn(mockRecentCheckIn);
-    }
-    setIsLoading(false);
-  }, []);
+      const recentCheckIn = checkIns[0] || mockRecentCheckIn;
 
-  useEffect(() => {
-    load();
-  }, [load]);
+      return { weekSessions, todayHabits, recentCheckIn };
+    },
+  });
+
+  const fallbackData = useMemo(
+    () => ({
+      weekSessions: mockWeekSessions,
+      todayHabits: mockTodayHabits,
+      recentCheckIn: mockRecentCheckIn,
+    }),
+    []
+  );
+
+  const data = dashboardQuery.data ?? fallbackData;
+
+  const reload = async () => {
+    await Promise.all([currentUserQuery.refetch(), dashboardQuery.refetch()]);
+  };
 
   return {
     currentUser,
-    weekSessions,
-    todayHabits,
-    recentCheckIn,
-    isLoading,
-    reload: load,
+    weekSessions: data.weekSessions,
+    todayHabits: data.todayHabits,
+    recentCheckIn: data.recentCheckIn,
+    isLoading: currentUserQuery.isLoading || dashboardQuery.isLoading,
+    reload,
   };
 }

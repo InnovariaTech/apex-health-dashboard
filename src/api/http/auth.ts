@@ -1,4 +1,4 @@
-import { axiosService } from "./axiosInterceptors";
+import { axiosService } from "./axiosInstance";
 import type {
   AuthApi,
   AuthResponseBody,
@@ -49,6 +49,7 @@ export function createAuthApi(): AuthApi {
       const res = await axiosService.post<AuthResponseBody>(`${AUTH_BASE}/login`, { email, password });
       return getUserFromResponse(res.data);
     },
+   
     async me() {
       const res = await axiosService.get<AuthResponseBody>(`${AUTH_BASE}/me`);
       return getUserFromResponse(res.data);
@@ -68,11 +69,11 @@ export function createAuthApi(): AuthApi {
       const res = await axiosService.post(`${AUTH_BASE}/reset-password`, { token, newPassword });
       return res.data;
     },
-    async updateMe(form: Partial<AuthUser>) {
-      const current = await this.me();
-      if (!current) return null;
-      return { ...current, ...form };
-    },
+    // async updateMe(form: Partial<AuthUser>) {
+    //   const current = await this.me();
+    //   if (!current) return null;
+    //   return { ...current, ...form };
+    // },
     redirectToLogin: () => {},
   };
 }

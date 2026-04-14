@@ -11,13 +11,13 @@ import { Toaster } from "@/components/ui/toaster";
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      <EnvironmentProvider>
-        <QueryClientProvider client={queryClientInstance}>
+    <QueryClientProvider client={queryClientInstance}>
+      <AuthProvider>
+        <EnvironmentProvider>
           <Router>{children}</Router>
           <Toaster />
-        </QueryClientProvider>
-      </EnvironmentProvider>
-    </AuthProvider>
+        </EnvironmentProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

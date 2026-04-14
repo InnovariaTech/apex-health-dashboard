@@ -16,7 +16,6 @@ import MyTreatments from "@/views/patient/pages/MyTreatments";
 import Referral from "@/views/patient/pages/Referral";
 import Rewards from "@/views/patient/pages/Rewards";
 import Sleep from "@/views/patient/pages/Sleep";
-import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -26,10 +25,9 @@ const LayoutWrapper = ({ children }: { children: ReactNode }) =>
   Layout ? <Layout>{children}</Layout> : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, isAuthenticated, authError } =
-    useAuth();
+  const { isLoadingAuth, isAuthenticated } = useAuth();
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -37,7 +35,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError?.type === "auth_required" || !isAuthenticated) {
+  if (!isAuthenticated) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -45,12 +43,6 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
-  }
-
-  if (authError) {
-    if (authError.type === "user_not_registered") {
-      return <UserNotRegisteredError />;
-    }
   }
 
   return (

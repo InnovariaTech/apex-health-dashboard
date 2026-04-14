@@ -33,6 +33,12 @@ export interface AuthResponseBody {
   user?: AuthUser;
   message?: string;
 }
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
+  issues?: Array<{ code: string; path: string[]; message: string }>; // Zod errors
+}
 
 export interface AuthApi {
   signup(payload: SignupPayload): Promise<AuthUser | null>;
@@ -42,12 +48,6 @@ export interface AuthApi {
   logout(): Promise<void>;
   forgotPassword(payload: ForgotPasswordPayload): Promise<unknown>;
   resetPassword(payload: ResetPasswordPayload): Promise<unknown>;
-  updateMe(form: Partial<AuthUser>): Promise<AuthUser | null>;
+  // updateMe(form: Partial<AuthUser>): Promise<AuthUser | null>;
   redirectToLogin(): void;
-}
-
-export interface AppApi {
-  auth: AuthApi;
-  entities: unknown;
-  integrations: unknown;
 }

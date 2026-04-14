@@ -5,7 +5,7 @@
  */
 import { createAuthApi } from "./auth";
 import { api as mockApi } from "@/mocks/in-memory/mockApi";
-import type { AppApi } from "@/types/auth_types";
+import type { AppApi } from "@/api/types";
 
 export function createHttpApi(): AppApi {
   return {

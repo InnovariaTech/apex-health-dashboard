@@ -1,7 +1,7 @@
 import { API_MODE } from "@/constants/api";
 import { api as mockApi } from "@/mocks/in-memory/mockApi";
 import { createHttpApi } from "@/api/http/createHttpApi";
-import type { AppApi } from "@/types/auth_types";
+import type { AppApi } from "@/api/types";
 
 /**
  * Application API surface. UI imports this — never import mock stores directly.

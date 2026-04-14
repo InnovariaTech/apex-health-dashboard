@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { api } from "@/api/client";
 import { useEnvironment } from "@/lib/EnvironmentContext";
-import { useAuth } from "@/lib/AuthContext";
+import { useLogout } from "@/hooks/auth/useAuth";
 import AIAssistantBar from "@/components/env/AIAssistantBar";
 import GymSwitcher from "@/components/env/GymSwitcher";
 import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
@@ -25,7 +25,7 @@ import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
 export default function Layout({ children }) {
   const location = useLocation();
   const { environment } = useEnvironment();
-  const { logout } = useAuth();
+  const logoutMutation = useLogout();
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -192,7 +192,7 @@ export default function Layout({ children }) {
               </Link>
               <button
                 type="button"
-                onClick={() => logout()}
+                onClick={() => void logoutMutation.mutateAsync()}
                 className="hover:opacity-80 transition-opacity"
                 aria-label="Logout"
                 title="Logout"
