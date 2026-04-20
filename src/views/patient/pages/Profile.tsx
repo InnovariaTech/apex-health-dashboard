@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
 import { api } from "@/api/client";
+import { useProfile } from "@/hooks/care-validate/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,25 +11,34 @@ import { User, Save, CheckCircle } from "lucide-react";
 
 export default function Profile() {
   const { environment } = useEnvironment();
+  const { data: profileData, isLoading, isError } = useProfile();
   const [currentUser, setCurrentUser] = useState(null);
   const [form, setForm] = useState({ full_name: "", phone: "", date_of_birth: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    loadUser();
+    api.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
 
-  const loadUser = async () => {
-    const user = await api.auth.me();
-    setCurrentUser(user);
+  useEffect(() => {
+    if (!profileData) return;
+
+    const fullName = String(
+      profileData.full_name ||
+      profileData.fullName ||
+      profileData.name ||
+      [profileData.firstName, profileData.lastName].filter(Boolean).join(" ").trim() ||
+      ""
+    );
+
     setForm({
-      full_name: user.full_name || "",
-      phone: user.phone || "",
-      date_of_birth: user.date_of_birth || "",
-      bio: user.bio || "",
+      full_name: fullName,
+      phone: String(profileData.phone || profileData.phoneNumber || ""),
+      date_of_birth: String(profileData.date_of_birth || profileData.dateOfBirth || profileData.dob || ""),
+      bio: String(profileData.bio || profileData.notes || ""),
     });
-  };
+  }, [profileData]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -37,6 +47,14 @@ export default function Profile() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-2xl mx-auto">
@@ -53,6 +71,11 @@ export default function Profile() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
+          {isError && (
+            <p className="text-sm text-destructive">
+              Unable to load profile details right now. You can still edit and save manually.
+            </p>
+          )}
           <div className="flex items-center gap-4 mb-6">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-2"

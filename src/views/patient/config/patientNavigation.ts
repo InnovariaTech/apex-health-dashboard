@@ -15,6 +15,7 @@ import { createPageUrl } from "@/utils";
 /** Full clinical nav (Apex MD environment). */
 export const apexPatientNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   // { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },

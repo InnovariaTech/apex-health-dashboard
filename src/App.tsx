@@ -13,6 +13,7 @@ import Progress from "@/views/patient/pages/Progress";
 import Schedule from "@/views/patient/pages/Schedule";
 import AdvancedBiomarkers from "@/views/patient/pages/AdvancedBiomarkers";
 import MyTreatments from "@/views/patient/pages/MyTreatments";
+import MyCaseDetails from "@/views/patient/pages/MyCaseDetails";
 import Referral from "@/views/patient/pages/Referral";
 import Rewards from "@/views/patient/pages/Rewards";
 import Sleep from "@/views/patient/pages/Sleep";
@@ -121,6 +122,14 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper>
             <MyTreatments />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/MyCases/:caseId"
+        element={
+          <LayoutWrapper>
+            <MyCaseDetails />
           </LayoutWrapper>
         }
       />

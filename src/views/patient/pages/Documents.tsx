@@ -1,6 +1,8 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
 import { api } from "@/api/client";
+import { useDocuments } from "@/hooks/care-validate/useDocuments";
+import type { PatientDocumentItem } from "@/types/care-validate/document_types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,10 +29,24 @@ function getDocMeta(type) {
   return DOC_TYPES.find((d) => d.value === type) || DOC_TYPES[DOC_TYPES.length - 1];
 }
 
+function mapApiDocumentToPageDocument(doc: PatientDocumentItem) {
+  const uploader = doc.raw?.raw?.uploadedBy || {};
+  const uploaderName = [uploader.firstName, uploader.lastName].filter(Boolean).join(" ").trim();
+  return {
+    id: doc.id,
+    file_name: doc.fileName || doc.raw?.fileName || doc.raw?.raw?.fileName || "Untitled Document",
+    file_url: doc.raw?.raw?.url || doc.raw?.url || "",
+    document_type: doc.raw?.type || "other",
+    document_date: doc.raw?.raw?.createdAt || doc.createdAt || "",
+    provider: uploaderName,
+    notes: String(doc.raw?.notes || ""),
+    ai_summary: String(doc.raw?.ai_summary || ""),
+  };
+}
+
 export default function Documents() {
   const [currentUser, setCurrentUser] = useState(null);
   const [documents, setDocuments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(null); // doc id being analyzed
   const [showUpload, setShowUpload] = useState(false);
@@ -42,13 +58,15 @@ export default function Documents() {
     notes: "",
   });
   const [filterType, setFilterType] = useState("all");
+  const { data: apiDocuments = [], isLoading, isError } = useDocuments();
 
   useEffect(() => {
-    api.auth.me().then((user) => {
-      setCurrentUser(user);
-      return api.entities.PatientDocument.filter({ user_id: user.email }, "-created_date", 50);
-    }).then(setDocuments).finally(() => setIsLoading(false));
+    api.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
+
+  useEffect(() => {
+    setDocuments(apiDocuments.map(mapApiDocumentToPageDocument));
+  }, [apiDocuments]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -145,6 +163,16 @@ Important: Be specific and reference actual values when visible. Always recommen
         </CardContent>
       </Card>
 
+      {isError && (
+        <Card className="mb-6 border-2 border-destructive/30 bg-destructive/5">
+          <CardContent className="p-4">
+            <p className="text-sm font-medium text-foreground">
+              Unable to load documents right now. Please refresh and try again.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filter */}
       <div className="flex gap-2 flex-wrap mb-6">
         <Button
@@ -235,6 +263,23 @@ Important: Be specific and reference actual values when visible. Always recommen
                           )}
                         </Button>
                       )}
+                      {/* {doc.file_url && (
+                        <a
+                          href={doc.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-block mt-2"
+                        >
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-border font-bold text-xs h-7"
+                          >
+                            <FileText className="w-3 h-3 mr-1" /> View File
+                          </Button>
+                        </a>
+                      )} */}
                     </div>
                   </div>
                 </CardContent>
