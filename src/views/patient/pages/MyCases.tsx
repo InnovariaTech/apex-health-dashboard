@@ -2,7 +2,9 @@ import { useMemo } from "react";
 import { getRecentCasesDateRange, useCases } from "@/hooks/care-validate/useCases";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import type { CaseItem } from "@/types/care-validate/case_types";
 
 interface AssigneeInitial {
@@ -226,6 +228,21 @@ export default function MyCases() {
                       </div>
                     </div>
                   )}
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="font-semibold"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(`/Chat?caseId=${encodeURIComponent(caseItem.id)}`);
+                      }}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Open Chat
+                    </Button>
+                  </div>
                 </div>
                 <Badge variant="outline" className={`capitalize ${caseTheme.badgeClassName}`}>
                   {caseStatus}

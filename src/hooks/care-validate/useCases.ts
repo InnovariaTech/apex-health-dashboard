@@ -77,7 +77,8 @@ export function useCaseDetails(
     includeOrders: false,
     includeCaseProducts: false,
     includePayments: false,
-  }
+  },
+  options: { enablePolling?: boolean } = {}
 ) {
   const includeAttachments = params.includeAttachments ?? true;
   const documentFormat = params.documentFormat ?? "base64";
@@ -85,6 +86,7 @@ export function useCaseDetails(
   const includeOrders = params.includeOrders ?? false;
   const includeCaseProducts = params.includeCaseProducts ?? false;
   const includePayments = params.includePayments ?? false;
+  const enablePolling = options.enablePolling ?? false;
 
   return useQuery<CaseDetailsItem>({
     queryKey: queryKeys.careValidate.caseDetails(
@@ -106,7 +108,9 @@ export function useCaseDetails(
         includePayments,
       }),
     enabled: Boolean(caseId),
-    staleTime: 60_000,
+    staleTime: enablePolling ? 10_000 : 60_000,
+    refetchInterval: enablePolling ? 15_000 : false,
+    refetchIntervalInBackground: false,
   });
 }
 

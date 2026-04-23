@@ -27,18 +27,24 @@ export const queryKeys = {
           documentFormat,
         },
       ] as const,
-    treatmentBundles: (
-      isVisible?: boolean,
-      bundleId?: string,
-      includeIntakeForm?: boolean,
-      includeFollowupForm?: boolean
-    ) =>
+    treatmentBundles: (isVisible?: boolean) =>
       [
         "care-validate",
         "treatment-bundles",
         {
           isVisible: isVisible ?? "all",
-          bundleId: bundleId && bundleId.length > 0 ? bundleId : "all",
+        },
+      ] as const,
+    treatmentBundleById: (
+      bundleUUID: string,
+      includeIntakeForm?: boolean,
+      includeFollowupForm?: boolean
+    ) =>
+      [
+        "care-validate",
+        "treatment-bundle-by-id",
+        bundleUUID,
+        {
           includeIntakeForm:
             typeof includeIntakeForm === "boolean" ? includeIntakeForm : "all",
           includeFollowupForm:

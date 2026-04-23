@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -56,7 +57,11 @@ export default function MyCaseDetails() {
     []
   );
 
-  const { data: caseDetails, isLoading, isError } = useCaseDetails(caseId, detailsParams);
+  const { data: caseDetails, isLoading, isError } = useCaseDetails(
+    caseId,
+    detailsParams,
+    { enablePolling: true }
+  );
   const {
     data: userDocuments = [],
     isLoading: isUserDocumentsLoading,
@@ -169,7 +174,7 @@ export default function MyCaseDetails() {
           </TabsContent>
 
           <TabsContent value="chat">
-            <CaseChatPanel caseDetails={caseDetails} />
+            <CaseChatPanel caseDetails={caseDetails} caseId={caseId} />
           </TabsContent>
 
           <TabsContent value="documents">

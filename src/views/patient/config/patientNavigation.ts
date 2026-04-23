@@ -17,6 +17,7 @@ export const apexPatientNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
+  { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   // { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
@@ -39,6 +40,7 @@ export const apexPatientNavItems = [
 export const gymPatientNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
+  { title: "browse-treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   // { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },

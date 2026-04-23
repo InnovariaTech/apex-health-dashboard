@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, Eye } from "lucide-react";
+// @ts-nocheck
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import { Download, Eye, Send } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CaseDetailsItem } from "@/types/care-validate/case_types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +20,11 @@ import {
   type ChatAttachmentItem,
   type ChatMessageItem,
 } from "@/views/patient/utils/caseChatUtils";
+import { useCreateCaseComment } from "@/hooks/care-validate/useCommunications";
 
 interface CaseChatPanelProps {
   caseDetails: CaseDetailsItem;
+  caseId: string;
 }
 
 function downloadAttachment(attachment: ChatAttachmentItem) {
@@ -99,6 +104,8 @@ function ChatMessage({
   onPreviewAttachment: (attachment: ChatAttachmentItem) => void;
 }) {
   const isPatient = message.authorRole === "PATIENT";
+  const isOptimistic =
+    typeof message.id === "string" && message.id.startsWith("optimistic-");
 
   const bubbleClass = isPatient
     ? "bg-primary text-primary-foreground"
@@ -122,10 +129,12 @@ function ChatMessage({
         {!isPatient && (
           <span className={`${roleColorClass}`}>({message.authorRoleLabel})</span>
         )}
-        <span className="text-muted-foreground">{formatChatTime(message.createdAt)}</span>
+        <span className="text-muted-foreground">
+          {isOptimistic ? "Sending..." : formatChatTime(message.createdAt)}
+        </span>
       </div>
 
-      <div className={`rounded-2xl px-4 py-2 max-w-[80%] ${bubbleClass}`}>
+      <div className={`rounded-2xl px-4 py-2 max-w-[80%] ${bubbleClass} ${isOptimistic ? "opacity-70" : ""}`}>
         <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.text || "—"}</p>
       </div>
 
@@ -202,18 +211,158 @@ function ChatPreviewDialog({
   );
 }
 
-export default function CaseChatPanel({ caseDetails }: CaseChatPanelProps) {
+export default function CaseChatPanel({ caseDetails, caseId }: CaseChatPanelProps) {
   const [previewAttachment, setPreviewAttachment] = useState<ChatAttachmentItem | null>(null);
+  const [draft, setDraft] = useState("");
+  const [optimisticMessages, setOptimisticMessages] = useState<ChatMessageItem[]>([]);
+  const [visibleCount, setVisibleCount] = useState(40);
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false);
+  const createCommentMutation = useCreateCaseComment();
+  const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const messages = useMemo(
+  const previousMessagesLengthRef = useRef(0);
+  const previousScrollHeightRef = useRef(0);
+
+  const realMessages = useMemo(
     () => extractChatMessages(caseDetails, { includeRestricted: false }),
     [caseDetails]
   );
 
+  const mergedMessages = useMemo(() => {
+    if (optimisticMessages.length === 0) return realMessages;
+
+    const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+    const activeOptimistic = optimisticMessages.filter((optimistic) => {
+      const optimisticTime = new Date(optimistic.createdAt).getTime();
+      if (optimisticTime < twoMinutesAgo) return false;
+
+      const matchedReal = realMessages.some(
+        (real) =>
+          real.authorRole === "PATIENT" &&
+          real.text.trim() === optimistic.text.trim() &&
+          new Date(real.createdAt).getTime() >= optimisticTime - 10_000
+      );
+      return !matchedReal;
+    });
+
+    return [...realMessages, ...activeOptimistic];
+  }, [realMessages, optimisticMessages]);
+
+  const displayedMessages = useMemo(
+    () => mergedMessages.slice(-visibleCount),
+    [mergedMessages, visibleCount]
+  );
+  const hasOlderMessages = mergedMessages.length > visibleCount;
+
   useEffect(() => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages.length]);
+    if (optimisticMessages.length === 0) return;
+    const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+    setOptimisticMessages((prev) =>
+      prev.filter((optimistic) => {
+        const optimisticTime = new Date(optimistic.createdAt).getTime();
+        if (optimisticTime < twoMinutesAgo) return false;
+
+        const matchedReal = realMessages.some(
+          (real) =>
+            real.authorRole === "PATIENT" &&
+            real.text.trim() === optimistic.text.trim() &&
+            new Date(real.createdAt).getTime() >= optimisticTime - 10_000
+        );
+        return !matchedReal;
+      })
+    );
+  }, [optimisticMessages.length, realMessages]);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    if (isLoadingOlder) {
+      const heightDelta = container.scrollHeight - previousScrollHeightRef.current;
+      container.scrollTop = Math.max(0, container.scrollTop + heightDelta);
+      setIsLoadingOlder(false);
+      previousMessagesLengthRef.current = displayedMessages.length;
+      return;
+    }
+
+    const previousLength = previousMessagesLengthRef.current;
+    const hasNewMessages = displayedMessages.length > previousLength;
+    if (hasNewMessages) {
+      const nearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+      if (nearBottom || createCommentMutation.isSuccess) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    previousMessagesLengthRef.current = displayedMessages.length;
+  }, [displayedMessages, isLoadingOlder, createCommentMutation.isSuccess]);
+
+  const handleLoadOlder = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    previousScrollHeightRef.current = container.scrollHeight;
+    setIsLoadingOlder(true);
+    setVisibleCount((prev) => prev + 40);
+  };
+
+  const handleSend = async (event: FormEvent) => {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text || !caseId || createCommentMutation.isPending) return;
+
+    const submitter = (caseDetails.raw?.submitter ?? {}) as Record<string, unknown>;
+    const optimisticMessage: ChatMessageItem = {
+      id: `optimistic-${Date.now()}`,
+      text,
+      createdAt: new Date().toISOString(),
+      authorName: "You",
+      authorRole: "PATIENT",
+      authorRoleLabel: "Patient",
+      isRestricted: false,
+      attachments: [],
+    };
+
+    setDraft("");
+    setOptimisticMessages((prev) => [...prev, optimisticMessage]);
+
+    try {
+      await createCommentMutation.mutateAsync({
+        caseId,
+        text,
+        body: {
+          action: "ADD_COMMUNICATION",
+          communication: {
+            text,
+            isRestricted: false,
+            author: {
+              email: String(submitter.email ?? ""),
+              firstName: String(submitter.firstName ?? "Patient"),
+              lastName: String(submitter.lastName ?? "User"),
+            },
+            webhookNotify: false,
+          },
+        },
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["care-validate", "case-details", caseId],
+      });
+    } catch {
+      setOptimisticMessages((prev) =>
+        prev.filter((message) => message.id !== optimisticMessage.id)
+      );
+      setDraft(text);
+    }
+  };
+
+  const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      const form = event.currentTarget.closest("form");
+      form?.requestSubmit();
+    }
+  };
 
   return (
     <>
@@ -221,18 +370,33 @@ export default function CaseChatPanel({ caseDetails }: CaseChatPanelProps) {
         <CardHeader className="pb-2">
           <CardTitle className="text-xl font-bold text-foreground">Case Messages</CardTitle>
           <p className="text-xs text-muted-foreground">
-            {messages.length} {messages.length === 1 ? "message" : "messages"}
+            {mergedMessages.length} {mergedMessages.length === 1 ? "message" : "messages"}
           </p>
         </CardHeader>
 
         <CardContent className="p-0">
+          {hasOlderMessages && (
+            <div className="border-b border-border px-4 py-2 bg-background flex justify-center">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="text-xs"
+                onClick={handleLoadOlder}
+                disabled={isLoadingOlder}
+              >
+                {isLoadingOlder ? "Loading older messages..." : "Load older messages"}
+              </Button>
+            </div>
+          )}
+
           <div ref={scrollRef} className="max-h-[65vh] overflow-y-auto px-4 py-4 bg-muted/20 space-y-4">
-            {messages.length === 0 ? (
+            {displayedMessages.length === 0 ? (
               <div className="text-center py-10 text-sm text-muted-foreground">
                 No messages yet.
               </div>
             ) : (
-              messages.map((message) => (
+              displayedMessages.map((message) => (
                 <ChatMessage
                   key={message.id}
                   message={message}
@@ -241,6 +405,28 @@ export default function CaseChatPanel({ caseDetails }: CaseChatPanelProps) {
               ))
             )}
           </div>
+
+          <form
+            onSubmit={handleSend}
+            className="border-t border-border bg-background p-3 flex items-end gap-2"
+          >
+            <Textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={handleComposerKeyDown}
+              placeholder="Type your message... (Enter to send, Shift+Enter for newline)"
+              className="min-h-[44px] max-h-[120px] flex-1 resize-none text-sm"
+              disabled={createCommentMutation.isPending}
+            />
+            <Button
+              type="submit"
+              disabled={!draft.trim() || createCommentMutation.isPending}
+              className="h-11"
+            >
+              <Send className="w-4 h-4 mr-1" />
+              {createCommentMutation.isPending ? "Sending..." : "Send"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 

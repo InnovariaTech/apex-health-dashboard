@@ -3,98 +3,183 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { api } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Send, CheckCheck, Clock, Stethoscope, HeartHandshake } from "lucide-react";
+import { MessageSquare, Send, CheckCheck, Clock, Stethoscope } from "lucide-react";
 import { format } from "date-fns";
 import { useEnvironment } from "@/lib/EnvironmentContext";
-
-const THREAD_TYPES = [
-  {
-    id: "provider",
-    label: "My Provider",
-    sub: "Message your doctor or care team",
-    icon: Stethoscope,
-    color: "#2563eb",
-    placeholder: "Message your provider...",
-    badge: "Medical",
-    badgeColor: "bg-blue-100 text-blue-700",
-  },
-  {
-    id: "support",
-    label: "Patient Support",
-    sub: "Billing, scheduling, and general help",
-    icon: HeartHandshake,
-    color: "#7c3aed",
-    placeholder: "Message patient support...",
-    badge: "Support",
-    badgeColor: "bg-purple-100 text-purple-700",
-  },
-];
+import { useSearchParams } from "react-router-dom";
+import {
+  getRecentCasesDateRange,
+  useCases,
+  useLatestCaseId,
+} from "@/hooks/care-validate/useCases";
+import {
+  useCaseCommentsByID,
+  useCreateCaseComment,
+} from "@/hooks/care-validate/useCommunications";
+import { findPatientAuthor, formatAuthorName } from "@/lib/careValidateIdentity";
 
 export default function Chat() {
   const { environment } = useEnvironment();
+  const [searchParams] = useSearchParams();
+  const caseIdFromQuery = searchParams.get("caseId") ?? "";
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeThread, setActiveThread] = useState("provider");
-  const [selectedRecipient, setSelectedRecipient] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [activeCaseId, setActiveCaseId] = useState(caseIdFromQuery || "");
   const [newMessage, setNewMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [recordsPerPage, setRecordsPerPage] = useState(100);
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false);
+  const createCommentMutation = useCreateCaseComment();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const previousCommentCountRef = useRef(0);
+  const previousScrollHeightRef = useRef(0);
+  const dateRange = React.useMemo(() => getRecentCasesDateRange(), []);
+  const { data: cases = [], isLoading: isCasesLoading } = useCases({
+    startTime: dateRange.startTime,
+    endTime: dateRange.endTime,
+  });
+  const { data: latestCaseId = "" } = useLatestCaseId();
+  const activeCaseIdResolved = activeCaseId || latestCaseId || cases[0]?.id || "";
+  const activeCase = cases.find((caseItem) => caseItem.id === activeCaseIdResolved) ?? null;
+  const {
+    data: comments = [],
+    isLoading: isCommentsLoading,
+    isPending: isCommentsPending,
+    isError: isCommentsError,
+  } = useCaseCommentsByID(activeCaseIdResolved, { recordsPerPage, sortOrder: "ASC" });
 
-  useEffect(() => { loadData(); }, []);
-  useEffect(() => { if (selectedRecipient) loadMessages(); }, [selectedRecipient]);
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => {
+    loadCurrentUser();
+  }, []);
 
-  const loadData = async () => {
-    setIsLoading(true);
-    const user = await api.auth.me();
-    setCurrentUser(user);
-    const allUsers = await api.entities.User.list();
-    const careTeam = allUsers.filter(
-      (u) => u.email !== user.email && u.role !== "user"
-    );
-    if (careTeam.length > 0) setSelectedRecipient(careTeam[0]);
-    setIsLoading(false);
-  };
+  useEffect(() => {
+    if (caseIdFromQuery) {
+      setActiveCaseId(caseIdFromQuery);
+      return;
+    }
 
-  const loadMessages = useCallback(async () => {
-    if (!currentUser || !selectedRecipient) return;
-    const allMessages = await api.entities.Message.list("-created_date");
-    const threadId = [currentUser.email, selectedRecipient.email, activeThread].sort().join("-");
-    const conversation = allMessages
-      .filter(m => m.thread_id === threadId)
-      .reverse();
-    setMessages(conversation);
-    for (const msg of conversation) {
-      if (msg.to_user_id === currentUser.email && !msg.is_read) {
-        await api.entities.Message.update(msg.id, { is_read: true });
+    if (!activeCaseId && latestCaseId) {
+      setActiveCaseId(latestCaseId);
+      return;
+    }
+
+    if (!activeCaseId && cases[0]?.id) {
+      setActiveCaseId(cases[0].id);
+      return;
+    }
+
+    if (!caseIdFromQuery && activeCase?.id && !activeCaseId) {
+      setActiveCaseId(activeCase.id);
+    }
+  }, [caseIdFromQuery, latestCaseId, cases, activeCase?.id, activeCaseId]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    if (isLoadingOlder) {
+      const heightDelta = container.scrollHeight - previousScrollHeightRef.current;
+      container.scrollTop = Math.max(0, container.scrollTop + heightDelta);
+      setIsLoadingOlder(false);
+      previousCommentCountRef.current = comments.length;
+      return;
+    }
+
+    const previousCount = previousCommentCountRef.current;
+    const hasNewMessages = comments.length > previousCount;
+    if (hasNewMessages) {
+      const nearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+      if (nearBottom || createCommentMutation.isSuccess) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     }
-  }, [currentUser, selectedRecipient, activeThread]);
 
-  useEffect(() => { if (selectedRecipient) loadMessages(); }, [activeThread, loadMessages]);
+    previousCommentCountRef.current = comments.length;
+  }, [comments, isLoadingOlder, createCommentMutation.isSuccess]);
+
+  const loadCurrentUser = async () => {
+    const user = await api.auth.me();
+    setCurrentUser(user);
+  };
+
+  const patientAuthor = React.useMemo(() => findPatientAuthor(comments), [comments]);
+  const patientAuthorId = patientAuthor?.id ?? "";
+
+  const getAuthorInitial = useCallback((comment) => {
+    const firstInitial = String(comment?.author?.firstName ?? "")
+      .trim()
+      .charAt(0)
+      .toUpperCase();
+    const lastInitial = String(comment?.author?.lastName ?? "")
+      .trim()
+      .charAt(0)
+      .toUpperCase();
+    return `${firstInitial}${lastInitial}`.trim() || "T";
+  }, []);
+
+  const isCurrentUserComment = useCallback(
+    (comment) => {
+      if (!patientAuthorId) return false;
+      return String(comment?.author?.id ?? "") === patientAuthorId;
+    },
+    [patientAuthorId]
+  );
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedRecipient) return;
-    setIsSending(true);
-    const threadId = [currentUser.email, selectedRecipient.email, activeThread].sort().join("-");
-    await api.entities.Message.create({
-      from_user_id: currentUser.email,
-      to_user_id: selectedRecipient.email,
-      message_text: newMessage,
-      thread_id: threadId,
-      is_read: false,
-    });
+    const text = newMessage.trim();
+    if (!text || !activeCaseIdResolved || !currentUser) return;
+
+    const fullName = String(currentUser.full_name ?? "").trim();
+    const parts = fullName.split(" ").filter(Boolean);
+    const firstName =
+      parts[0] || String(currentUser.first_name ?? currentUser.firstName ?? "Patient");
+    const lastName =
+      parts.slice(1).join(" ") ||
+      String(currentUser.last_name ?? currentUser.lastName ?? "User");
+
     setNewMessage("");
-    loadMessages();
-    setIsSending(false);
+    try {
+      await createCommentMutation.mutateAsync({
+        caseId: activeCaseIdResolved,
+        text,
+        body: {
+          action: "ADD_COMMUNICATION",
+          communication: {
+            text,
+            isRestricted: false,
+            author: {
+              email: String(currentUser.email ?? ""),
+              firstName,
+              lastName,
+            },
+            webhookNotify: false,
+          },
+        },
+        optimisticAuthor: patientAuthor ?? {
+          id: "optimistic-patient",
+          firstName,
+          lastName,
+        },
+        recordsPerPage,
+        sortOrder: "ASC",
+      });
+    } catch {
+      setNewMessage(text);
+    }
   };
 
-  if (isLoading) {
+  const handleLoadOlder = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    previousScrollHeightRef.current = container.scrollHeight;
+    setIsLoadingOlder(true);
+    setRecordsPerPage((prev) => prev + 100);
+  }, []);
+
+  if (!currentUser || isCasesLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -102,7 +187,17 @@ export default function Chat() {
     );
   }
 
-  const currentThreadConfig = THREAD_TYPES.find(t => t.id === activeThread);
+  const currentThreadConfig = {
+    label: "Case Chat",
+    sub: activeCase
+      ? `Case #${activeCase.shortId} - ${activeCase.title}`
+      : "Message your care team for this case",
+    icon: Stethoscope,
+    color: "#2563eb",
+    placeholder: "Message your provider...",
+    badge: "Medical",
+    badgeColor: "bg-blue-100 text-blue-700",
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
@@ -117,39 +212,20 @@ export default function Chat() {
             <p className="text-xs text-muted-foreground font-medium">Secure messaging with your medical team</p>
           </div>
         </div>
-
-        {/* Thread type selector */}
-        <div className="flex gap-2">
-          {THREAD_TYPES.map(thread => (
-            <button
-              key={thread.id}
-              onClick={() => setActiveThread(thread.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${
-                activeThread === thread.id
-                  ? "border-current text-white"
-                  : "border-border text-muted-foreground hover:border-muted-foreground bg-background"
-              }`}
-              style={activeThread === thread.id ? { backgroundColor: thread.color, borderColor: thread.color } : {}}
-            >
-              <thread.icon className="w-4 h-4" />
-              {thread.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Recipient bar */}
-        {selectedRecipient && (
+        {activeCase && (
           <div className="border-b px-6 py-3 bg-muted/30 flex items-center gap-3 flex-shrink-0">
             <Avatar className="w-9 h-9 border-2" style={{ borderColor: currentThreadConfig.color }}>
               <AvatarFallback className="text-white text-sm font-bold" style={{ backgroundColor: currentThreadConfig.color }}>
-                {selectedRecipient.full_name?.[0]?.toUpperCase() || "D"}
+                {String(activeCase.title ?? "C").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="text-sm font-bold text-foreground">{selectedRecipient.full_name || "Care Team"}</p>
+              <p className="text-sm font-bold text-foreground">{activeCase.title || "Current Case"}</p>
               <p className="text-xs text-muted-foreground">{currentThreadConfig.sub}</p>
             </div>
             <Badge className={`text-xs font-bold border-none ${currentThreadConfig.badgeColor}`}>
@@ -159,8 +235,34 @@ export default function Chat() {
         )}
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-muted/10">
-          {messages.length === 0 ? (
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-muted/10"
+        >
+          {!isCommentsPending && comments.length >= recordsPerPage && (
+            <div className="flex justify-center mb-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleLoadOlder}
+                disabled={isLoadingOlder || isCommentsLoading}
+                className="text-xs"
+              >
+                {isLoadingOlder ? "Loading older messages..." : "Load older messages"}
+              </Button>
+            </div>
+          )}
+
+          {isCommentsPending && comments.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : isCommentsError ? (
+            <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+              Unable to load case messages right now.
+            </div>
+          ) : comments.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: currentThreadConfig.color + "18" }}>
                 <currentThreadConfig.icon className="w-8 h-8" style={{ color: currentThreadConfig.color }} />
@@ -169,14 +271,16 @@ export default function Chat() {
               <p className="text-sm text-muted-foreground max-w-xs">{currentThreadConfig.sub}. Messages are reviewed during business hours.</p>
             </div>
           ) : (
-            messages.map((msg) => {
-              const isFromMe = msg.from_user_id === currentUser.email;
+            comments.map((msg) => {
+              const isFromMe =
+                isCurrentUserComment(msg) || String(msg.id ?? "").startsWith("optimistic-");
+              const authorName = formatAuthorName(msg.author);
               return (
                 <div key={msg.id} className={`flex ${isFromMe ? "justify-end" : "justify-start"}`}>
                   {!isFromMe && (
                     <Avatar className="w-7 h-7 mr-2 mt-1 flex-shrink-0 border" style={{ borderColor: currentThreadConfig.color }}>
                       <AvatarFallback className="text-white text-xs font-bold" style={{ backgroundColor: currentThreadConfig.color }}>
-                        {selectedRecipient?.full_name?.[0]?.toUpperCase() || "D"}
+                        {getAuthorInitial(msg)}
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -188,13 +292,35 @@ export default function Chat() {
                     }`}
                     style={isFromMe ? { backgroundColor: currentThreadConfig.color } : {}}
                     >
-                      <p className="whitespace-pre-wrap">{msg.message_text}</p>
+                      {!isFromMe && (
+                        <p className="text-[10px] font-semibold mb-1 opacity-80">{authorName}</p>
+                      )}
+                      <p className="whitespace-pre-wrap">{msg.text}</p>
+                      {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {msg.attachments.map((attachment, index) => (
+                            <a
+                              key={attachment.id || `${msg.id}-attachment-${index}`}
+                              href={attachment.url || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-xs underline opacity-90"
+                            >
+                              {attachment.fileName || "Attachment"}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className={`flex items-center gap-1.5 mt-1 px-1 ${isFromMe ? "justify-end" : "justify-start"}`}>
                       <span className="text-[10px] text-muted-foreground font-medium">
-                        {format(new Date(msg.created_date), "MMM d, h:mm a")}
+                        {String(msg.id ?? "").startsWith("optimistic-")
+                          ? "Sending..."
+                          : msg.createdAt
+                            ? format(new Date(msg.createdAt), "MMM d, h:mm a")
+                            : "—"}
                       </span>
-                      {isFromMe && (msg.is_read
+                      {isFromMe && (msg.id
                         ? <CheckCheck className="w-3 h-3" style={{ color: currentThreadConfig.color }} />
                         : <Clock className="w-3 h-3 text-muted-foreground" />
                       )}
@@ -212,8 +338,10 @@ export default function Chat() {
           <p className="text-[10px] text-muted-foreground font-medium mb-2 text-center">
             ⚠️ For medical emergencies, call 911. This is not a crisis line.
           </p>
-          {!selectedRecipient ? (
-            <p className="text-center text-sm text-muted-foreground font-semibold py-2">No care team members available.</p>
+          {!activeCaseIdResolved ? (
+            <p className="text-center text-sm text-muted-foreground font-semibold py-2">
+              No active case selected.
+            </p>
           ) : (
             <form onSubmit={handleSendMessage} className="flex gap-2">
               <Input
@@ -221,15 +349,15 @@ export default function Chat() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={currentThreadConfig.placeholder}
                 className="flex-1 border-2 focus:border-primary font-medium"
-                disabled={isSending}
+                disabled={createCommentMutation.isPending}
               />
               <Button
                 type="submit"
-                disabled={isSending || !newMessage.trim()}
+                disabled={createCommentMutation.isPending || !newMessage.trim()}
                 className="px-5 font-bold text-white"
                 style={{ backgroundColor: currentThreadConfig.color }}
               >
-                {isSending
+                {createCommentMutation.isPending
                   ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                   : <Send className="w-4 h-4" />
                 }

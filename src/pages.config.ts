@@ -14,6 +14,7 @@ import Health from "./views/patient/pages/Health";
 import Biomarkers from "./views/patient/pages/Biomarkers";
 import Documents from "./views/patient/pages/Documents";
 import MyCases from "./views/patient/pages/MyCases";
+import BrowseTreatments from "./views/patient/pages/BrowseTreatments";
 import __Layout from "./layouts/AppLayout";
 
 export type PageComponent = ComponentType<any>;
@@ -31,6 +32,7 @@ export const PAGES: Record<string, PageComponent> = {
   Biomarkers,
   Documents,
   MyCases,
+  BrowseTreatments,
 };
 
 export interface PagesConfig {
