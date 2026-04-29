@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { getRecentCasesDateRange, useCases } from "@/hooks/care-validate/useCases";
+import { useCases } from "@/hooks/care-validate/useCases";
+import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -133,7 +134,7 @@ function getAssigneeInitials(caseItem: CaseItem): AssigneeInitial[] {
 
 export default function MyCases() {
   const navigate = useNavigate();
-  const dateRange = useMemo(() => getRecentCasesDateRange(), []);
+  const dateRange = useMemo(() => getCasesDateRange(), []);
   const { data: cases = [], isLoading, isError } = useCases({
     startTime: dateRange.startTime,
     endTime: dateRange.endTime,

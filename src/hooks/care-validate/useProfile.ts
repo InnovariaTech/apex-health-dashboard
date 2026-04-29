@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchPatientProfileGlobalSettings,
   fetchPatientProfilePartnerIntegration,
   fetchPatientProfilePromoCode,
   fetchPatientProfileUserStatus,
+  updatePatientProfileUserEmail,
+  updatePatientProfileUser,
 } from "@/api/care-validate/profile";
 import { queryKeys } from "@/hooks/queryKeys";
 import type {
@@ -13,7 +15,10 @@ import type {
   PatientProfileGlobalSettingsInfo,
   PatientProfilePartnerIntegrationInfo,
   PatientProfilePromoCodeInfo,
+  PatientProfileUserInfo,
   PatientProfileUserStatus,
+  UpdatePatientProfileEmailBody,
+  UpdatePatientProfileUserBody,
 } from "@/types/care-validate/profile_types";
 
 export function useProfileStatus(
@@ -66,6 +71,48 @@ export function useProfilePromoCode(
       ),
     enabled: Boolean(code),
     staleTime: 60_000,
+  });
+}
+
+export function useUpdateProfileUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation<PatientProfileUserInfo, unknown, UpdatePatientProfileUserBody>({
+    mutationFn: (body) => updatePatientProfileUser(body),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.careValidate.profileUserStatus(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.careValidate.profileUser(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.auth.user(),
+        }),
+      ]);
+    },
+  });
+}
+
+export function useUpdateProfileUserEmail() {
+  const queryClient = useQueryClient();
+
+  return useMutation<PatientProfileUserInfo, unknown, UpdatePatientProfileEmailBody>({
+    mutationFn: (body) => updatePatientProfileUserEmail(body),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.careValidate.profileUserStatus(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.careValidate.profileUser(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.auth.user(),
+        }),
+      ]);
+    },
   });
 }
 

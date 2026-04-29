@@ -12,17 +12,6 @@ import type {
   GetCasesParams,
 } from "@/types/care-validate/case_types";
 
-export function getRecentCasesDateRange(referenceDate = new Date()) {
-  const endDate = new Date(referenceDate);
-  const startDate = new Date(referenceDate);
-  startDate.setMonth(startDate.getMonth() - 2);
-
-  return {
-    startTime: startDate.toISOString(),
-    endTime: endDate.toISOString(),
-  };
-}
-
 export function useCases(params: GetCasesParams): ReturnType<typeof useQuery<CaseItem[]>>;
 export function useCases(includePayments?: boolean): ReturnType<typeof useQuery<CaseItem[]>>;
 export function useCases(

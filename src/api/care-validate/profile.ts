@@ -10,10 +10,16 @@ import type {
   PatientProfileGlobalSettingsInfo,
   PatientProfilePartnerIntegrationInfo,
   PatientProfilePromoCodeInfo,
+  PatientProfileUserInfo,
   PatientProfileUserStatus,
+  UpdatePatientProfileEmailBody,
+  UpdatePatientProfileEmailResponse,
+  UpdatePatientProfileUserBody,
+  UpdatePatientProfileUserResponse,
 } from "@/types/care-validate/profile_types";
 
 const PATIENT_PROFILE_USER_ENDPOINT = "/api/patient/profile/user";
+const PATIENT_PROFILE_USER_EMAIL_ENDPOINT = "/api/patient/profile/user/email";
 const PATIENT_PROFILE_PARTNER_INTEGRATION_ENDPOINT =
   "/api/patient/profile/partner-integration";
 const PATIENT_PROFILE_GLOBAL_SETTINGS_ENDPOINT = "/api/patient/profile/global-settings";
@@ -33,6 +39,32 @@ function mapPatientProfileUserStatus(raw: unknown): PatientProfileUserStatus {
   };
 }
 
+function mapPatientProfileUser(raw: unknown): PatientProfileUserInfo {
+  const row = (raw ?? {}) as Record<string, unknown>;
+
+  return {
+    ...row,
+    email: String(row.email ?? ""),
+    firstName: String(row.firstName ?? ""),
+    lastName: String(row.lastName ?? ""),
+    dob: String(row.dob ?? ""),
+    phoneNumber: String(row.phoneNumber ?? ""),
+    gender: String(row.gender ?? ""),
+    address: String(row.address ?? ""),
+    address2: String(row.address2 ?? ""),
+    city: String(row.city ?? ""),
+    state: String(row.state ?? ""),
+    country: String(row.country ?? ""),
+    postalCode: String(row.postalCode ?? ""),
+    allergies: String(row.allergies ?? ""),
+    currentMedications: String(row.currentMedications ?? ""),
+    healthConditions: String(row.healthConditions ?? ""),
+    languagePreferences: Array.isArray(row.languagePreferences)
+      ? row.languagePreferences.map((item) => String(item))
+      : [],
+  };
+}
+
 export async function fetchPatientProfileUserStatus(
   params: FetchPatientProfileUserStatusParams = {}
 ): Promise<PatientProfileUserStatus> {
@@ -47,6 +79,41 @@ export async function fetchPatientProfileUserStatus(
   );
 
   return mapPatientProfileUserStatus(res.data?.data);
+}
+
+export async function updatePatientProfileUser(
+  body: UpdatePatientProfileUserBody
+): Promise<PatientProfileUserInfo> {
+  const res = await axiosService.post<UpdatePatientProfileUserResponse>(
+    PATIENT_PROFILE_USER_ENDPOINT,
+    body
+  );
+
+  return mapPatientProfileUser(res.data?.data?.user);
+}
+
+export async function updatePatientProfileUserEmail(
+  body: UpdatePatientProfileEmailBody
+): Promise<PatientProfileUserInfo> {
+  const res = await axiosService.post<UpdatePatientProfileEmailResponse>(
+    PATIENT_PROFILE_USER_EMAIL_ENDPOINT,
+    body
+  );
+
+  return mapPatientProfileUser(res.data?.data?.user);
+}
+
+export function buildUpdateEmailPayload(
+  currentEmail: string,
+  newEmail: string
+): UpdatePatientProfileEmailBody {
+  return {
+    action: "UPDATE_EMAIL",
+    data: {
+      currentEmail,
+      newEmail,
+    },
+  };
 }
 
 function mapPatientProfilePartnerIntegration(

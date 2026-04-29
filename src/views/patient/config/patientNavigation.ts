@@ -9,6 +9,7 @@ import {
   CreditCard,
   UserCircle,
   Pill,
+  FlaskConical,
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
@@ -19,7 +20,7 @@ export const apexPatientNavItems = [
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
   { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  // { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
   // { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
   // { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
@@ -42,7 +43,7 @@ export const gymPatientNavItems = [
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
   { title: "browse-treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
-  // { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+  { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
   // { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
   // { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },

@@ -17,6 +17,74 @@ export interface FetchPatientProfileUserStatusParams {
   email?: string;
 }
 
+export type PatientProfileGender = "MALE" | "FEMALE" | "OTHER" | string;
+
+export interface UpdatePatientProfileUserBody {
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender: PatientProfileGender;
+  phoneNumber: string;
+  address: string;
+  address2?: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  allergies?: string;
+  currentMedications?: string;
+  healthConditions?: string;
+  languagePreferences?: string[];
+}
+
+export interface PatientProfileUserInfo {
+  email: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  phoneNumber: string;
+  gender: PatientProfileGender;
+  address: string;
+  address2: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  allergies: string;
+  currentMedications: string;
+  healthConditions: string;
+  languagePreferences: string[];
+  [key: string]: unknown;
+}
+
+export interface UpdatePatientProfileUserResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    user?: unknown;
+    [key: string]: unknown;
+  };
+}
+
+export type UpdatePatientProfileEmailAction = "UPDATE_EMAIL";
+
+export interface UpdatePatientProfileEmailBody {
+  action: UpdatePatientProfileEmailAction;
+  data: {
+    newEmail: string;
+    currentEmail: string;
+  };
+}
+
+export interface UpdatePatientProfileEmailResponse {
+  success?: boolean;
+  message?: string;
+  data?: {
+    user?: unknown;
+    [key: string]: unknown;
+  };
+}
+
 export interface PatientProfilePartnerIntegrationInfo {
   available: boolean;
   reason: string;

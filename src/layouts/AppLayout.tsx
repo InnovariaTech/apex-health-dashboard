@@ -18,7 +18,7 @@ import {
 import { api } from "@/api/client";
 import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useLogout } from "@/hooks/auth/useAuth";
-import AIAssistantBar from "@/components/env/AIAssistantBar";
+import AIAssistantBar from "@/components/global/AIAssistantBar";
 import GymSwitcher from "@/components/env/GymSwitcher";
 import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
 

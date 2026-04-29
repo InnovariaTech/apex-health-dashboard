@@ -14,6 +14,7 @@ import {
   FlaskConical, Activity, Dumbbell, Pill, Stethoscope, File
 } from "lucide-react";
 import { format } from "date-fns";
+import { useAiChatStore } from "@/stores/aiChatStore";
 
 const DOC_TYPES = [
   { value: "lab_results", label: "Lab Results", icon: FlaskConical, color: "text-blue-500" },
@@ -45,6 +46,7 @@ function mapApiDocumentToPageDocument(doc: PatientDocumentItem) {
 }
 
 export default function Documents() {
+  const setPendingPrompt = useAiChatStore((s) => s.setPendingPrompt);
   const [currentUser, setCurrentUser] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -89,28 +91,13 @@ export default function Documents() {
     setUploadForm({ document_type: "lab_results", document_date: format(new Date(), "yyyy-MM-dd"), provider: "", notes: "" });
   };
 
-  const handleAnalyze = async (doc) => {
-    setIsAnalyzing(doc.id);
-    const prompt = `You are an expert medical AI assistant at Apex MD. A patient has uploaded a medical document (${doc.document_type.replace(/_/g, " ")}) titled "${doc.file_name}"${doc.provider ? ` from ${doc.provider}` : ""}${doc.document_date ? ` dated ${doc.document_date}` : ""}.
-
-Please analyze this document and provide:
-1. A clear summary of what the document contains and key findings
-2. Any values or metrics that are outside optimal ranges (flag these clearly)
-3. Clinical interpretation — what does this mean for the patient's health?
-4. Specific actionable recommendations (supplements, peptides, lifestyle changes, medical follow-ups)
-5. Any urgent concerns the patient should discuss with their Apex MD physician
-
-Important: Be specific and reference actual values when visible. Always recommend confirming with their physician.`;
-
-    const summary = await api.integrations.Core.InvokeLLM({
-      prompt,
-      file_urls: [doc.file_url],
+  const handleAnalyze = (doc) => {
+    setPendingPrompt({
+      message: `I have requested a detailed analysis for lab report ${doc.id}. Please retrieve its full details and provide a comprehensive summary, explaining any out-of-range biomarkers in simple terms.`,
+      isHidden: true,
+      documentId: doc.id,
     });
-
-    await api.entities.PatientDocument.update(doc.id, { ai_summary: summary });
-    setDocuments((prev) => prev.map((d) => d.id === doc.id ? { ...d, ai_summary: summary } : d));
-    setIsAnalyzing(null);
-    setSelectedDoc((prev) => prev?.id === doc.id ? { ...prev, ai_summary: summary } : prev);
+    setSelectedDoc(null);
   };
 
   const handleDelete = async (docId) => {

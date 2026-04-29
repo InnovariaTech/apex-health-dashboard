@@ -107,5 +107,6 @@ export const queryKeys = {
   patients: {
     me: ["patients", "me"] as const,
     home: (email?: string | null) => ["patients", "home", email ?? "anonymous"] as const,
+    biomarkersSummary: () => ["patients", "biomarkers-summary"] as const,
   },
 };

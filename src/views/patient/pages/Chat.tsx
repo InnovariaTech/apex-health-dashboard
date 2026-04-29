@@ -10,10 +10,10 @@ import { format } from "date-fns";
 import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useSearchParams } from "react-router-dom";
 import {
-  getRecentCasesDateRange,
   useCases,
   useLatestCaseId,
 } from "@/hooks/care-validate/useCases";
+import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
 import {
   useCaseCommentsByID,
   useCreateCaseComment,
@@ -34,7 +34,7 @@ export default function Chat() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const previousCommentCountRef = useRef(0);
   const previousScrollHeightRef = useRef(0);
-  const dateRange = React.useMemo(() => getRecentCasesDateRange(), []);
+  const dateRange = React.useMemo(() => getCasesDateRange(), []);
   const { data: cases = [], isLoading: isCasesLoading } = useCases({
     startTime: dateRange.startTime,
     endTime: dateRange.endTime,
