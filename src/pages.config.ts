@@ -42,7 +42,7 @@ export interface PagesConfig {
 }
 
 export const pagesConfig = {
-  mainPage: "Dashboard",
+  mainPage: "MyCases",
   Pages: PAGES,
   Layout: __Layout as LayoutComponent,
 } satisfies PagesConfig;

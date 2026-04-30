@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { useLoginMutation } from "@/hooks/auth/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { extractApiErrorDetails, extractDisplayErrorMessage } from "@/utils/errorHandler";
+import { extractDisplayErrorMessage } from "@/utils/errorHandler";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -29,66 +28,83 @@ export default function Login() {
   };
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-            <LogIn className="w-5 h-5" />
-            Login
-          </CardTitle>
-          <CardDescription className="text-center">
-            Sign in to access your dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
+      <Card className="w-full max-w-5xl shadow-lg overflow-hidden">
+        <div className="grid md:grid-cols-2 min-h-[620px]">
+          <div className="hidden md:block">
+            <img
+              src="/images/bgpatient11.png"
+              alt="Patient background"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex items-center justify-center p-6 md:p-10 bg-white">
+            <div className="w-full max-w-md">
+              <CardHeader className="space-y-2 px-0 pt-0">
+                <img
+                  src="/images/blacklogo.png"
+                  alt="Apex MD Logo"
+                  className="h-14 w-auto object-contain mx-auto mb-2"
+                />
+                <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                  <LogIn className="w-5 h-5" />
+                  Login
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Sign in to access your dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 px-0 pb-0">
+                {error ? (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                ) : null}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={form.email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setForm((p) => ({ ...p, email: e.target.value }))
-                }
-                required
-              />
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={form.email}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setForm((p) => ({ ...p, email: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="current-password"
+                      placeholder="Enter your password"
+                      value={form.password}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setForm((p) => ({ ...p, password: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <Button className="w-full font-semibold" type="submit" disabled={loginMutation.isPending}>
+                    {loginMutation.isPending ? "Signing in..." : "Sign in"}
+                  </Button>
+                </form>
+
+                {/* <Separator />
+                <p className="text-sm text-center text-muted-foreground">
+                  New here?{" "}
+                  <Link to="/signup" className="font-semibold text-primary hover:underline">
+                    Create an account
+                  </Link>
+                </p> */}
+              </CardContent>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={form.password}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setForm((p) => ({ ...p, password: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <Button className="w-full font-semibold" type="submit" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-
-          <Separator />
-
-          <p className="text-sm text-center text-muted-foreground">
-            New here?{" "}
-            <Link to="/signup" className="font-semibold text-primary hover:underline">
-              Create an account
-            </Link>
-          </p>
-        </CardContent>
+          </div>
+        </div>
       </Card>
     </div>
   );

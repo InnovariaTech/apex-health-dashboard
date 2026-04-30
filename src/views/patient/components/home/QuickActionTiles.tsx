@@ -8,7 +8,7 @@ import { useEnvironment } from "@/lib/EnvironmentContext";
 
 const tiles = [
   { label: "Message Team", sub: "Chat with your coach", icon: MessageSquare, page: "Chat", color: "#3b82f6" },
-  { label: "Shop", sub: "Treatments & supplements", icon: ShoppingBag, page: "Marketplace", color: "#8b5cf6" },
+  { label: "Shop", sub: "Treatments & supplements", icon: ShoppingBag, page: "BrowseTreatments", color: "#8b5cf6" },
   { label: "Workouts", sub: "Start today's session", icon: Dumbbell, page: "Workouts", color: "#10b981" },
   { label: "Lab Results", sub: "View biomarkers", icon: FlaskConical, page: "Biomarkers", color: "#f59e0b" },
   { label: "Progress", sub: "Track your journey", icon: TrendingUp, page: "Progress", color: "#ef4444" },

@@ -39,6 +39,7 @@ export default function Layout({ children }) {
 
   const isGymEnv = environment.id !== "apex-md";
   const navItems = getPatientNavItems(isGymEnv);
+  const emailPrefix = currentUser?.email?.split("@")?.[0] || "User";
 
   const isDark = environment.themeMode === "dark" || environment.id === "apex-md";
   const activeItemBg = environment.primaryColor;
@@ -178,7 +179,7 @@ export default function Layout({ children }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate" style={{ color: environment.sidebarText }}>
-                  {currentUser?.full_name || "User"}
+                  {currentUser?.full_name || emailPrefix}
                 </p>
                 <p className="text-xs truncate" style={{ color: environment.mutedTextColor }}>
                   {currentUser?.email}
@@ -233,7 +234,7 @@ export default function Layout({ children }) {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <GymSwitcher />
+              {/* <GymSwitcher /> */}
             </div>
           </header>
 

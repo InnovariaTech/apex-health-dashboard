@@ -15,12 +15,13 @@ import { createPageUrl } from "@/utils";
 
 /** Full clinical nav (Apex MD environment). */
 export const apexPatientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  // { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
-  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-  { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
+  // { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
+
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+ 
   // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
   // { title: "Schedule", url: createPageUrl("Schedule"), icon: CalendarDays },
   // { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
@@ -33,13 +34,14 @@ export const apexPatientNavItems = [
   // { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
   // { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
   // { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
+  { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
   { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
 ];
 
 /** Gym-branded portals — fitness-focused subset. */
 export const gymPatientNavItems = [
-  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
   { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
   { title: "browse-treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },

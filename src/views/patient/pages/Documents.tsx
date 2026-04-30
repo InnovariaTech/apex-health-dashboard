@@ -59,7 +59,8 @@ export default function Documents() {
     provider: "",
     notes: "",
   });
-  const [filterType, setFilterType] = useState("all");
+  // Keep only "All" tab active for now.
+  // const [filterType, setFilterType] = useState("all");
   const { data: apiDocuments = [], isLoading, isError } = useDocuments();
 
   useEffect(() => {
@@ -106,7 +107,8 @@ export default function Documents() {
     if (selectedDoc?.id === docId) setSelectedDoc(null);
   };
 
-  const filtered = filterType === "all" ? documents : documents.filter((d) => d.document_type === filterType);
+  // Show all documents regardless of type filter.
+  const filtered = documents;
 
   if (isLoading) {
     return (
@@ -130,13 +132,13 @@ export default function Documents() {
               <p className="text-muted-foreground font-semibold">Labs, scans, reports — AI-analyzed for insights</p>
             </div>
           </div>
-          <Button
+          {/* <Button
             onClick={() => setShowUpload(true)}
             className="bg-primary hover:bg-primary/80 text-primary-foreground font-bold"
           >
             <Upload className="w-5 h-5 mr-2" />
             UPLOAD DOCUMENT
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -164,13 +166,12 @@ export default function Documents() {
       <div className="flex gap-2 flex-wrap mb-6">
         <Button
           size="sm"
-          variant={filterType === "all" ? "default" : "outline"}
-          onClick={() => setFilterType("all")}
-          className={`font-bold ${filterType === "all" ? "bg-primary text-primary-foreground" : "border-border"}`}
+          variant="default"
+          className="font-bold bg-primary text-primary-foreground"
         >
           All ({documents.length})
         </Button>
-        {DOC_TYPES.map((dt) => {
+        {/* {DOC_TYPES.map((dt) => {
           const count = documents.filter((d) => d.document_type === dt.value).length;
           if (count === 0) return null;
           return (
@@ -184,7 +185,7 @@ export default function Documents() {
               {dt.label} ({count})
             </Button>
           );
-        })}
+        })} */}
       </div>
 
       {/* Document grid */}

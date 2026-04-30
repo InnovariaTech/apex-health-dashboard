@@ -21,6 +21,23 @@ import {
   ChevronDown,
   ChevronUp,
   AlertTriangle,
+  Droplets,
+  Droplet,
+  Wine,
+  Beef,
+  Filter,
+  Bone,
+  Flame,
+  Sparkles,
+  Magnet,
+  Candy,
+  Atom,
+  Activity,
+  Gauge,
+  Pill,
+  ShieldAlert,
+  TestTube,
+  type LucideIcon,
 } from "lucide-react";
 import {
   LineChart,
@@ -56,6 +73,162 @@ const formatCategoryLabel = (key: string) =>
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+// ─── Category visual theme (icon + colors) ───────────────────────────────────
+type CategoryMeta = {
+  icon: LucideIcon;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  accent: string; // border-l accent for the section header
+};
+
+const CATEGORY_META: Record<string, CategoryMeta> = {
+  "blood count (cbc)": {
+    icon: Droplets,
+    iconColor: "text-rose-600",
+    bgColor: "bg-rose-50",
+    borderColor: "border-rose-200",
+    accent: "border-rose-400",
+  },
+  "blood count": {
+    icon: Droplets,
+    iconColor: "text-rose-600",
+    bgColor: "bg-rose-50",
+    borderColor: "border-rose-200",
+    accent: "border-rose-400",
+  },
+  cbc: {
+    icon: Droplets,
+    iconColor: "text-rose-600",
+    bgColor: "bg-rose-50",
+    borderColor: "border-rose-200",
+    accent: "border-rose-400",
+  },
+  liver: {
+    icon: Wine,
+    iconColor: "text-amber-700",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    accent: "border-amber-400",
+  },
+  protein: {
+    icon: Beef,
+    iconColor: "text-red-700",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    accent: "border-red-400",
+  },
+  lipid: {
+    icon: Droplet,
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    borderColor: "border-yellow-200",
+    accent: "border-yellow-400",
+  },
+  kidney: {
+    icon: Filter,
+    iconColor: "text-cyan-600",
+    bgColor: "bg-cyan-50",
+    borderColor: "border-cyan-200",
+    accent: "border-cyan-400",
+  },
+  bone: {
+    icon: Bone,
+    iconColor: "text-stone-600",
+    bgColor: "bg-stone-50",
+    borderColor: "border-stone-200",
+    accent: "border-stone-400",
+  },
+  metabolic: {
+    icon: Flame,
+    iconColor: "text-orange-600",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-200",
+    accent: "border-orange-400",
+  },
+  hormones: {
+    icon: Sparkles,
+    iconColor: "text-fuchsia-600",
+    bgColor: "bg-fuchsia-50",
+    borderColor: "border-fuchsia-200",
+    accent: "border-fuchsia-400",
+  },
+  iron: {
+    icon: Magnet,
+    iconColor: "text-slate-700",
+    bgColor: "bg-slate-100",
+    borderColor: "border-slate-300",
+    accent: "border-slate-500",
+  },
+  glucose: {
+    icon: Candy,
+    iconColor: "text-pink-600",
+    bgColor: "bg-pink-50",
+    borderColor: "border-pink-200",
+    accent: "border-pink-400",
+  },
+  inflammation: {
+    icon: Flame,
+    iconColor: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    accent: "border-red-400",
+  },
+  metabolites: {
+    icon: Atom,
+    iconColor: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-200",
+    accent: "border-indigo-400",
+  },
+  pancreas: {
+    icon: Activity,
+    iconColor: "text-teal-600",
+    bgColor: "bg-teal-50",
+    borderColor: "border-teal-200",
+    accent: "border-teal-400",
+  },
+  thyroid: {
+    icon: Gauge,
+    iconColor: "text-violet-600",
+    bgColor: "bg-violet-50",
+    borderColor: "border-violet-200",
+    accent: "border-violet-400",
+  },
+  vitamins: {
+    icon: Pill,
+    iconColor: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    accent: "border-emerald-400",
+  },
+  "tumor markers": {
+    icon: ShieldAlert,
+    iconColor: "text-rose-700",
+    bgColor: "bg-rose-50",
+    borderColor: "border-rose-200",
+    accent: "border-rose-400",
+  },
+};
+
+const DEFAULT_CATEGORY_META: CategoryMeta = {
+  icon: TestTube,
+  iconColor: "text-blue-600",
+  bgColor: "bg-blue-50",
+  borderColor: "border-blue-200",
+  accent: "border-blue-400",
+};
+
+const getCategoryMeta = (key: string): CategoryMeta => {
+  const norm = key.toLowerCase().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  if (CATEGORY_META[norm]) return CATEGORY_META[norm];
+  // partial-match fallback (e.g. "Blood Count (CBC)" → "blood count")
+  for (const k of Object.keys(CATEGORY_META)) {
+    if (norm.includes(k)) return CATEGORY_META[k];
+  }
+  return DEFAULT_CATEGORY_META;
+};
 
 const formatChartDate = (iso: string) => {
   if (!iso) return "";
@@ -287,20 +460,28 @@ function CategorySection({
   items: BiomarkerSummaryItem[];
   onSelect: (item: BiomarkerSummaryItem) => void;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   const flaggedCount = items.filter((it) => {
     const status = getLatestPoint(it.trend)?.status?.toUpperCase();
     return status === "HIGH" || status === "LOW" || status === "CRITICAL";
   }).length;
 
+  const meta = getCategoryMeta(category);
+  const Icon = meta.icon;
+
   return (
     <section className="mb-8">
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-center justify-between py-2 mb-3 border-b border-border"
+        className={`w-full flex items-center justify-between py-2 pl-3 pr-2 mb-3 rounded-md border-b border-border border-l-4 ${meta.accent} bg-gradient-to-r from-card to-transparent hover:from-muted/40 transition-colors`}
       >
         <div className="flex items-center gap-3">
+          <span
+            className={`inline-flex items-center justify-center w-9 h-9 rounded-md border ${meta.borderColor} ${meta.bgColor}`}
+          >
+            <Icon className={`w-5 h-5 ${meta.iconColor}`} />
+          </span>
           <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">
             {formatCategoryLabel(category)}
           </h2>
