@@ -21,7 +21,7 @@ export default function Login() {
 
     try {
       await loginMutation.mutateAsync(form);
-      navigate("/");
+      navigate("/Dashboard");
     } catch (err: unknown) {
       setError(extractDisplayErrorMessage(err));
     }

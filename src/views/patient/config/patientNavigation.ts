@@ -10,12 +10,14 @@ import {
   UserCircle,
   Pill,
   FlaskConical,
+  Sparkles,
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
 /** Full clinical nav (Apex MD environment). */
 export const apexPatientNavItems = [
-  // { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "Health Analysis", url: createPageUrl("HealthAnalysis"), icon: Sparkles },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
   // { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
 

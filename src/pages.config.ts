@@ -15,6 +15,7 @@ import Biomarkers from "./views/patient/pages/Biomarkers";
 import Documents from "./views/patient/pages/Documents";
 import MyCases from "./views/patient/pages/MyCases";
 import BrowseTreatments from "./views/patient/pages/BrowseTreatments";
+import HealthAnalysis from "./views/patient/pages/HealthAnalysis";
 import __Layout from "./layouts/AppLayout";
 
 export type PageComponent = ComponentType<any>;
@@ -33,6 +34,7 @@ export const PAGES: Record<string, PageComponent> = {
   Documents,
   MyCases,
   BrowseTreatments,
+  HealthAnalysis,
 };
 
 export interface PagesConfig {
@@ -42,7 +44,7 @@ export interface PagesConfig {
 }
 
 export const pagesConfig = {
-  mainPage: "MyCases",
+  mainPage: "Dashboard",
   Pages: PAGES,
   Layout: __Layout as LayoutComponent,
 } satisfies PagesConfig;

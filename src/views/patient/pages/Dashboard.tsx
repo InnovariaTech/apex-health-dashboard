@@ -3,6 +3,8 @@ import React from "react";
 import { usePatientHomeData } from "@/views/patient/hooks/usePatientHomeData";
 
 import QuickActionTiles from "@/views/patient/components/home/QuickActionTiles";
+import AnalyzeHealthSection from "@/views/patient/components/health-analysis/AnalyzeHealthSection";
+import LatestSummaryPreview from "@/views/patient/components/health-analysis/LatestSummaryPreview";
 
 export default function Dashboard() {
   const {
@@ -63,6 +65,12 @@ export default function Dashboard() {
         </div>
       </div>
       */}
+
+      {/* AI Health Analysis + Latest Summary */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6 items-stretch">
+        <AnalyzeHealthSection />
+        <LatestSummaryPreview />
+      </div>
 
       {/* Row 3: Quick action tiles */}
       <div className="mb-6">
