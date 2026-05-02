@@ -1,6 +1,6 @@
 import { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, PerspectiveCamera, Html, Environment, OrbitControls } from '@react-three/drei';
+import { useGLTF, PerspectiveCamera, Environment, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -15,6 +15,108 @@ interface BodyModel3DProps {
   className?: string;
   color?: string;
   progress?: number;
+}
+
+function MedicalScanLoader({ color }: { color: string }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+      <style>{`
+        @keyframes hologram-scan {
+          0%   { transform: translateY(-120%); opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 1; }
+          100% { transform: translateY(120%); opacity: 0; }
+        }
+        @keyframes hologram-grid {
+          0%, 100% { opacity: 0.18; }
+          50%      { opacity: 0.32; }
+        }
+        @keyframes hologram-pulse {
+          0%, 100% { transform: translate(-50%, 0) scale(1);    opacity: 0.75; }
+          50%      { transform: translate(-50%, 0) scale(1.06); opacity: 1; }
+        }
+        @keyframes hologram-dash {
+          to { stroke-dashoffset: -40; }
+        }
+        @keyframes hologram-dot {
+          0%, 100% { opacity: 0.4; }
+          50%      { opacity: 1; }
+        }
+      `}</style>
+
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            `linear-gradient(${color}33 1px, transparent 1px),
+             linear-gradient(90deg, ${color}33 1px, transparent 1px)`,
+          backgroundSize: '32px 32px',
+          maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)',
+          animation: 'hologram-grid 2.4s ease-in-out infinite',
+        }}
+      />
+
+      <svg
+        viewBox="0 0 100 240"
+        className="h-[78%] relative z-10"
+        fill="none"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ filter: `drop-shadow(0 0 6px ${color}66)` }}
+      >
+        <g
+          stroke={color}
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="3 2"
+          opacity="0.55"
+          style={{ animation: 'hologram-dash 4s linear infinite' }}
+        >
+          <circle cx="50" cy="28" r="13" />
+          <path d="M 32 50 L 68 50 L 76 96 L 70 146 L 58 146 L 56 176 L 44 176 L 42 146 L 30 146 L 24 96 Z" />
+          <path d="M 32 50 L 16 108 L 20 132" />
+          <path d="M 68 50 L 84 108 L 80 132" />
+          <path d="M 44 176 L 40 220 L 38 232" />
+          <path d="M 56 176 L 60 220 L 62 232" />
+        </g>
+      </svg>
+
+      <div
+        className="absolute left-[8%] right-[8%] h-[2px] z-20"
+        style={{
+          top: '50%',
+          background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+          boxShadow: `0 0 16px ${color}, 0 0 32px ${color}88`,
+          animation: 'hologram-scan 2.4s ease-in-out infinite',
+        }}
+      />
+
+      <div
+        className="absolute bottom-5 left-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-sm"
+        style={{
+          background: `${color}14`,
+          border: `1px solid ${color}40`,
+          animation: 'hologram-pulse 1.6s ease-in-out infinite',
+        }}
+      >
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{
+            background: color,
+            boxShadow: `0 0 8px ${color}`,
+            animation: 'hologram-dot 1.2s ease-in-out infinite',
+          }}
+        />
+        <span
+          className="text-[10px] font-mono uppercase tracking-[0.18em]"
+          style={{ color }}
+        >
+          Calibrating hologram
+        </span>
+      </div>
+    </div>
+  );
 }
 
 interface ScanRingProps {
@@ -95,9 +197,10 @@ interface HumanModelProps {
   scanState: ScanState;
   progress: number;
   color: string;
+  onReady?: (() => void) | undefined;
 }
 
-function HumanModel({ scanState, progress, color }: HumanModelProps) {
+function HumanModel({ scanState, progress, color, onReady }: HumanModelProps) {
   const modelRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(modelPath);
   const [computedScale, setComputedScale] = useState(1.8);
@@ -126,7 +229,9 @@ function HumanModel({ scanState, progress, color }: HumanModelProps) {
         });
       }
     });
-  }, [scene, color]);
+
+    onReady?.();
+  }, [scene, color, onReady]);
 
   useEffect(() => {
     if (modelRef.current) {
@@ -157,9 +262,10 @@ interface SceneProps {
   scanState: ScanState;
   progress: number;
   color: string;
+  onModelReady?: (() => void) | undefined;
 }
 
-function Scene({ scanState, progress, color }: SceneProps) {
+function Scene({ scanState, progress, color, onModelReady }: SceneProps) {
   const isScanning = scanState === 'scanning-down' || scanState === 'scanning-up';
 
   return (
@@ -170,12 +276,8 @@ function Scene({ scanState, progress, color }: SceneProps) {
 
       <PerspectiveCamera makeDefault position={[0, 0, 12]} fov={45} />
 
-      <Suspense fallback={
-        <Html center>
-          <div className="text-muted-foreground text-sm">Loading 3D model...</div>
-        </Html>
-      }>
-        <HumanModel scanState={scanState} progress={progress} color={color} />
+      <Suspense fallback={null}>
+        <HumanModel scanState={scanState} progress={progress} color={color} onReady={onModelReady} />
 
         {isScanning && <ScanRing progress={progress} scanRange={6.4} yOffset={0.54} color={color} />}
 
@@ -201,6 +303,7 @@ export function BodyModel3D({
 }: BodyModel3DProps) {
   const [webglSupported, setWebglSupported] = useState(true);
   const [modelError, setModelError] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -238,6 +341,7 @@ export function BodyModel3D({
     <div
       className={className}
       style={{
+        position: 'relative',
         width: '100%',
         height: '100%',
         filter: `brightness(${brightness})`,
@@ -260,8 +364,25 @@ export function BodyModel3D({
         onError={() => setModelError(true)}
         style={{ background: 'transparent' }}
       >
-        <Scene scanState={scanState} progress={progress} color={color} />
+        <Scene
+          scanState={scanState}
+          progress={progress}
+          color={color}
+          onModelReady={() => setModelReady(true)}
+        />
       </Canvas>
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: modelReady ? 0 : 1,
+          transition: 'opacity 450ms ease-out',
+          pointerEvents: 'none',
+        }}
+      >
+        <MedicalScanLoader color={color} />
+      </div>
     </div>
   );
 }
