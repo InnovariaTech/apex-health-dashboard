@@ -2,9 +2,13 @@
 import React from "react";
 import { useGroupedTreatments } from "@/hooks/care-validate/useTreatments";
 import { htmlToPlainText } from "@/lib/htmlUtils";
+import { useEnvironment } from "@/lib/EnvironmentContext";
+import { resolveTreatmentFormUrl } from "@/lib/formLinks";
 
 export default function BrowseTreatments() {
   const { groups, isLoading, isError } = useGroupedTreatments({ isVisible: true });
+  const { environment } = useEnvironment();
+  const envId = environment?.id;
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
@@ -46,7 +50,7 @@ export default function BrowseTreatments() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {group.items.map((item) => (
-                <TreatmentCard key={item.id} item={item} />
+                <TreatmentCard key={item.id} item={item} envId={envId} />
               ))}
             </div>
           </section>
@@ -55,8 +59,14 @@ export default function BrowseTreatments() {
   );
 }
 
-function TreatmentCard({ item }) {
+function TreatmentCard({ item, envId }) {
   const descriptionPreview = htmlToPlainText(item.description || "");
+  const formUrl = resolveTreatmentFormUrl({
+    envId,
+    bundleName: item.name,
+    externalUrl: item.externalUrl,
+    externalFormUrl: item.externalFormUrl,
+  });
 
   return (
     <article className="group rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
@@ -87,12 +97,14 @@ function TreatmentCard({ item }) {
         ) : null}
 
         <div className="mt-auto pt-3">
-          <button
-            type="button"
-            className="w-full rounded-md bg-slate-900 text-white text-sm font-medium py-2 hover:bg-slate-800 transition-colors"
+          <a
+            href={formUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center rounded-md bg-slate-900 text-white text-sm font-medium py-2 hover:bg-slate-800 transition-colors"
           >
             Get Started
-          </button>
+          </a>
         </div>
       </div>
     </article>

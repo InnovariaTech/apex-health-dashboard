@@ -65,6 +65,8 @@ export default function HealthAnalysis() {
   const score = activeSummary?.healthScore ?? 0;
   const isLoading = history.isLoading;
   const isEmpty = !isLoading && !activeSummary;
+  const scoreExplanation = activeSummary?.metadata?.scoreExplanation?.trim();
+  const hasScoreExplanation = Boolean(scoreExplanation);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto bg-background text-foreground">
@@ -135,7 +137,11 @@ export default function HealthAnalysis() {
       {/* Main content */}
       {!isLoading && activeSummary && (
         <>
-          <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          <div
+            className={`grid gap-6 mb-6 ${
+              hasScoreExplanation ? "lg:grid-cols-3" : "lg:grid-cols-1"
+            }`}
+          >
             {/* Score gauge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -166,25 +172,26 @@ export default function HealthAnalysis() {
             </motion.div>
 
             {/* Score explanation + meta */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="lg:col-span-2"
-            >
-              <Card className="border-2 shadow-md h-full" style={{ borderColor: `${accent}30` }}>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5" style={{ color: accent }} />
-                    <h2 className="text-lg font-bold text-foreground">Why this score</h2>
-                  </div>
-                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
-                    {activeSummary.metadata?.scoreExplanation ||
-                      "No detailed explanation was provided for this analysis."}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+            {hasScoreExplanation && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="lg:col-span-2"
+              >
+                <Card className="border-2 shadow-md h-full" style={{ borderColor: `${accent}30` }}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <AlertCircle className="w-5 h-5" style={{ color: accent }} />
+                      <h2 className="text-lg font-bold text-foreground">Why this score</h2>
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
+                      {scoreExplanation}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </div>
 
           {/* Narrative summary + history */}
