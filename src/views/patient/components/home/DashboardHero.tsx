@@ -2,18 +2,8 @@
 import React, { useMemo } from "react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { motion } from "framer-motion";
-import {
-  Sparkles,
-  Sun,
-  Sunrise,
-  Moon,
-  Activity,
-  ClipboardList,
-  Brain,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Sun, Sunrise, Moon, Activity, ClipboardList, Brain } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useProfile } from "@/hooks/care-validate/useProfile";
 import { usePatientData } from "@/hooks/patients/usePatientData";
 import { useCases } from "@/hooks/care-validate/useCases";
@@ -60,46 +50,36 @@ interface StatTileProps {
   value: string | number;
   hint?: string;
   icon: typeof Activity;
-  color: string;
+  accent?: boolean;
   loading?: boolean;
 }
 
-function StatTile({ label, value, hint, icon: Icon, color, loading }: StatTileProps) {
+function StatTile({ label, value, hint, icon: Icon, accent, loading }: StatTileProps) {
   return (
-    <Card
-      className="border shadow-sm hover:shadow-md transition-shadow"
-      style={{ borderColor: `${color}33` }}
-    >
-      <CardContent className="p-4 flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: `${color}1a` }}
-        >
-          <Icon className="w-5 h-5" style={{ color }} />
+    <div className="apex-card relative overflow-hidden px-5 py-[18px]">
+      <div
+        className="absolute top-0 left-0 h-0.5 w-2/5"
+        style={{ background: accent ? "var(--apex-accent)" : "var(--opt)" }}
+      />
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="apex-eyebrow">{label}</span>
+        <Icon className="w-3.5 h-3.5 text-ink-3" />
+      </div>
+      {loading ? (
+        <Skeleton className="h-9 w-20" />
+      ) : (
+        <div className="text-[34px] font-mono font-medium leading-none tracking-[-0.035em] text-foreground">
+          {value}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground truncate">
-            {label}
-          </p>
-          {loading ? (
-            <Skeleton className="h-6 w-16 mt-1" />
-          ) : (
-            <p className="text-xl font-bold text-foreground leading-tight truncate">
-              {value}
-            </p>
-          )}
-          {hint && !loading && (
-            <p className="text-[11px] text-muted-foreground font-medium truncate">{hint}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      )}
+      {hint && !loading && (
+        <p className="text-xs text-muted-foreground mt-2">{hint}</p>
+      )}
+    </div>
   );
 }
 
 export default function DashboardHero() {
-  const { environment } = useEnvironment();
-  const accent = environment.primaryColor;
   const profileQuery = useProfile();
   const authQuery = usePatientData();
   const casesQuery = useCases({ recordsPerPage: 100 });
@@ -148,99 +128,66 @@ export default function DashboardHero() {
       transition={{ duration: 0.35 }}
       className="mb-6"
     >
-      <Card
-        className="border-2 shadow-sm overflow-hidden relative"
-        style={{
-          borderColor: `${accent}30`,
-          background: `linear-gradient(135deg, ${accent}14 0%, transparent 55%)`,
-        }}
-      >
-        <div
-          className="absolute inset-y-0 right-0 w-1/2 pointer-events-none opacity-40"
-          style={{
-            background: `radial-gradient(circle at 80% 30%, ${accent}26 0%, transparent 60%)`,
-          }}
-        />
-        <CardContent className="relative p-6 md:p-7">
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-            <div className="min-w-0">
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-3 border"
-                style={{
-                  borderColor: `${accent}66`,
-                  color: accent,
-                  backgroundColor: `${accent}14`,
-                }}
-              >
-                <greeting.Icon className="w-3.5 h-3.5" />
-                {greeting.label}
-              </div>
-              {isNameLoading ? (
-                <Skeleton className="h-9 w-72 mb-2" />
-              ) : (
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight mb-1">
-                  Welcome back, <span style={{ color: accent }}>{firstName}</span>
-                </h1>
-              )}
-              <p className="text-sm text-muted-foreground font-medium">
-                {format(now, "EEEE, MMMM d, yyyy")}
-              </p>
-            </div>
-
-            <div
-              className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border"
-              style={{
-                borderColor: `${accent}40`,
-                backgroundColor: `${accent}0a`,
-              }}
-            >
-              <Sparkles className="w-4 h-4" style={{ color: accent }} />
-              <span className="text-xs font-mono font-semibold" style={{ color: accent }}>
-                {latestSummary
-                  ? "Insights ready below"
-                  : "Run your first AI health scan"}
+      {/* Page head — date eyebrow, editorial title, live sync strip */}
+      <div className="pb-5 mb-5 border-b border-border">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="apex-pulse-dot" />
+              <span className="apex-eyebrow">
+                {format(now, "EEEE · MMM d, yyyy").toUpperCase()}
               </span>
             </div>
+            {isNameLoading ? (
+              <Skeleton className="h-11 w-80" />
+            ) : (
+              <h1 className="apex-page-title">
+                {greeting.label}, <em>{firstName}</em>
+              </h1>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <StatTile
-              label="Health Score"
-              value={latestScore !== null ? `${latestScore}` : "—"}
-              hint={latestScoreHint}
-              icon={Activity}
-              color={accent}
-              loading={summariesQuery.isLoading}
-            />
-            <StatTile
-              label="Active Cases"
-              value={activeCases}
-              hint={
-                cases.length === 0
-                  ? "No cases yet"
-                  : `${cases.length} total`
-              }
-              icon={ClipboardList}
-              color="#8b5cf6"
-              loading={casesQuery.isLoading}
-            />
-            <StatTile
-              label="AI Analyses"
-              value={summaries.length}
-              hint={
-                summaries.length === 0
-                  ? "Tap analyse to start"
-                  : summaries.length === 1
-                  ? "1 scan completed"
-                  : `${summaries.length} scans completed`
-              }
-              icon={Brain}
-              color="#10b981"
-              loading={summariesQuery.isLoading}
-            />
+          <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-full border border-border bg-card text-[11px] text-ink-2 font-mono">
+            <span className="apex-pulse-dot" style={{ width: 7, height: 7 }} />
+            <span>
+              {latestSummary
+                ? "AI insights ready below"
+                : "Run your first AI health scan"}
+            </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatTile
+          label="Health Score"
+          value={latestScore !== null ? `${latestScore}` : "—"}
+          hint={latestScoreHint}
+          icon={Activity}
+          accent
+          loading={summariesQuery.isLoading}
+        />
+        <StatTile
+          label="Active Cases"
+          value={activeCases}
+          hint={cases.length === 0 ? "No cases yet" : `${cases.length} total`}
+          icon={ClipboardList}
+          loading={casesQuery.isLoading}
+        />
+        <StatTile
+          label="AI Analyses"
+          value={summaries.length}
+          hint={
+            summaries.length === 0
+              ? "Tap analyse to start"
+              : summaries.length === 1
+              ? "1 scan completed"
+              : `${summaries.length} scans completed`
+          }
+          icon={Brain}
+          loading={summariesQuery.isLoading}
+        />
+      </div>
     </motion.div>
   );
 }

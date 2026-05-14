@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   type DynamicCaseForm,
   fieldValueToLines,
@@ -10,16 +11,16 @@ interface CaseDynamicFormCardProps {
 
 export default function CaseDynamicFormCard({ form }: CaseDynamicFormCardProps) {
   return (
-    <Card className="border-2 border-border/80 bg-muted/30 shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-bold text-foreground">{form.name}</CardTitle>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">{form.name}</CardTitle>
         {form.description && (
-          <p className="text-sm text-muted-foreground">{form.description}</p>
+          <p className="text-[13px] text-muted-foreground">{form.description}</p>
         )}
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {form.fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-muted-foreground">
             No question responses available for this form.
           </p>
         ) : (
@@ -29,26 +30,32 @@ export default function CaseDynamicFormCard({ form }: CaseDynamicFormCardProps) 
             return (
               <div
                 key={field.responseId}
-                className="rounded-md border border-border bg-background/95 p-3"
+                className="rounded-[10px] border border-border bg-surface-2 p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-foreground leading-snug">{field.label}</p>
+                  <p className="text-[13px] font-medium text-foreground leading-snug">
+                    {field.label}
+                  </p>
                   {field.isPHI && (
-                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                    <Badge variant="warning" className="shrink-0">
                       PHI
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
                 {lines.length === 0 ? (
-                  <p className="text-sm text-muted-foreground mt-1">—</p>
+                  <p className="text-[13px] text-muted-foreground mt-1.5">—</p>
                 ) : lines.length === 1 ? (
-                  <p className="text-sm text-muted-foreground mt-2">{lines[0]}</p>
+                  <p className="text-[13px] text-ink-2 mt-2">{lines[0]}</p>
                 ) : (
                   <ul className="mt-2 space-y-1">
                     {lines.map((line, idx) => (
-                      <li key={`${field.responseId}-${idx}`} className="text-sm text-muted-foreground">
-                        - {line}
+                      <li
+                        key={`${field.responseId}-${idx}`}
+                        className="text-[13px] text-ink-2 flex gap-2"
+                      >
+                        <span className="text-muted-foreground">–</span>
+                        <span>{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -61,4 +68,3 @@ export default function CaseDynamicFormCard({ form }: CaseDynamicFormCardProps) 
     </Card>
   );
 }
-

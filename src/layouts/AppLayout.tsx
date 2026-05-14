@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Settings, Activity, LogOut } from "lucide-react";
+import { Settings, Activity, LogOut, Search, Bell, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -40,74 +40,71 @@ export default function Layout({ children }) {
   const isGymEnv = environment.id !== "apex-md";
   const navItems = getPatientNavItems(isGymEnv);
   const emailPrefix = currentUser?.email?.split("@")?.[0] || "User";
+  const displayName = currentUser?.full_name || emailPrefix;
+  const initials = (currentUser?.full_name || emailPrefix)
+    .split(/\s+/)
+    .map((p) => p?.[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-  const isDark = environment.themeMode === "dark" || environment.id === "apex-md";
-  const activeItemBg = environment.primaryColor;
-  const activeItemTextColor =
-    environment.id === "planet-fitness" || environment.id === "golds-gym"
-      ? "#000000"
-      : "#FFFFFF";
+  // Brand name split — first word plain, remainder italic accent ("Apex MD").
+  const [brandFirst, ...brandRest] = String(environment.name || "Apex").split(" ");
+  const brandRemainder = brandRest.join(" ");
+
+  // Active page label for the breadcrumb.
+  const activeItem = navItems.find((item) => location.pathname === item.url);
+  const pageLabel = activeItem?.title || "Overview";
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full" style={{ backgroundColor: environment.backgroundColor }}>
-        <Sidebar
-          className="border-r"
-          style={{
-            backgroundColor: environment.sidebarBg,
-            borderColor: environment.borderColor,
-          }}
-        >
-          <SidebarHeader
-            className="border-b p-4"
-            style={{ borderColor: environment.borderColor }}
-          >
-            <Link to={createPageUrl("Dashboard")} className="block">
-              <div className="bg-white rounded-sm px-3 py-2 inline-block">
-                <img
-                  src={environment.logoUrl}
-                  alt={environment.name}
-                  className="h-20 w-auto object-contain"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "block";
-                  }}
-                />
-                <span
-                  className="hidden text-sm font-bold"
-                  style={{ color: environment.primaryColor }}
-                >
-                  {environment.name}
-                </span>
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar className="border-r border-border bg-card">
+          <SidebarHeader className="px-4 pt-7 pb-5">
+            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2.5 px-2">
+              <div className="w-[30px] h-[30px] rounded-[7px] bg-foreground text-background grid place-items-center font-serif font-medium italic text-base">
+                {brandFirst?.[0]?.toUpperCase() || "A"}
               </div>
-              {isGymEnv && (
-                <p className="text-xs mt-1 font-semibold text-center" style={{ color: environment.mutedTextColor }}>
-                  Powered by Apex MD
-                </p>
-              )}
+              <div className="font-serif font-medium text-[19px] tracking-[-0.01em] text-foreground">
+                {brandFirst}
+                {brandRemainder && (
+                  <em className="not-italic" style={{ fontStyle: "italic", color: "var(--apex-accent)" }}>
+                    {brandRemainder}
+                  </em>
+                )}
+              </div>
             </Link>
+            {isGymEnv && (
+              <p className="text-[10px] mt-1 px-2 text-muted-foreground tracking-wide">
+                Powered by Apex MD
+              </p>
+            )}
           </SidebarHeader>
 
-          <SidebarContent className="p-3">
-            <SidebarGroup>
+          <SidebarContent className="px-[18px]">
+            <SidebarGroup className="p-0">
+              <div className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium px-3 py-2">
+                Menu
+              </div>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="gap-0.5">
                   {navItems.map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           asChild
-                          className="mb-1 transition-all duration-200"
-                          style={
+                          className={`h-auto rounded-[8px] transition-colors ${
                             isActive
-                              ? { backgroundColor: activeItemBg, color: activeItemTextColor }
-                              : { color: environment.sidebarText, opacity: 0.75 }
-                          }
+                              ? "bg-foreground text-background hover:bg-foreground hover:text-background"
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                          }`}
                         >
-                          <Link to={item.url} className="flex items-center gap-3 px-4 py-3">
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-semibold">{item.title}</span>
+                          <Link to={item.url} className="flex items-center gap-[11px] px-3 py-2">
+                            <item.icon
+                              className={`w-4 h-4 ${isActive ? "" : "text-muted-foreground"}`}
+                            />
+                            <span className="text-[13.5px] font-normal">{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -118,130 +115,97 @@ export default function Layout({ children }) {
             </SidebarGroup>
 
             {currentUser?.health_score != null && (
-              <div
-                className="mt-6 mx-3 p-4 rounded-lg border"
-                style={{
-                  backgroundColor: isDark ? "#1a1a2e" : environment.surfaceColor,
-                  borderColor: environment.borderColor,
-                }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className="text-sm font-bold uppercase tracking-wide"
-                    style={{ color: environment.sidebarText }}
-                  >
-                    Health Score
-                  </span>
-                  <Activity className="w-4 h-4" style={{ color: environment.primaryColor }} />
+              <div className="mt-5 apex-card p-4">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="apex-eyebrow">Health Score</span>
+                  <Activity className="w-3.5 h-3.5" style={{ color: "var(--apex-accent)" }} />
                 </div>
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="text-4xl font-bold" style={{ color: environment.sidebarText }}>
+                <div className="flex items-baseline gap-1.5 mb-2.5">
+                  <span className="text-3xl font-mono font-medium text-foreground tracking-[-0.03em]">
                     {Math.round(currentUser.health_score)}
                   </span>
-                  <span className="text-lg font-semibold" style={{ color: environment.mutedTextColor }}>
-                    /100
-                  </span>
+                  <span className="text-sm font-mono text-muted-foreground">/100</span>
                 </div>
-                <div
-                  className="h-3 rounded-full overflow-hidden"
-                  style={{ backgroundColor: environment.borderColor }}
-                >
+                <div className="h-1.5 rounded-full overflow-hidden bg-secondary">
                   <div
-                    className="h-full transition-all duration-500 rounded-full"
-                    style={{
-                      width: `${currentUser.health_score}%`,
-                      backgroundColor: environment.primaryColor,
-                    }}
+                    className="h-full transition-all duration-500 rounded-full bg-primary"
+                    style={{ width: `${currentUser.health_score}%` }}
                   />
                 </div>
-                <p className="text-xs mt-2 font-semibold" style={{ color: environment.mutedTextColor }}>
-                  Powered by {environment.name}
-                </p>
               </div>
             )}
           </SidebarContent>
 
-          <div className="border-t p-4" style={{ borderColor: environment.borderColor }}>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center border-2"
-                style={{
-                  backgroundColor: isDark ? "#333" : environment.surfaceColor,
-                  borderColor: environment.primaryColor,
-                }}
-              >
-                <span
-                  className="font-bold text-sm"
-                  style={{ color: environment.primaryColor }}
-                >
-                  {currentUser?.full_name?.[0]?.toUpperCase() || "U"}
-                </span>
+          <div className="border-t border-border p-3.5 mx-[18px]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs font-medium flex-shrink-0">
+                {initials || "U"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate" style={{ color: environment.sidebarText }}>
-                  {currentUser?.full_name || emailPrefix}
+                <p className="text-[13px] font-medium leading-tight truncate text-foreground">
+                  {displayName}
                 </p>
-                <p className="text-xs truncate" style={{ color: environment.mutedTextColor }}>
+                <p className="text-[11px] text-muted-foreground truncate">
                   {currentUser?.email}
                 </p>
               </div>
-              <Link to={createPageUrl("Profile")}>
-                <Settings
-                  className="w-5 h-5 transition-colors"
-                  style={{ color: environment.mutedTextColor }}
-                />
+              <Link to={createPageUrl("Profile")} aria-label="Settings" title="Settings">
+                <Settings className="w-[18px] h-[18px] text-muted-foreground hover:text-foreground transition-colors" />
               </Link>
               <button
                 type="button"
                 onClick={() => void logoutMutation.mutateAsync()}
-                className="hover:opacity-80 transition-opacity"
+                className="hover:text-foreground transition-colors text-muted-foreground"
                 aria-label="Logout"
                 title="Logout"
               >
-                <LogOut className="w-5 h-5" style={{ color: environment.mutedTextColor }} />
+                <LogOut className="w-[18px] h-[18px]" />
               </button>
             </div>
           </div>
         </Sidebar>
 
         <main className="flex-1 flex flex-col min-w-0">
-          <header
-            className="border-b px-6 py-3 sticky top-0 z-10 flex items-center justify-between"
-            style={{
-              backgroundColor: environment.sidebarBg,
-              borderColor: environment.borderColor,
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <SidebarTrigger
-                className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden"
-                style={{ color: environment.sidebarText }}
-              />
-              <div
-                className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border"
-                style={{
-                  borderColor: environment.primaryColor,
-                  color: environment.primaryColor,
-                  backgroundColor: "transparent",
-                }}
-              >
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: environment.primaryColor }}
-                />
-                {environment.name}
-              </div>
+          <header className="border-b border-border bg-card px-6 py-3 sticky top-0 z-10 flex items-center gap-4">
+            <SidebarTrigger
+              className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden text-foreground"
+            />
+            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{environment.name}</span>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-foreground">{pageLabel}</span>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              {/* <GymSwitcher /> */}
+            <div className="flex-1" />
+
+            <div className="relative hidden md:block w-[260px]">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search records, protocols, providers..."
+                className="w-full h-[34px] pl-8 pr-3 rounded-[8px] border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:border-ink-2 transition-colors"
+              />
+            </div>
+            <button
+              type="button"
+              className="w-[34px] h-[34px] rounded-[8px] border border-border bg-card grid place-items-center text-muted-foreground hover:bg-secondary transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
+            <Link
+              to={createPageUrl("Profile")}
+              className="w-[34px] h-[34px] rounded-[8px] border border-border bg-card grid place-items-center text-muted-foreground hover:bg-secondary transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </Link>
+            <div className="hidden">
+              <GymSwitcher />
             </div>
           </header>
 
-          <div
-            className="flex-1 overflow-auto pb-20"
-            style={{ backgroundColor: environment.backgroundColor }}
-          >
+          <div className="flex-1 overflow-auto pb-20 bg-background">
             {children}
           </div>
         </main>

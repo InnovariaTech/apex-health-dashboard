@@ -4,6 +4,11 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['Saira', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+  			serif: ['Saira', '-apple-system', 'sans-serif'],
+  			mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -50,6 +55,34 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+  			ink: {
+  				DEFAULT: 'var(--ink)',
+  				2: 'var(--ink-2)',
+  				3: 'var(--ink-3)',
+  				4: 'var(--ink-4)',
+  				inv: 'var(--ink-inv)'
+  			},
+  			surface: {
+  				DEFAULT: 'var(--surface)',
+  				2: 'var(--surface-2)',
+  				3: 'var(--surface-3)'
+  			},
+  			opt: {
+  				DEFAULT: 'var(--opt)',
+  				soft: 'var(--opt-soft)'
+  			},
+  			bord: {
+  				DEFAULT: 'var(--bord)',
+  				soft: 'var(--bord-soft)'
+  			},
+  			att: {
+  				DEFAULT: 'var(--att)',
+  				soft: 'var(--att-soft)'
+  			},
+  			info: {
+  				DEFAULT: 'var(--info)',
+  				soft: 'var(--info-soft)'
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
@@ -77,11 +110,26 @@ module.exports = {
   				to: {
   					height: '0'
   				}
+  			},
+  			'apex-pulse': {
+  				'0%': { transform: 'scale(0.6)', opacity: '0.55' },
+  				'100%': { transform: 'scale(1.8)', opacity: '0' }
+  			},
+  			'apex-blink': {
+  				'0%, 100%': { opacity: '1' },
+  				'50%': { opacity: '0.3' }
+  			},
+  			'apex-fade-up': {
+  				from: { opacity: '0', transform: 'translateY(8px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'apex-pulse': 'apex-pulse 1.8s ease-out infinite',
+  			'apex-blink': 'apex-blink 1.4s ease-in-out infinite',
+  			'apex-fade-up': 'apex-fade-up 350ms ease-out backwards'
   		}
   	}
   },

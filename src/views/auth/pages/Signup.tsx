@@ -1,8 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserPlus } from "lucide-react";
 import { useSignupMutation } from "@/hooks/auth/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -49,16 +48,21 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
-            <UserPlus className="w-5 h-5" />
-            Create account
-          </CardTitle>
-          <CardDescription className="text-center">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
+      <Card className="apex-card w-full max-w-md">
+        <CardHeader className="space-y-3 items-center text-center">
+          <div className="w-11 h-11 rounded-[12px] bg-foreground grid place-items-center">
+            <span className="font-serif text-xl font-semibold text-background leading-none">
+              A
+            </span>
+          </div>
+          <div className="apex-eyebrow">Apex MD Health</div>
+          <h1 className="apex-page-title">
+            Create <em>account</em>
+          </h1>
+          <p className="text-[13px] text-ink-2">
             Sign up to start using the dashboard
-          </CardDescription>
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {error ? (
@@ -133,16 +137,20 @@ export default function Signup() {
                 required
               />
             </div>
-            <Button className="w-full font-semibold" type="submit" disabled={signupMutation.isPending}>
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={signupMutation.isPending}
+            >
               {signupMutation.isPending ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
           <Separator />
 
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-[13px] text-center text-ink-2">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-primary hover:underline">
+            <Link to="/login" className="font-medium text-primary hover:underline">
               Sign in
             </Link>
           </p>

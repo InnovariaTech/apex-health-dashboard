@@ -1,31 +1,25 @@
 // @ts-nocheck
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Pill,
   Syringe,
   Leaf,
   ChevronDown,
   ChevronUp,
-  Clock,
   Target,
   AlertTriangle,
   CheckCircle,
   Zap,
-  Heart,
   Brain,
-  Flame,
 } from "lucide-react";
 
 const TREATMENT_STACKS = [
   {
     category: "Hormone Replacement Therapy (HRT)",
     icon: Syringe,
-    iconColor: "text-blue-600",
-    bgColor: "bg-blue-50 border-blue-200",
-    badgeColor: "bg-blue-100 text-blue-800 border-blue-300",
+    rule: "var(--info)",
     treatments: [
       {
         name: "Testosterone Cypionate",
@@ -54,9 +48,7 @@ const TREATMENT_STACKS = [
   {
     category: "GLP-1 Receptor Agonist",
     icon: Syringe,
-    iconColor: "text-violet-600",
-    bgColor: "bg-violet-50 border-violet-200",
-    badgeColor: "bg-violet-100 text-violet-800 border-violet-300",
+    rule: "var(--att)",
     treatments: [
       {
         name: "Semaglutide (Ozempic / Wegovy)",
@@ -74,9 +66,7 @@ const TREATMENT_STACKS = [
   {
     category: "Peptide Therapy",
     icon: Zap,
-    iconColor: "text-amber-600",
-    bgColor: "bg-amber-50 border-amber-200",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+    rule: "var(--bord)",
     treatments: [
       {
         name: "BPC-157",
@@ -105,9 +95,7 @@ const TREATMENT_STACKS = [
   {
     category: "Targeted Supplements",
     icon: Leaf,
-    iconColor: "text-emerald-600",
-    bgColor: "bg-emerald-50 border-emerald-200",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+    rule: "var(--opt)",
     treatments: [
       {
         name: "Methylfolate (L-5-MTHF)",
@@ -157,31 +145,37 @@ const TREATMENT_STACKS = [
   },
 ];
 
-function TreatmentCard({ treatment, badgeColor }) {
+function TreatmentCard({ treatment }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden">
+    <div className="rounded-[12px] border border-border bg-card overflow-hidden">
       <button
-        className="w-full text-left p-4 flex items-start justify-between gap-3"
+        className="w-full text-left p-4 flex items-start gap-3"
         onClick={() => setExpanded(e => !e)}
       >
-        <div className="flex-1">
+        <div
+          className="w-10 h-10 rounded-[10px] grid place-items-center flex-shrink-0"
+          style={{ backgroundColor: "var(--apex-accent-soft)" }}
+        >
+          <Pill className="w-5 h-5" style={{ color: "var(--apex-accent)" }} />
+        </div>
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="font-bold text-foreground">{treatment.name}</span>
-            <Badge className={`${badgeColor} border text-xs font-bold`}>{treatment.dose}</Badge>
-            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 border text-xs font-semibold flex items-center gap-1">
+            <span className="text-[14px] font-medium text-foreground">{treatment.name}</span>
+            <span className="font-mono text-[12px] text-ink-3">{treatment.dose}</span>
+            <Badge variant="success">
               <CheckCircle className="w-3 h-3" /> Active
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground font-semibold">{treatment.purpose}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            <span className="font-semibold">Frequency:</span> {treatment.frequency} · <span className="font-semibold">Route:</span> {treatment.route}
+          <p className="text-[12px] text-muted-foreground font-medium">{treatment.purpose}</p>
+          <p className="text-[12px] text-muted-foreground mt-0.5">
+            <span className="font-medium text-ink-3">Frequency:</span> {treatment.frequency} · <span className="font-medium text-ink-3">Route:</span> {treatment.route}
           </p>
         </div>
         {expanded
-          ? <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
-          : <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
+          ? <ChevronUp className="w-4 h-4 text-ink-4 flex-shrink-0 mt-1" />
+          : <ChevronDown className="w-4 h-4 text-ink-4 flex-shrink-0 mt-1" />
         }
       </button>
 
@@ -189,34 +183,37 @@ function TreatmentCard({ treatment, badgeColor }) {
         <div className="px-4 pb-4 space-y-4 border-t border-border pt-4">
           {/* What it does */}
           <div>
-            <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
-              <Brain className="w-3.5 h-3.5 text-violet-500" /> What This Does
+            <h4 className="apex-eyebrow mb-1.5 flex items-center gap-1">
+              <Brain className="w-3.5 h-3.5 text-primary" /> What This Does
             </h4>
-            <p className="text-sm text-muted-foreground leading-relaxed bg-muted rounded-lg p-3">
+            <p className="text-[13px] text-muted-foreground leading-relaxed bg-secondary rounded-[10px] p-3">
               {treatment.what_it_does}
             </p>
           </div>
 
           {/* Benefits */}
           <div>
-            <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-              <Target className="w-3.5 h-3.5 text-emerald-500" /> Key Benefits
+            <h4 className="apex-eyebrow mb-2 flex items-center gap-1">
+              <Target className="w-3.5 h-3.5 text-primary" /> Key Benefits
             </h4>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
               {treatment.benefits.map((b, i) => (
-                <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <span className="text-emerald-500 font-bold mt-0.5">✓</span> {b}
+                <li key={i} className="flex items-start gap-1.5 text-[12px] text-muted-foreground">
+                  <CheckCircle className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: "var(--opt)" }} /> {b}
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Monitoring */}
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div
+            className="flex items-start gap-2 rounded-[10px] p-3 border"
+            style={{ borderColor: "var(--bord)", background: "var(--bord-soft)" }}
+          >
+            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "var(--bord)" }} />
             <div>
-              <p className="text-xs font-bold text-amber-800 mb-0.5">Monitoring Protocol</p>
-              <p className="text-xs text-amber-700">{treatment.monitoring}</p>
+              <p className="text-[12px] font-medium mb-0.5" style={{ color: "var(--bord)" }}>Monitoring Protocol</p>
+              <p className="text-[12px]" style={{ color: "var(--bord)" }}>{treatment.monitoring}</p>
             </div>
           </div>
         </div>
@@ -230,23 +227,29 @@ function StackSection({ stack }) {
   const Icon = stack.icon;
 
   return (
-    <Card className={`border-2 ${stack.bgColor} mb-5`}>
+    <Card className="apex-card relative overflow-hidden mb-5">
+      <div
+        className="absolute top-0 left-0 h-0.5 w-2/5"
+        style={{ background: stack.rule }}
+      />
       <button
         className="w-full flex items-center justify-between p-4 text-left"
         onClick={() => setOpen(o => !o)}
       >
-        <div className="flex items-center gap-2">
-          <Icon className={`w-5 h-5 ${stack.iconColor}`} />
-          <span className="font-bold text-foreground">{stack.category}</span>
-          <span className="text-xs text-muted-foreground ml-1">({stack.treatments.length} treatment{stack.treatments.length > 1 ? "s" : ""})</span>
+        <div className="flex items-center gap-2.5">
+          <Icon className="w-5 h-5 text-primary" />
+          <span className="apex-card-title">{stack.category}</span>
+          <span className="text-[12px] text-muted-foreground ml-1">
+            {stack.treatments.length} treatment{stack.treatments.length > 1 ? "s" : ""}
+          </span>
         </div>
-        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        {open ? <ChevronUp className="w-4 h-4 text-ink-4" /> : <ChevronDown className="w-4 h-4 text-ink-4" />}
       </button>
 
       {open && (
         <CardContent className="pt-0 px-4 pb-4 space-y-3">
           {stack.treatments.map((t, i) => (
-            <TreatmentCard key={i} treatment={t} badgeColor={stack.badgeColor} />
+            <TreatmentCard key={i} treatment={t} />
           ))}
         </CardContent>
       )}
@@ -257,33 +260,39 @@ function StackSection({ stack }) {
 export default function MyTreatments() {
   const totalTreatments = TREATMENT_STACKS.reduce((acc, s) => acc + s.treatments.length, 0);
 
+  const summaryTiles = [
+    { label: "Active Treatments", value: totalTreatments, rule: "var(--info)" },
+    { label: "Injectable Protocols", value: 2, rule: "var(--att)" },
+    { label: "Oral Supplements", value: 4, rule: "var(--opt)" },
+    { label: "Lab Review Cycle", value: "Quarterly", rule: "var(--bord)" },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Summary row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-          <p className="text-3xl font-black text-blue-700">{totalTreatments}</p>
-          <p className="text-xs font-bold text-blue-600 mt-1">Active Treatments</p>
-        </div>
-        <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 text-center">
-          <p className="text-xl font-black text-violet-700">2</p>
-          <p className="text-xs font-bold text-violet-600 mt-1">Injectable Protocols</p>
-        </div>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
-          <p className="text-xl font-black text-emerald-700">4</p>
-          <p className="text-xs font-bold text-emerald-600 mt-1">Oral Supplements</p>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          <p className="text-xl font-black text-amber-700">Quarterly</p>
-          <p className="text-xs font-bold text-amber-600 mt-1">Lab Review Cycle</p>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {summaryTiles.map((tile) => (
+          <div key={tile.label} className="apex-card relative overflow-hidden px-5 py-[18px]">
+            <div
+              className="absolute top-0 left-0 h-0.5 w-2/5"
+              style={{ background: tile.rule }}
+            />
+            <div className="font-mono text-[28px] font-medium leading-none tracking-[-0.035em] text-foreground">
+              {tile.value}
+            </div>
+            <div className="apex-eyebrow mt-2.5">{tile.label}</div>
+          </div>
+        ))}
       </div>
 
       {/* Disclaimer */}
-      <div className="flex items-start gap-2 bg-primary/5 border border-primary/20 rounded-lg p-3">
+      <div
+        className="flex items-start gap-2.5 rounded-[10px] p-3.5 border"
+        style={{ borderColor: "var(--apex-accent-soft)", background: "var(--apex-accent-soft)" }}
+      >
         <Pill className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-foreground/70">
-          <span className="font-bold text-foreground">Personalized Treatment Stack</span> — All protocols are prescribed and monitored by your Apex MD physician. Dosages are adjusted based on your lab results, genomic profile, and clinical response. Do not modify without consulting your provider.
+        <p className="text-[12px] text-ink-2 leading-relaxed">
+          <span className="font-medium text-foreground">Personalized Treatment Stack</span> — All protocols are prescribed and monitored by your Apex MD physician. Dosages are adjusted based on your lab results, genomic profile, and clinical response. Do not modify without consulting your provider.
         </p>
       </div>
 

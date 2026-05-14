@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biomarkers · Apex Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; }
+
+  :root {
+    --bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-2: #EAEAE7;
+    --ink: #1A1A1A;
+    --ink-2: #525252;
+    --ink-3: #8A8A8A;
+    --ink-4: #B5B5B5;
+    --line: rgba(26, 26, 26, 0.09);
+    --line-2: rgba(26, 26, 26, 0.16);
+    --accent: #9B1C2E;
+    --accent-soft: #F5E4E7;
+    --opt: #2E7D5A;
+    --opt-soft: rgba(46, 125, 90, 0.12);
+    --opt-band: rgba(46, 125, 90, 0.16);
+    --bord: #B8761C;
+    --bord-soft: rgba(184, 118, 28, 0.12);
+    --bord-band: rgba(184, 118, 28, 0.18);
+    --att: #B23A3A;
+    --att-soft: rgba(178, 58, 58, 0.12);
+    --att-band: rgba(178, 58, 58, 0.18);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow-card: 0 1px 0 rgba(26,25,22,0.04);
+    --shadow-panel: 0 24px 60px rgba(26,25,22,0.18);
+    --font-sans: 'Saira', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-serif: 'Saira', -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 24px;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 16px;
+    font-style: italic;
+  }
+  .brand-name {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+  }
+  .brand-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .nav-section { margin-bottom: 18px; }
+  .nav-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    padding: 8px 12px;
+    font-weight: 500;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 120ms, color 120ms;
+  }
+  .nav-item i { font-size: 16px; color: var(--ink-3); }
+  .nav-item:hover { background: rgba(26,25,22,0.04); color: var(--ink); }
+  .nav-item.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .nav-item.active i { color: var(--bg); }
+  .nav-item .nav-badge {
+    margin-left: auto;
+    font-size: 10px;
+    background: rgba(255,255,255,0.18);
+    color: var(--bg);
+    padding: 2px 6px;
+    border-radius: 100px;
+    font-family: var(--font-mono);
+  }
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 14px 12px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .user-name { font-size: 13px; font-weight: 500; line-height: 1.2; }
+  .user-plan { font-size: 11px; color: var(--ink-3); }
+
+  /* ---------- Main ---------- */
+  main { min-width: 0; padding: 28px 36px 48px; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .breadcrumb {
+    font-size: 12px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb i { font-size: 12px; }
+  .topbar-spacer { flex: 1; }
+  .search-wrap {
+    position: relative;
+    width: 260px;
+  }
+  .search-wrap input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 120ms;
+  }
+  .search-wrap input::placeholder { color: var(--ink-3); }
+  .search-wrap input:focus { border-color: var(--ink-2); }
+  .search-wrap i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    color: var(--ink-3);
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: background 120ms;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn i { font-size: 16px; }
+
+  /* ---------- Page head ---------- */
+  .page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .page-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    margin: 0 0 8px;
+  }
+  .page-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .page-sub .sep { width: 3px; height: 3px; background: var(--ink-4); border-radius: 50%; }
+  .page-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 120ms, border-color 120ms;
+    color: var(--ink);
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn i { font-size: 15px; }
+  .btn.primary {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .btn.primary:hover { background: #2a2924; }
+
+  /* ---------- KPI strip ---------- */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+  .kpi-rule {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    width: 40%;
+  }
+  .kpi-rule.opt { background: var(--opt); }
+  .kpi-rule.bord { background: var(--bord); }
+  .kpi-rule.att { background: var(--att); }
+  .kpi-lbl {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .kpi-val {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+  .kpi-val .unit {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--ink-3);
+    margin-left: 4px;
+    font-weight: 400;
+  }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .kpi-sub i { font-size: 13px; }
+
+  /* ---------- Featured biomarker ---------- */
+  .featured {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    margin-bottom: 22px;
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 36px;
+    box-shadow: var(--shadow-card);
+  }
+  .feat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .feat-name {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .feat-fullname {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin: 0 0 18px;
+  }
+  .feat-val {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .feat-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .feat-unit { font-size: 14px; color: var(--ink-3); }
+  .feat-delta {
+    font-size: 12px;
+    color: var(--opt);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 18px;
+  }
+  .feat-delta i { font-size: 14px; }
+  .feat-desc {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    margin: 0 0 20px;
+  }
+  .feat-actions { display: flex; gap: 8px; }
+  .feat-actions .btn { font-size: 12px; padding: 7px 12px; }
+
+  .feat-chart-wrap {
+    position: relative;
+  }
+  .feat-chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .feat-chart-title {
+    font-size: 13px;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .feat-chart-range {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+  }
+
+  /* ---------- Filter row ---------- */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    font: inherit;
+    font-size: 13px;
+    padding: 7px 13px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: border-color 120ms, background 120ms;
+  }
+  .pill:hover { border-color: var(--line-2); }
+  .pill.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .pill .ct {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin-left: 5px;
+    opacity: 0.6;
+  }
+  .view-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle-switch {
+    width: 32px;
+    height: 18px;
+    background: var(--line-2);
+    border-radius: 100px;
+    position: relative;
+    transition: background 150ms;
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 150ms;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .toggle.on .toggle-switch { background: var(--accent); }
+  .toggle.on .toggle-switch::after { transform: translateX(14px); }
+
+  /* ---------- Biomarker grid ---------- */
+  .bm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .bm {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color 150ms, transform 150ms;
+    text-align: left;
+    box-shadow: var(--shadow-card);
+    animation: fadeUp 350ms ease-out backwards;
+  }
+  .bm:hover {
+    border-color: var(--line-2);
+    transform: translateY(-1px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .bm-h {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .bm-name { font-size: 13.5px; font-weight: 500; margin: 0; }
+  .bm-cat {
+    font-size: 10px;
+    color: var(--ink-3);
+    margin: 3px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .bm-v { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
+  .bm-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+  .bm-u { font-size: 11px; color: var(--ink-3); }
+  .bm-prev {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    display: none;
+  }
+  .compare-mode .bm-prev { display: block; }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .dot.opt { background: var(--opt); }
+  .dot.bord { background: var(--bord); }
+  .dot.att { background: var(--att); }
+
+  .rng { margin: 12px 0 4px; }
+  .rng-t {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    display: flex;
+    overflow: hidden;
+  }
+  .rng-t .z { height: 100%; }
+  .z-lo, .z-hi { background: var(--att-band); }
+  .z-bl, .z-bh { background: var(--bord-band); }
+  .z-op { background: var(--opt-band); }
+  .mk {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 12px;
+    background: var(--ink);
+    border-radius: 1px;
+    transform: translateX(-50%);
+    transition: left 300ms ease-out;
+  }
+  .mk-prev {
+    position: absolute;
+    top: -3px;
+    width: 10px;
+    height: 12px;
+    transform: translateX(-50%);
+    display: none;
+  }
+  .mk-prev::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    width: 8px;
+    height: 8px;
+    background: transparent;
+    border: 1.5px solid var(--ink-3);
+    border-radius: 50%;
+  }
+  .compare-mode .mk-prev { display: block; }
+  .rng-conn {
+    position: absolute;
+    top: 8px;
+    height: 2px;
+    background: var(--ink-3);
+    opacity: 0.3;
+    display: none;
+  }
+  .compare-mode .rng-conn { display: block; }
+  .rng-m {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+  }
+
+  .bm-f {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .delta.good { color: var(--opt); }
+  .delta.bad { color: var(--att); }
+  .delta i { font-size: 12px; }
+
+  /* ---------- Insights ---------- */
+  .insights-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 8px 4px 14px;
+  }
+  .insights-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .insights-meta { font-size: 12px; color: var(--ink-3); }
+  .insights {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 0 22px;
+    box-shadow: var(--shadow-card);
+  }
+  .ins-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ins-row:last-child { border-bottom: none; }
+  .ins-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+  }
+  .ins-ic.good { background: var(--opt-soft); color: var(--opt); }
+  .ins-ic.warn { background: var(--bord-soft); color: var(--bord); }
+  .ins-ic.alert { background: var(--att-soft); color: var(--att); }
+  .ins-ic.info { background: var(--accent-soft); color: var(--accent); }
+  .ins-tx { font-size: 13.5px; line-height: 1.6; color: var(--ink); flex: 1; }
+  .ins-lbl { font-weight: 500; margin-right: 4px; }
+  .ins-action {
+    font-size: 12px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ins-action:hover { text-decoration: underline; }
+
+  /* ---------- Drill panel ---------- */
+  .drill-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 25, 22, 0.32);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms;
+    z-index: 90;
+  }
+  .drill-overlay.open { opacity: 1; pointer-events: auto; }
+  .drill {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 540px;
+    max-width: 95vw;
+    background: var(--surface);
+    box-shadow: var(--shadow-panel);
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0.18, 1);
+    z-index: 100;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .drill.open { transform: translateX(0); }
+  .drill-head {
+    padding: 22px 28px 18px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 2;
+  }
+  .drill-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--ink-2);
+  }
+  .drill-close:hover { background: var(--surface-2); }
+  .drill-tag {
+    display: inline-block;
+    font-size: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 9px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .drill-name {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 30px;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin: 0 0 4px;
+    padding-right: 50px;
+  }
+  .drill-fullname {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin: 0 0 16px;
+  }
+  .drill-headline {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .drill-headline-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .drill-headline-unit { font-size: 13px; color: var(--ink-3); }
+  .drill-status {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+  }
+  .drill-status.opt { background: var(--opt-soft); color: var(--opt); }
+  .drill-status.bord { background: var(--bord-soft); color: var(--bord); }
+  .drill-status.att { background: var(--att-soft); color: var(--att); }
+  .drill-status .dot { margin-top: 0; }
+
+  .drill-body { padding: 18px 28px 28px; }
+  .drill-section { margin-bottom: 24px; }
+  .drill-section-h {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-weight: 500;
+    margin: 0 0 10px;
+  }
+  .drill-chart-wrap {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .drill-range {
+    margin: 6px 0 18px;
+  }
+  .drill-range-bar {
+    position: relative;
+    height: 10px;
+    border-radius: 5px;
+    display: flex;
+    overflow: hidden;
+  }
+  .drill-range-bar .z { height: 100%; }
+  .drill-range-mk {
+    position: absolute;
+    top: -5px;
+    width: 3px;
+    height: 20px;
+    background: var(--ink);
+    border-radius: 2px;
+    transform: translateX(-50%);
+  }
+  .drill-range-mk::after {
+    content: attr(data-val);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .drill-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 10px;
+  }
+  .drill-prose {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.65;
+    margin: 0;
+  }
+  .factor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .factor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .factor .arrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    width: 18px;
+    text-align: center;
+  }
+  .factor .arrow.up { color: var(--att); }
+  .factor .arrow.down { color: var(--opt); }
+  .plan-list { margin: 0; padding: 0; list-style: none; }
+  .plan-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 13.5px;
+  }
+  .plan-item:last-child { border-bottom: none; }
+  .plan-item i { color: var(--accent); margin-top: 2px; font-size: 16px; flex-shrink: 0; }
+  .related-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .related-pill {
+    padding: 5px 11px;
+    border-radius: 100px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    font-size: 12px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .related-pill:hover { background: var(--surface-2); }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .featured { grid-template-columns: 1fr; }
+    .bm-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-title { font-size: 34px; }
+  }
+  @media (max-width: 700px) {
+    main { padding: 18px; }
+    .kpi-strip { grid-template-columns: 1fr; }
+    .bm-grid { grid-template-columns: 1fr; }
+    .drill { width: 100vw; }
+    .page-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<h1 class="sr-only">Apex Health biomarkers dashboard</h1>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-name">Apex<em>MD</em></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Health</div>
+      <a class="nav-item"><i class="ti ti-layout-dashboard"></i> Overview</a>
+      <a class="nav-item active"><i class="ti ti-test-pipe"></i> Biomarkers <span class="nav-badge">12</span></a>
+      <a class="nav-item"><i class="ti ti-dna"></i> Genomics</a>
+      <a class="nav-item"><i class="ti ti-body-scan"></i> Body composition</a>
+      <a class="nav-item"><i class="ti ti-heartbeat"></i> Cardiovascular</a>
+      <a class="nav-item"><i class="ti ti-moon-stars"></i> Sleep</a>
+      <a class="nav-item"><i class="ti ti-run"></i> Activity</a>
+      <a class="nav-item"><i class="ti ti-apple"></i> Nutrition</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Account</div>
+      <a class="nav-item"><i class="ti ti-stethoscope"></i> Care team</a>
+      <a class="nav-item"><i class="ti ti-file-text"></i> Reports</a>
+      <a class="nav-item"><i class="ti ti-message"></i> Messages</a>
+    </div>
+    <div class="sidebar-foot">
+      <div class="avatar">AC</div>
+      <div>
+        <div class="user-name">Alex Chen</div>
+        <div class="user-plan">Apex Longevity · Active</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span>Health</span>
+        <i class="ti ti-chevron-right"></i>
+        <span style="color: var(--ink);">Biomarkers</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search biomarkers, reports, protocols..." />
+      </div>
+      <button class="icon-btn" aria-label="Notifications"><i class="ti ti-bell"></i></button>
+      <button class="icon-btn" aria-label="Settings"><i class="ti ti-settings"></i></button>
+    </div>
+
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Biomarkers <em>panel</em></h1>
+        <div class="page-sub">
+          <span>Q1 2026 · 12 of 27 tracked</span>
+          <span class="sep"></span>
+          <span>Drawn Apr 28, 2026</span>
+          <span class="sep"></span>
+          <span>Quest Diagnostics · San Mateo, CA</span>
+        </div>
+      </div>
+      <div class="page-actions">
+        <button class="btn"><i class="ti ti-download"></i> Export PDF</button>
+        <button class="btn"><i class="ti ti-history"></i> History</button>
+        <button class="btn primary"><i class="ti ti-calendar-plus"></i> Schedule panel</button>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi">
+        <div class="kpi-rule opt"></div>
+        <div class="kpi-lbl">Biological age</div>
+        <div class="kpi-val">38.2<span class="unit">yr</span></div>
+        <div class="kpi-sub"><i class="ti ti-trending-down" style="color: var(--opt);"></i> 5.8 below chronological</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-rule opt"></div>
+        <div class="kpi-lbl">Longevity score</div>
+        <div class="kpi-val">86<span class="unit">/100</span></div>
+        <div class="kpi-sub"><i class="ti ti-arrow-up" style="color: var(--opt);"></i> Top 12% for age band</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-rule bord"></div>
+        <div class="kpi-lbl">In optimal range</div>
+        <div class="kpi-val">23<span class="unit">/27</span></div>
+        <div class="kpi-sub">1 borderline · 1 attention</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-rule opt"></div>
+        <div class="kpi-lbl">Improving</div>
+        <div class="kpi-val">14<span class="unit">markers</span></div>
+        <div class="kpi-sub"><i class="ti ti-calendar" style="color: var(--ink-3);"></i> Since Jan 2026</div>
+      </div>
+    </div>
+
+    <div class="featured">
+      <div>
+        <span class="feat-tag"><i class="ti ti-star" style="font-size:11px"></i> Most predictive</span>
+        <h2 class="feat-name">ApoB <span class="dot opt" aria-label="optimal"></span></h2>
+        <p class="feat-fullname">Apolipoprotein B · Lipids panel</p>
+        <div class="feat-val">
+          <span class="feat-num">78</span>
+          <span class="feat-unit">mg/dL</span>
+        </div>
+        <div class="feat-delta">
+          <i class="ti ti-arrow-down-right"></i> 10 mg/dL since last quarter · 30% below baseline
+        </div>
+        <p class="feat-desc">ApoB counts every atherogenic particle in your blood — the single strongest lipid-panel predictor of cardiovascular events. Each LDL, IDL, and VLDL particle carries exactly one ApoB. Your value sits comfortably below the &lt;90 mg/dL threshold for primary prevention.</p>
+        <div class="feat-actions">
+          <button class="btn" data-drill="apob"><i class="ti ti-arrow-up-right"></i> Full detail</button>
+          <button class="btn"><i class="ti ti-target"></i> Optimize</button>
+        </div>
+      </div>
+      <div class="feat-chart-wrap">
+        <div class="feat-chart-head">
+          <div class="feat-chart-title">8-quarter trajectory</div>
+          <div class="feat-chart-range">112 → 78 mg/dL</div>
+        </div>
+        <svg viewBox="0 0 480 220" style="width: 100%; height: auto; display: block;" preserveAspectRatio="xMidYMid meet">
+          <!-- Optimal band -->
+          <rect x="40" y="135" width="430" height="50" fill="rgba(46,125,90,0.07)"/>
+          <text x="44" y="131" font-size="10" fill="#2E7D5A" font-family="JetBrains Mono, monospace" font-weight="500">Optimal &lt;90</text>
+          <!-- Grid lines -->
+          <line x1="40" y1="60" x2="470" y2="60" stroke="rgba(26,25,22,0.06)" stroke-width="0.5"/>
+          <line x1="40" y1="100" x2="470" y2="100" stroke="rgba(26,25,22,0.06)" stroke-width="0.5"/>
+          <line x1="40" y1="135" x2="470" y2="135" stroke="rgba(26,25,22,0.08)" stroke-width="0.5"/>
+          <line x1="40" y1="185" x2="470" y2="185" stroke="rgba(26,25,22,0.06)" stroke-width="0.5"/>
+          <!-- Y axis labels -->
+          <text x="34" y="64" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">130</text>
+          <text x="34" y="104" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">110</text>
+          <text x="34" y="139" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">90</text>
+          <text x="34" y="189" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">70</text>
+          <!-- Area fill -->
+          <path d="M 70,55 L 130,75 L 190,90 L 250,108 L 310,128 L 370,148 L 430,168 L 460,182 L 460,200 L 70,200 Z" fill="rgba(26,25,22,0.04)"/>
+          <!-- Line -->
+          <polyline points="70,55 130,75 190,90 250,108 310,128 370,148 430,168 460,182" fill="none" stroke="#1A1A1A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Points -->
+          <circle cx="70" cy="55" r="3" fill="#1A1A1A"/>
+          <circle cx="130" cy="75" r="3" fill="#1A1A1A"/>
+          <circle cx="190" cy="90" r="3" fill="#1A1A1A"/>
+          <circle cx="250" cy="108" r="3" fill="#1A1A1A"/>
+          <circle cx="310" cy="128" r="3" fill="#1A1A1A"/>
+          <circle cx="370" cy="148" r="3" fill="#1A1A1A"/>
+          <circle cx="430" cy="168" r="3" fill="#1A1A1A"/>
+          <circle cx="460" cy="182" r="5" fill="#2E7D5A" stroke="#FFFFFF" stroke-width="2"/>
+          <!-- Value labels -->
+          <text x="70" y="44" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="middle">112</text>
+          <text x="470" y="180" font-size="11" fill="#2E7D5A" font-family="JetBrains Mono, monospace" font-weight="500" text-anchor="end">78</text>
+          <!-- X labels -->
+          <text x="70" y="215" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Q2 24</text>
+          <text x="190" y="215" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Q4 24</text>
+          <text x="310" y="215" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Q2 25</text>
+          <text x="430" y="215" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Q4 25</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="pills" id="pills">
+        <button class="pill active" data-cat="all">All <span class="ct">12</span></button>
+        <button class="pill" data-cat="lipids">Lipids <span class="ct">3</span></button>
+        <button class="pill" data-cat="metabolic">Metabolic <span class="ct">4</span></button>
+        <button class="pill" data-cat="hormones">Hormones <span class="ct">2</span></button>
+        <button class="pill" data-cat="inflammation">Inflammation <span class="ct">2</span></button>
+        <button class="pill" data-cat="vitamins">Vitamins <span class="ct">1</span></button>
+      </div>
+      <div class="view-controls">
+        <div class="toggle" id="compareToggle">
+          <span>Compare to last quarter</span>
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bm-grid" id="bmgrid"></div>
+
+    <div class="insights-head">
+      <h2 class="insights-title">Patterns & insights</h2>
+      <span class="insights-meta">Generated from your last 4 panels</span>
+    </div>
+
+    <div class="insights">
+      <div class="ins-row">
+        <div class="ins-ic good"><i class="ti ti-trending-down"></i></div>
+        <div class="ins-tx">
+          <span class="ins-lbl">Lipid trajectory improving across the board.</span> ApoB ↓30%, LDL ↓27%, and triglycerides ↓31% since you started rosuvastatin in October. Your cardiovascular risk profile is the strongest it has been in three years.
+        </div>
+        <button class="ins-action">Open report <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+      </div>
+      <div class="ins-row">
+        <div class="ins-ic alert"><i class="ti ti-alert-triangle"></i></div>
+        <div class="ins-tx">
+          <span class="ins-lbl">ALT trending up across three panels.</span> Liver enzymes have moved 24 → 32 → 42 U/L. May correlate with your increased training load and statin initiation. Worth a hepatic ultrasound and an alcohol intake check at the next visit.
+        </div>
+        <button class="ins-action">Message Dr. Patel <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+      </div>
+      <div class="ins-row">
+        <div class="ins-ic info"><i class="ti ti-bulb"></i></div>
+        <div class="ins-tx">
+          <span class="ins-lbl">Pattern noticed.</span> Your fasting insulin and hs-CRP both dropped sharply after the 14-day continuous glucose monitor cycle in February. Replicating that protocol once per quarter could compound the gains.
+        </div>
+        <button class="ins-action">Plan next cycle <i class="ti ti-arrow-right" style="font-size:12px"></i></button>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="drill-overlay" id="drillOverlay"></div>
+  <aside class="drill" id="drillPanel" aria-hidden="true"></aside>
+
+</div>
+
+<script>
+const biomarkers = [
+  {
+    id:'ldl', name:'LDL-C', full:'Low-density lipoprotein cholesterol', cat:'lipids',
+    value:108, unit:'mg/dL', status:'bord',
+    rangeLo:40, rangeHi:200, optLo:70, optHi:100, prev:118,
+    history:[148,138,128,122,118,108],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'LDL particles deliver cholesterol from the liver to peripheral tissues. Excess circulating LDL is the primary substrate for arterial plaque formation, making it one of the most actionable modifiable risk factors for cardiovascular disease.',
+    moves:[
+      {f:'Saturated fat intake', d:'up'},
+      {f:'Statin therapy', d:'down'},
+      {f:'Soluble fiber (oats, beans)', d:'down'},
+      {f:'Body fat percentage', d:'up'},
+      {f:'Plant sterols', d:'down'},
+      {f:'Refined carbs', d:'up'},
+    ],
+    plan:[
+      'Continue rosuvastatin 5mg nightly',
+      'Add 5g psyllium husk to morning routine',
+      'Target 30g soluble fiber daily (oats, beans, apples)',
+      'Recheck at the next quarterly draw',
+    ],
+    related:['ApoB','HDL-C','Triglycerides'],
+  },
+  {
+    id:'hdl', name:'HDL-C', full:'High-density lipoprotein cholesterol', cat:'lipids',
+    value:58, unit:'mg/dL', status:'opt',
+    rangeLo:25, rangeHi:90, optLo:50, optHi:80, prev:54,
+    history:[44,48,50,52,54,58],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'up',
+    what:'HDL transports cholesterol back to the liver for clearance. Higher levels generally correlate with cardiovascular protection, though the relationship plateaus and very high HDL is not necessarily better.',
+    moves:[
+      {f:'Aerobic exercise', d:'up'},
+      {f:'Olive oil intake', d:'up'},
+      {f:'Body fat percentage', d:'down'},
+      {f:'Smoking', d:'down'},
+      {f:'Refined carbs', d:'down'},
+      {f:'Moderate alcohol', d:'up'},
+    ],
+    plan:[
+      'Maintain Zone 2 cardio 4x/week',
+      'Continue current Mediterranean-style eating pattern',
+      'Trajectory is excellent — no changes needed',
+    ],
+    related:['ApoB','Triglycerides','ApoA1'],
+  },
+  {
+    id:'trig', name:'Triglycerides', full:'Serum triglycerides', cat:'lipids',
+    value:86, unit:'mg/dL', status:'opt',
+    rangeLo:30, rangeHi:250, optLo:60, optHi:100, prev:94,
+    history:[125,118,108,98,94,86],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'The storage form of fat in the blood. Elevated triglycerides reflect carbohydrate excess and insulin resistance more than dietary fat intake. They form a powerful trio with HDL and fasting glucose for diagnosing metabolic syndrome.',
+    moves:[
+      {f:'Refined carbohydrates', d:'up'},
+      {f:'Alcohol intake', d:'up'},
+      {f:'Omega-3 fatty acids', d:'down'},
+      {f:'Exercise', d:'down'},
+      {f:'Body fat', d:'up'},
+      {f:'Fructose intake', d:'up'},
+    ],
+    plan:[
+      'Hold steady — refined-carb reduction is paying off',
+      'Continue 2g EPA+DHA daily',
+      'Maintain alcohol below 4 drinks per week',
+    ],
+    related:['HbA1c','Fasting insulin','VLDL'],
+  },
+  {
+    id:'hba1c', name:'HbA1c', full:'Glycated hemoglobin', cat:'metabolic',
+    value:5.2, unit:'%', status:'opt',
+    rangeLo:4, rangeHi:7, optLo:4.8, optHi:5.6, prev:5.3,
+    history:[5.5,5.4,5.4,5.3,5.3,5.2],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'Average blood glucose over the past 90 days, measured via glycated hemoglobin. The single best summary of long-term metabolic health and one of the strongest predictors of all-cause mortality.',
+    moves:[
+      {f:'Refined carb intake', d:'up'},
+      {f:'Sleep deprivation', d:'up'},
+      {f:'Resistance training', d:'down'},
+      {f:'Body fat percentage', d:'up'},
+      {f:'Time-restricted eating', d:'down'},
+      {f:'Walking after meals', d:'down'},
+    ],
+    plan:[
+      'Maintain current eating window (16:8)',
+      'Continue resistance training 3x/week',
+      'No changes — this is an excellent value',
+    ],
+    related:['Fasting glucose','Fasting insulin','HOMA-IR'],
+  },
+  {
+    id:'fg', name:'Fasting glucose', full:'Plasma glucose, fasting', cat:'metabolic',
+    value:88, unit:'mg/dL', status:'opt',
+    rangeLo:60, rangeHi:120, optLo:75, optHi:95, prev:91,
+    history:[94,92,93,91,90,88],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'Glucose level after 8+ hours fasting. A spot-check of basal glucose regulation. Less informative than HbA1c or fasting insulin in isolation, but useful as part of a metabolic panel.',
+    moves:[
+      {f:'Late-night meals', d:'up'},
+      {f:'Stress', d:'up'},
+      {f:'Sleep quality', d:'down'},
+      {f:'Resistance training', d:'down'},
+      {f:'Morning cortisol', d:'up'},
+      {f:'Cold exposure', d:'down'},
+    ],
+    plan:[
+      'Continue current routine',
+      'Optional: track with CGM for 14 days next quarter',
+    ],
+    related:['HbA1c','Fasting insulin','Cortisol'],
+  },
+  {
+    id:'fi', name:'Fasting insulin', full:'Serum insulin, fasting', cat:'metabolic',
+    value:5.8, unit:'μIU/mL', status:'opt',
+    rangeLo:0, rangeHi:20, optLo:3, optHi:8, prev:7.1,
+    history:[8.4,7.8,7.5,7.1,6.4,5.8],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'The earliest and most sensitive indicator of insulin resistance — often abnormal years before glucose moves. Considered by many longevity clinicians the single most important metabolic marker to track.',
+    moves:[
+      {f:'Body fat percentage', d:'up'},
+      {f:'Refined carb intake', d:'up'},
+      {f:'Resistance training', d:'down'},
+      {f:'Sleep quality', d:'down'},
+      {f:'Time-restricted eating', d:'down'},
+      {f:'Visceral adiposity', d:'up'},
+    ],
+    plan:[
+      'Strong downward trajectory — keep the 16:8 protocol',
+      'Maintain current training volume',
+      'Aim for the lower half of the optimal range',
+    ],
+    related:['HbA1c','Glucose','HOMA-IR'],
+  },
+  {
+    id:'alt', name:'ALT', full:'Alanine aminotransferase', cat:'metabolic',
+    value:42, unit:'U/L', status:'att',
+    rangeLo:5, rangeHi:80, optLo:15, optHi:30, prev:32,
+    history:[22,24,28,30,32,42],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'A liver enzyme released into circulation when hepatocytes are stressed or damaged. The most sensitive routine marker for liver health. Modest elevations can occur with intense training, alcohol, statins, or fatty liver.',
+    moves:[
+      {f:'Alcohol intake', d:'up'},
+      {f:'Hepatic steatosis', d:'up'},
+      {f:'Intense exercise (transient)', d:'up'},
+      {f:'Some medications', d:'up'},
+      {f:'Body fat percentage', d:'up'},
+      {f:'Acetaminophen', d:'up'},
+    ],
+    plan:[
+      'Repeat ALT/AST in 4 weeks to confirm trend',
+      'Schedule hepatic ultrasound',
+      'Audit alcohol intake and training load',
+      'Review all medications and supplements',
+    ],
+    related:['AST','GGT','Bilirubin'],
+  },
+  {
+    id:'t', name:'Testosterone', full:'Total testosterone', cat:'hormones',
+    value:612, unit:'ng/dL', status:'opt',
+    rangeLo:250, rangeHi:1100, optLo:500, optHi:900, prev:580,
+    history:[520,540,560,575,580,612],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'up',
+    what:'The primary male sex hormone, also involved in body composition, mood regulation, bone density, libido, and metabolic health. Free testosterone (the unbound fraction) is generally more biologically relevant than total.',
+    moves:[
+      {f:'Body fat percentage', d:'down'},
+      {f:'Sleep quality', d:'up'},
+      {f:'Resistance training', d:'up'},
+      {f:'Chronic stress', d:'down'},
+      {f:'Zinc & vitamin D', d:'up'},
+      {f:'Endurance overtraining', d:'down'},
+    ],
+    plan:[
+      'Trajectory is excellent — keep current protocol',
+      'Continue prioritizing 7.5+ hours sleep',
+      'Recheck with free testosterone & SHBG next panel',
+    ],
+    related:['Free testosterone','SHBG','Estradiol'],
+  },
+  {
+    id:'tsh', name:'TSH', full:'Thyroid stimulating hormone', cat:'hormones',
+    value:1.8, unit:'mIU/L', status:'opt',
+    rangeLo:0.3, rangeHi:5, optLo:0.8, optHi:2.5, prev:1.9,
+    history:[2.1,2.0,1.9,1.9,1.9,1.8],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'flat',
+    what:'The pituitary signal to the thyroid gland. Elevated TSH indicates the pituitary is working harder to coax thyroid output. Sits comfortably in the optimal mid-range for metabolic and cognitive function.',
+    moves:[
+      {f:'Iodine deficiency', d:'up'},
+      {f:'Selenium deficiency', d:'up'},
+      {f:'Chronic stress', d:'up'},
+      {f:'Autoimmunity', d:'up'},
+      {f:'Caloric restriction', d:'up'},
+    ],
+    plan:[
+      'Stable and optimal — annual rechecks sufficient',
+      'No supplementation needed at this time',
+    ],
+    related:['Free T4','Free T3','Anti-TPO'],
+  },
+  {
+    id:'crp', name:'hs-CRP', full:'High-sensitivity C-reactive protein', cat:'inflammation',
+    value:0.6, unit:'mg/L', status:'opt',
+    rangeLo:0, rangeHi:5, optLo:0, optHi:1, prev:0.9,
+    history:[1.4,1.2,1.0,0.9,0.7,0.6],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'The most accessible marker of systemic inflammation and an independent risk factor for cardiovascular events. Chronic low-grade elevation correlates with metabolic dysfunction, poor sleep, and overall mortality.',
+    moves:[
+      {f:'Visceral fat', d:'up'},
+      {f:'Refined carbs', d:'up'},
+      {f:'Sleep quality', d:'down'},
+      {f:'Omega-3 intake', d:'down'},
+      {f:'Periodontal health', d:'down'},
+      {f:'Regular exercise', d:'down'},
+    ],
+    plan:[
+      'Excellent — continue current anti-inflammatory practices',
+      'Maintain omega-3 supplementation',
+    ],
+    related:['IL-6','Fibrinogen','Ferritin'],
+  },
+  {
+    id:'hcy', name:'Homocysteine', full:'Plasma homocysteine', cat:'inflammation',
+    value:8.2, unit:'μmol/L', status:'opt',
+    rangeLo:4, rangeHi:15, optLo:5, optHi:9, prev:8.4,
+    history:[9.1,8.9,8.6,8.5,8.4,8.2],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'down',
+    what:'An amino acid intermediate in methylation. Elevations indicate B-vitamin pathway issues (folate, B12, B6) and correlate independently with cardiovascular events, cognitive decline, and dementia risk.',
+    moves:[
+      {f:'B12 deficiency', d:'up'},
+      {f:'Folate deficiency', d:'up'},
+      {f:'MTHFR variants', d:'up'},
+      {f:'Alcohol intake', d:'up'},
+      {f:'Coffee (high intake)', d:'up'},
+      {f:'Methylated B complex', d:'down'},
+    ],
+    plan:[
+      'Continue current methylated B-complex',
+      'Optional: test methylmalonic acid if curious about B12 status',
+    ],
+    related:['Vitamin B12','Folate','Methylmalonic acid'],
+  },
+  {
+    id:'vd', name:'Vitamin D, 25-OH', full:'25-hydroxyvitamin D', cat:'vitamins',
+    value:48, unit:'ng/mL', status:'opt',
+    rangeLo:10, rangeHi:100, optLo:40, optHi:80, prev:42,
+    history:[28,32,36,40,42,48],
+    labels:['Q4 24','Q1 25','Q2 25','Q3 25','Q4 25','Q1 26'],
+    desirable:'up',
+    what:'Hormonally active vitamin involved in bone health, immune function, mood regulation, and the expression of over 200 genes. Most adults benefit from supplementation, particularly at higher latitudes.',
+    moves:[
+      {f:'Sun exposure', d:'up'},
+      {f:'D3 supplementation', d:'up'},
+      {f:'Body fat (sequesters)', d:'down'},
+      {f:'Magnesium status (cofactor)', d:'up'},
+      {f:'Vitamin K2 (works with)', d:'up'},
+    ],
+    plan:[
+      'Continue 4000 IU D3 + 100mcg K2 daily',
+      'Target upper third of optimal range (60+ ng/mL)',
+    ],
+    related:['Calcium','PTH','Magnesium'],
+  },
+];
+
+function fmt(n) {
+  return Math.abs(n) < 1 ? Number(n).toFixed(1) : Math.round(n).toString();
+}
+
+function markerPercent(b, val) {
+  const v = val !== undefined ? val : b.value;
+  if (v < b.optLo) return Math.max(2, ((v - b.rangeLo) / (b.optLo - b.rangeLo)) * 32);
+  if (v <= b.optHi) return 32 + ((v - b.optLo) / (b.optHi - b.optLo)) * 36;
+  return Math.min(98, 68 + ((v - b.optHi) / (b.rangeHi - b.optHi)) * 32);
+}
+
+function isGoodDelta(b) {
+  const delta = b.value - b.prev;
+  if (b.desirable === 'flat') return Math.abs(delta) < 0.5;
+  if (b.desirable === 'up') return delta > 0;
+  return delta < 0;
+}
+
+function makeSparkline(data, status) {
+  const w = 80, h = 26;
+  const max = Math.max(...data), min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * (h - 6) - 3;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const color = status === 'opt' ? '#2E7D5A' : status === 'bord' ? '#B8761C' : '#B23A3A';
+  const last = data[data.length-1];
+  const lastY = h - ((last - min) / range) * (h - 6) - 3;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><polyline points="${points}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${w}" cy="${lastY.toFixed(1)}" r="2.5" fill="${color}"/></svg>`;
+}
+
+function renderBiomarkers(cat) {
+  const grid = document.getElementById('bmgrid');
+  const filtered = cat === 'all' ? biomarkers : biomarkers.filter(b => b.cat === cat);
+  grid.innerHTML = filtered.map((b, i) => {
+    const mk = markerPercent(b);
+    const mkPrev = markerPercent(b, b.prev);
+    const delta = b.value - b.prev;
+    const good = isGoodDelta(b);
+    const deltaClass = good ? 'good' : 'bad';
+    const deltaStr = (delta > 0 ? '+' : '') + fmt(delta);
+    const arrow = delta > 0 ? 'ti-arrow-up-right' : delta < 0 ? 'ti-arrow-down-right' : 'ti-arrow-right';
+    const catLabel = b.cat.charAt(0).toUpperCase() + b.cat.slice(1);
+    const statusLabel = b.status === 'opt' ? 'optimal' : b.status === 'bord' ? 'borderline' : 'attention';
+    const lo = Math.min(mk, mkPrev), hi = Math.max(mk, mkPrev);
+    const connStyle = `left:${lo}%; width:${(hi-lo)}%`;
+    return `
+      <button class="bm" data-drill="${b.id}" style="animation-delay: ${i*40}ms">
+        <div class="bm-h">
+          <div>
+            <p class="bm-name">${b.name}</p>
+            <p class="bm-cat">${catLabel}</p>
+          </div>
+          <span class="dot ${b.status}" aria-label="${statusLabel}"></span>
+        </div>
+        <div class="bm-v">
+          <span class="bm-num">${b.value}</span>
+          <span class="bm-u">${b.unit}</span>
+        </div>
+        <div class="bm-prev">Previous: ${b.prev} ${b.unit}</div>
+        <div class="rng">
+          <div class="rng-t">
+            <span class="z z-lo" style="width:18%"></span>
+            <span class="z z-bl" style="width:14%"></span>
+            <span class="z z-op" style="width:36%"></span>
+            <span class="z z-bh" style="width:14%"></span>
+            <span class="z z-hi" style="width:18%"></span>
+            <span class="rng-conn" style="${connStyle}"></span>
+            <span class="mk-prev" style="left:${mkPrev}%"></span>
+            <span class="mk" style="left:${mk}%"></span>
+          </div>
+          <div class="rng-m">
+            <span>${b.rangeLo}</span>
+            <span>${b.optLo}–${b.optHi}</span>
+            <span>${b.rangeHi}</span>
+          </div>
+        </div>
+        <div class="bm-f">
+          <span class="delta ${deltaClass}">
+            <i class="ti ${arrow}"></i>${deltaStr} ${b.unit}
+          </span>
+          ${makeSparkline(b.history, b.status)}
+        </div>
+      </button>
+    `;
+  }).join('');
+}
+
+function renderChart(b) {
+  const w = 480, h = 200, padL = 36, padR = 16, padT = 28, padB = 24;
+  const max = Math.max(...b.history, b.optHi * 1.2);
+  const min = Math.min(...b.history, b.optLo * 0.8);
+  const range = max - min;
+  const xStep = (w - padL - padR) / (b.history.length - 1);
+  const yFor = v => padT + (1 - (v - min) / range) * (h - padT - padB);
+  const points = b.history.map((v, i) => `${padL + i * xStep},${yFor(v)}`).join(' ');
+  const lastIdx = b.history.length - 1;
+  const optTop = yFor(b.optHi);
+  const optBot = yFor(b.optLo);
+  const color = b.status === 'opt' ? '#2E7D5A' : b.status === 'bord' ? '#B8761C' : '#B23A3A';
+  return `
+    <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto;" preserveAspectRatio="xMidYMid meet">
+      <rect x="${padL}" y="${optTop}" width="${w-padL-padR}" height="${optBot-optTop}" fill="rgba(46,125,90,0.07)"/>
+      <text x="${padL+4}" y="${optTop-4}" font-size="9" fill="#2E7D5A" font-family="JetBrains Mono, monospace" font-weight="500">Optimal ${b.optLo}–${b.optHi}</text>
+      <line x1="${padL}" y1="${yFor(min)}" x2="${w-padR}" y2="${yFor(min)}" stroke="rgba(26,25,22,0.08)" stroke-width="0.5"/>
+      <text x="${padL-6}" y="${optTop+3}" font-size="9" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">${fmt(b.optHi)}</text>
+      <text x="${padL-6}" y="${optBot+3}" font-size="9" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">${fmt(b.optLo)}</text>
+      <polyline points="${points}" fill="none" stroke="#1A1A1A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+      ${b.history.map((v,i)=>`<circle cx="${padL+i*xStep}" cy="${yFor(v)}" r="${i===lastIdx?4:2.5}" fill="${i===lastIdx?color:'#1A1A1A'}" ${i===lastIdx?'stroke="#FFFFFF" stroke-width="2"':''}/>`).join('')}
+      <text x="${padL + lastIdx*xStep}" y="${yFor(b.history[lastIdx])-10}" font-size="11" fill="${color}" font-family="JetBrains Mono, monospace" font-weight="500" text-anchor="end">${b.value}</text>
+      ${b.labels.map((l,i)=>i%2===0?`<text x="${padL+i*xStep}" y="${h-6}" font-size="9" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">${l}</text>`:'').join('')}
+    </svg>
+  `;
+}
+
+function openDrill(id) {
+  const b = biomarkers.find(x => x.id === id);
+  if (!b) return;
+  const mk = markerPercent(b);
+  const delta = b.value - b.prev;
+  const good = isGoodDelta(b);
+  const deltaStr = (delta > 0 ? '+' : '') + fmt(delta);
+  const statusLabel = b.status === 'opt' ? 'Optimal' : b.status === 'bord' ? 'Borderline' : 'Needs attention';
+  const catLabel = b.cat.charAt(0).toUpperCase() + b.cat.slice(1);
+
+  const panel = document.getElementById('drillPanel');
+  panel.innerHTML = `
+    <div class="drill-head">
+      <button class="drill-close" id="drillClose" aria-label="Close"><i class="ti ti-x"></i></button>
+      <span class="drill-tag">${catLabel} panel</span>
+      <h2 class="drill-name">${b.name}</h2>
+      <p class="drill-fullname">${b.full}</p>
+      <div class="drill-headline">
+        <div>
+          <span class="drill-headline-num">${b.value}</span>
+          <span class="drill-headline-unit">${b.unit}</span>
+        </div>
+        <div class="drill-status ${b.status}">
+          <span class="dot ${b.status}"></span> ${statusLabel}
+        </div>
+        <div class="delta ${good?'good':'bad'}" style="font-size: 13px;">
+          <i class="ti ${delta>0?'ti-arrow-up-right':'ti-arrow-down-right'}"></i>
+          ${deltaStr} ${b.unit} vs last quarter
+        </div>
+      </div>
+    </div>
+    <div class="drill-body">
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">Reference range</h3>
+        <div class="drill-range">
+          <div class="drill-range-bar">
+            <span class="z z-lo" style="width:18%"></span>
+            <span class="z z-bl" style="width:14%"></span>
+            <span class="z z-op" style="width:36%"></span>
+            <span class="z z-bh" style="width:14%"></span>
+            <span class="z z-hi" style="width:18%"></span>
+            <span class="drill-range-mk" data-val="${b.value}" style="left:${mk}%"></span>
+          </div>
+          <div class="drill-range-labels">
+            <span>${b.rangeLo}</span>
+            <span>${b.optLo}</span>
+            <span>${b.optHi}</span>
+            <span>${b.rangeHi}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">8-quarter trajectory</h3>
+        <div class="drill-chart-wrap">${renderChart(b)}</div>
+      </div>
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">What this measures</h3>
+        <p class="drill-prose">${b.what}</p>
+      </div>
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">What moves it</h3>
+        <div class="factor-grid">
+          ${b.moves.map(m => `
+            <div class="factor">
+              <span class="arrow ${m.d}">${m.d === 'up' ? '↑' : '↓'}</span>
+              <span>${m.f}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">Your plan</h3>
+        <ul class="plan-list">
+          ${b.plan.map(p => `<li class="plan-item"><i class="ti ti-circle-check"></i><span>${p}</span></li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="drill-section">
+        <h3 class="drill-section-h">Related markers</h3>
+        <div class="related-pills">
+          ${b.related.map(r => `<span class="related-pill">${r}</span>`).join('')}
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  document.getElementById('drillOverlay').classList.add('open');
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
+
+  document.getElementById('drillClose').addEventListener('click', closeDrill);
+}
+
+function closeDrill() {
+  document.getElementById('drillOverlay').classList.remove('open');
+  const panel = document.getElementById('drillPanel');
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+}
+
+// Initial render
+renderBiomarkers('all');
+
+// Pill filter
+document.querySelectorAll('#pills .pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('#pills .pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    renderBiomarkers(p.dataset.cat);
+  });
+});
+
+// Compare toggle
+const compareToggle = document.getElementById('compareToggle');
+compareToggle.addEventListener('click', () => {
+  compareToggle.classList.toggle('on');
+  document.body.classList.toggle('compare-mode');
+});
+
+// Drill clicks (event delegation)
+document.body.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-drill]');
+  if (target) {
+    openDrill(target.dataset.drill);
+  }
+});
+
+// Overlay close
+document.getElementById('drillOverlay').addEventListener('click', closeDrill);
+
+// ESC close
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDrill();
+});
+</script>
+
+</body>
+</html>

@@ -24,6 +24,15 @@ function formatCaseLabel(value: string) {
     .join(" ");
 }
 
+function getStatusBadgeVariant(status: string) {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "CLOSED" || normalized === "COMPLETED") return "secondary";
+  if (normalized === "URGENT") return "danger";
+  if (normalized === "IN_PROGRESS" || normalized === "OPEN" || normalized === "ACTIVE")
+    return "info";
+  return "default";
+}
+
 function getPromoCode(caseDetails: CaseDetailsItem): string {
   const raw = caseDetails.raw ?? {};
 
@@ -80,110 +89,130 @@ export default function MyCaseDetails() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
       <Link
         to={createPageUrl("MyCases")}
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.08em] font-medium text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" />
+        <ArrowLeft className="w-3.5 h-3.5" />
         Back to My Cases
       </Link>
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Case Details</h1>
-        <p className="text-muted-foreground mt-2">Review your case information and timeline.</p>
+      {/* Page head */}
+      <div className="mb-6 pb-5 border-b border-border">
+        <p className="apex-eyebrow">Care portal</p>
+        <h1 className="apex-page-title mt-1">
+          Case <em>details</em>
+        </h1>
+        <p className="text-[13px] text-ink-2 mt-2">
+          Review your case information and timeline.
+        </p>
       </div>
 
       {isError || !caseDetails ? (
-        <Card className="border-2 border-destructive/30 bg-destructive/5">
-          <CardContent className="p-4">
-            <p className="text-sm text-foreground">
-              Unable to load this case right now. Please try again.
-            </p>
-          </CardContent>
-        </Card>
+        <div
+          className="apex-card p-4 text-sm"
+          style={{ borderColor: "var(--att)", background: "var(--att-soft)" }}
+        >
+          <span style={{ color: "var(--att)" }}>
+            Unable to load this case right now. Please try again.
+          </span>
+        </div>
       ) : (
         <div className="space-y-6">
           <CaseTimeline caseDetails={caseDetails} />
 
           <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-muted p-1">
-            <TabsTrigger value="overview" className="font-bold data-[state=active]:bg-background">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="appointments" className="font-bold data-[state=active]:bg-background">
-              Appointments
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="font-bold data-[state=active]:bg-background">
-              Chat
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="font-bold data-[state=active]:bg-background">
-              Documents
-            </TabsTrigger>
-          </TabsList>
+            <TabsList className="w-full max-w-2xl flex">
+              <TabsTrigger value="overview" className="flex-1">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="appointments" className="flex-1">
+                Appointments
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="flex-1">
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex-1">
+                Documents
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
-            <Card className="border-2 border-border">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3">
-                  <CardTitle className="text-xl font-bold text-foreground">
-                    {caseDetails.title || caseDetails.raw?.title || "Untitled Case"}
-                  </CardTitle>
-                  <Badge variant="outline" className="capitalize">
-                    {formatCaseLabel(String(caseDetails.status || caseDetails.raw?.status || "open"))}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p className="text-muted-foreground">
-                  Case ID:{" "}
-                  <span className="text-foreground font-medium">
-                    {caseDetails.shortId || caseDetails.id || caseId}
-                  </span>
-                </p>
-                {caseDetails.raw?.productBundle?.name && (
-                  <p className="text-muted-foreground">
-                    Product Bundle:{" "}
-                    <span className="text-foreground font-medium">
-                      {String(caseDetails.raw.productBundle.name)}
-                    </span>
-                  </p>
-                )}
-                {getPromoCode(caseDetails) && (
-                  <p className="text-muted-foreground">
-                    Promo Code Details:{" "}
-                    <span className="text-foreground font-medium">{getPromoCode(caseDetails)}</span>
-                  </p>
-                )}
-                {caseDetails.submitterEmail && (
-                  <p className="text-muted-foreground">
-                    Submitter Email:{" "}
-                    <span className="text-foreground font-medium">{caseDetails.submitterEmail}</span>
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            <TabsContent value="overview" className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <CardTitle className="text-xl">
+                      {caseDetails.title || caseDetails.raw?.title || "Untitled Case"}
+                    </CardTitle>
+                    <Badge
+                      variant={getStatusBadgeVariant(
+                        caseDetails.status || caseDetails.raw?.status || "open"
+                      )}
+                      className="whitespace-nowrap shrink-0"
+                    >
+                      {formatCaseLabel(
+                        String(caseDetails.status || caseDetails.raw?.status || "open")
+                      )}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <dl className="divide-y divide-border text-[13px]">
+                    <div className="flex items-center justify-between gap-3 py-2.5 first:pt-0">
+                      <dt className="text-muted-foreground">Case ID</dt>
+                      <dd className="font-mono text-foreground">
+                        {caseDetails.shortId || caseDetails.id || caseId}
+                      </dd>
+                    </div>
+                    {caseDetails.raw?.productBundle?.name && (
+                      <div className="flex items-center justify-between gap-3 py-2.5">
+                        <dt className="text-muted-foreground">Product Bundle</dt>
+                        <dd className="text-foreground text-right">
+                          {String(caseDetails.raw.productBundle.name)}
+                        </dd>
+                      </div>
+                    )}
+                    {getPromoCode(caseDetails) && (
+                      <div className="flex items-center justify-between gap-3 py-2.5">
+                        <dt className="text-muted-foreground">Promo Code</dt>
+                        <dd className="font-mono text-foreground">
+                          {getPromoCode(caseDetails)}
+                        </dd>
+                      </div>
+                    )}
+                    {caseDetails.submitterEmail && (
+                      <div className="flex items-center justify-between gap-3 py-2.5 last:pb-0">
+                        <dt className="text-muted-foreground">Submitter Email</dt>
+                        <dd className="text-foreground text-right">
+                          {caseDetails.submitterEmail}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </CardContent>
+              </Card>
 
-            {forms.map((form) => (
-              <CaseDynamicFormCard key={form.id} form={form} />
-            ))}
-          </TabsContent>
+              {forms.map((form) => (
+                <CaseDynamicFormCard key={form.id} form={form} />
+              ))}
+            </TabsContent>
 
-          <TabsContent value="appointments">
-            <CaseAppointmentsPanel caseDetails={caseDetails} />
-          </TabsContent>
+            <TabsContent value="appointments">
+              <CaseAppointmentsPanel caseDetails={caseDetails} />
+            </TabsContent>
 
-          <TabsContent value="chat">
-            <CaseChatPanel caseDetails={caseDetails} caseId={caseId} />
-          </TabsContent>
+            <TabsContent value="chat">
+              <CaseChatPanel caseDetails={caseDetails} caseId={caseId} />
+            </TabsContent>
 
-          <TabsContent value="documents">
-            <CaseDocumentsPanel
-              caseDetails={caseDetails}
-              userDocuments={userDocuments}
-              isUserDocumentsLoading={isUserDocumentsLoading}
-            />
-          </TabsContent>
+            <TabsContent value="documents">
+              <CaseDocumentsPanel
+                caseDetails={caseDetails}
+                userDocuments={userDocuments}
+                isUserDocumentsLoading={isUserDocumentsLoading}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       )}

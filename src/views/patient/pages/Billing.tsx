@@ -8,8 +8,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useEnvironment } from "@/lib/EnvironmentContext";
-import { CreditCard, Package, CheckCircle, ExternalLink, Receipt } from "lucide-react";
+import {
+  CreditCard,
+  Package,
+  CheckCircle,
+  ExternalLink,
+  Receipt,
+  ShieldCheck,
+} from "lucide-react";
 
 function toArray(value) {
   if (Array.isArray(value)) return value;
@@ -33,8 +39,23 @@ function formatCurrency(value) {
   return String(value);
 }
 
+const STATUS_BADGE = {
+  paid: "success",
+  succeeded: "success",
+  active: "success",
+  pending: "warning",
+  processing: "warning",
+  failed: "danger",
+  canceled: "danger",
+  cancelled: "danger",
+  refunded: "info",
+};
+
+function statusVariant(status) {
+  return STATUS_BADGE[String(status || "").toLowerCase()] || "secondary";
+}
+
 export default function Billing() {
-  const { environment } = useEnvironment();
   const { data: billingCases = [], isLoading: isCasesLoading, isError: isCasesError } = useBilling();
   const {
     data: paymentMethodsData,
@@ -76,10 +97,7 @@ export default function Billing() {
       activeSubscription?.monthlyPrice ??
       activeSubscription?.billingAmount
   );
-  const planPrice = readString(
-    planAmount ? `${planAmount}/mo` : "",
-    "$0.00/mo"
-  );
+  const planPrice = readString(planAmount || "$0.00");
   const renewsOn = readString(
     activeSubscription?.renewsOn,
     activeSubscription?.renewalDate,
@@ -132,109 +150,178 @@ export default function Billing() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Billing</h1>
-        <p className="text-muted-foreground">Manage your subscription and payment history</p>
+    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground">
+      {/* Page head */}
+      <div className="mb-6 pb-5 border-b border-border flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="apex-eyebrow flex items-center gap-1.5 mb-2">
+            <CreditCard className="w-3 h-3" style={{ color: "var(--apex-accent)" }} />
+            Billing &amp; payments
+          </div>
+          <h1 className="apex-page-title">
+            Billing <em>overview</em>
+          </h1>
+          <p className="text-[13px] text-ink-2 mt-2">
+            Manage your subscription, payment method and invoice history.
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
+          <ShieldCheck className="w-3.5 h-3.5" style={{ color: "var(--apex-accent)" }} />
+          Secure payments
+        </span>
       </div>
+
       {hasError && (
-        <p className="text-sm text-destructive mb-4">
-          Unable to load full billing details right now. Partial data may be shown.
-        </p>
+        <div
+          className="mb-6 apex-card p-4 text-sm"
+          style={{ borderColor: "var(--att)", background: "var(--att-soft)" }}
+        >
+          <span style={{ color: "var(--att)" }}>
+            Unable to load full billing details right now. Partial data may be shown.
+          </span>
+        </div>
       )}
 
-      {/* Current Plan */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5" style={{ color: environment.primaryColor }} />
-            Current Plan
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold text-lg text-foreground">{planName}</p>
-              <p className="text-sm text-muted-foreground">Renews on {renewsOn}</p>
-            </div>
-            <div className="text-right">
-              <p className="font-bold text-foreground">{planPrice}</p>
-              <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                <CheckCircle className="w-3 h-3 mr-1" /> {planStatus}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-2 border-t border-border">
-            <Button variant="outline" className="flex-1 font-bold">
-              Change Plan
-            </Button>
-            <Button variant="outline" className="flex-1 font-bold text-destructive border-destructive/40 hover:bg-destructive/5">
-              Cancel Subscription
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Payment Method */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5" style={{ color: environment.primaryColor }} />
-            Payment Method
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-400 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">{paymentBrand}</span>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 mb-3.5">
+        {/* Current Plan */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" />
+              Current Plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="font-semibold text-foreground">•••• •••• •••• {paymentLast4}</p>
-                <p className="text-xs text-muted-foreground">Expires {paymentExpiry}</p>
+                <p className="apex-eyebrow mb-1.5">Plan</p>
+                <p className="font-serif text-xl font-medium text-foreground">{planName}</p>
+                <p className="text-[13px] text-ink-2 mt-1">
+                  Renews on <span className="font-mono">{renewsOn}</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="font-mono text-[32px] font-medium leading-none tracking-[-0.035em] text-foreground">
+                  {planPrice}
+                  <span className="font-sans text-sm text-muted-foreground ml-1 font-normal">
+                    /mo
+                  </span>
+                </div>
+                <Badge variant={statusVariant(planStatus)} className="mt-2.5">
+                  <CheckCircle className="w-3 h-3 mr-1" /> {planStatus}
+                </Badge>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="font-bold">Update</Button>
-          </div>
-        </CardContent>
-      </Card>
+
+            <div className="flex gap-3 pt-4 border-t border-border">
+              <Button variant="outline" className="flex-1">
+                Change Plan
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 text-primary border-primary/40 hover:bg-primary/5"
+              >
+                Cancel Subscription
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment Method */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-primary" />
+              Payment Method
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-[10px] border border-border bg-secondary p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="apex-eyebrow">{paymentBrand}</span>
+                <span className="font-mono text-[11px] text-ink-3">
+                  Exp {paymentExpiry}
+                </span>
+              </div>
+              <p className="font-mono text-[15px] tracking-[0.08em] text-foreground">
+                •••• •••• •••• {paymentLast4}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" className="w-full">
+              Update Payment Method
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Invoice History */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="w-5 h-5" style={{ color: environment.primaryColor }} />
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-primary" />
             Invoice History
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {invoiceRows.length === 0 && (
-              <p className="text-sm text-muted-foreground">No invoices yet.</p>
-            )}
-            {invoiceRows.map((inv) => (
-              <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div>
-                  <p className="font-semibold text-sm text-foreground">{inv.id}</p>
-                  <p className="text-xs text-muted-foreground">{inv.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-foreground">{inv.amount}</span>
-                  <Badge variant="outline" className="text-emerald-600 border-emerald-300 text-xs">{inv.status}</Badge>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-7 h-7"
-                    disabled={!inv.url}
-                    onClick={() => inv.url && window.open(inv.url, "_blank", "noopener,noreferrer")}
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {invoiceRows.length === 0 ? (
+            <p className="text-[13px] text-muted-foreground">No invoices yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em] py-2 pr-4">
+                      Invoice
+                    </th>
+                    <th className="text-left text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em] py-2 pr-4">
+                      Date
+                    </th>
+                    <th className="text-left text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em] py-2 pr-4">
+                      Amount
+                    </th>
+                    <th className="text-left text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em] py-2 pr-4">
+                      Status
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-muted-foreground uppercase tracking-[0.08em] py-2">
+                      Receipt
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceRows.map((inv) => (
+                    <tr
+                      key={inv.id}
+                      className="border-b border-border last:border-0 hover:bg-secondary/60"
+                    >
+                      <td className="py-3 pr-4 font-mono text-[12px] font-medium text-foreground">
+                        {inv.id}
+                      </td>
+                      <td className="py-3 pr-4 font-mono text-[12px] text-muted-foreground">
+                        {inv.date}
+                      </td>
+                      <td className="py-3 pr-4 font-mono text-[13px] font-medium text-foreground">
+                        {inv.amount}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <Badge variant={statusVariant(inv.status)}>{inv.status}</Badge>
+                      </td>
+                      <td className="py-3 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 ml-auto"
+                          disabled={!inv.url}
+                          onClick={() => inv.url && window.open(inv.url, "_blank", "noopener,noreferrer")}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

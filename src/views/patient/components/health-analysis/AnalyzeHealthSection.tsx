@@ -84,25 +84,12 @@ export default function AnalyzeHealthSection() {
   const StatusIcon = STATUS_LINES[statusIndex].icon;
 
   return (
-    <Card
-      className="relative overflow-hidden border-2 shadow-md h-full"
-      style={{
-        borderColor: `${accent}40`,
-        background: `linear-gradient(135deg, ${accent}10 0%, transparent 60%)`,
-      }}
-    >
+    <Card className="relative overflow-hidden h-full">
       <CardContent className="relative p-6 md:p-7 flex flex-col h-full">
         <div>
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 border"
-            style={{
-              borderColor: `${accent}66`,
-              color: accent,
-              backgroundColor: `${accent}14`,
-            }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            AI HEALTH ANALYSIS
+          <div className="apex-eyebrow flex items-center gap-1.5 mb-4">
+            <Sparkles className="w-3 h-3" style={{ color: "var(--apex-accent)" }} />
+            AI health analysis
           </div>
 
           <AnimatePresence mode="wait">
@@ -113,7 +100,7 @@ export default function AnalyzeHealthSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
               >
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight">
+                <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-2 leading-none tracking-[-0.035em]">
                   Running analysis...
                 </h2>
                 <p className="text-sm md:text-base text-muted-foreground mb-6 leading-relaxed">
@@ -151,7 +138,7 @@ export default function AnalyzeHealthSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
               >
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2 leading-tight">
+                <h2 className="font-serif text-3xl md:text-4xl font-medium text-foreground mb-2 leading-none tracking-[-0.035em]">
                   {hasSummary ? "Refresh your analysis" : "Analyse your health in seconds"}
                 </h2>
                 <p className="text-sm md:text-base text-muted-foreground mb-6 leading-relaxed">
@@ -189,12 +176,8 @@ export default function AnalyzeHealthSection() {
         {/* 3D holographic body — drag to rotate when idle, scans during analysis */}
         <div className="mt-6 flex justify-center">
           <div
-            className="relative rounded-2xl border w-full overflow-hidden"
-            style={{
-              borderColor: `${accent}30`,
-              background: `radial-gradient(ellipse at center bottom, ${accent}14 0%, transparent 70%)`,
-              height: 480,
-            }}
+            className="relative rounded-[14px] border border-border w-full overflow-hidden bg-secondary/40"
+            style={{ height: 480 }}
           >
             <BodyModel3D
               scanState={scanState}

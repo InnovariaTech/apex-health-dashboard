@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · Apex Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; }
+
+  :root {
+    --bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-2: #EAEAE7;
+    --surface-3: #1A1A1A;
+    --ink: #1A1A1A;
+    --ink-2: #525252;
+    --ink-3: #8A8A8A;
+    --ink-4: #B5B5B5;
+    --ink-inv: #E8E8E6;
+    --line: rgba(26, 26, 26, 0.09);
+    --line-2: rgba(26, 26, 26, 0.16);
+    --line-inv: rgba(232, 232, 230, 0.14);
+    --accent: #9B1C2E;
+    --accent-soft: #F5E4E7;
+    --opt: #2E7D5A;
+    --opt-soft: rgba(46, 125, 90, 0.12);
+    --bord: #B8761C;
+    --bord-soft: rgba(184, 118, 28, 0.12);
+    --att: #B23A3A;
+    --att-soft: rgba(178, 58, 58, 0.12);
+    --info: #1E5A8C;
+    --info-soft: rgba(30, 90, 140, 0.10);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow-card: 0 1px 0 rgba(26,26,26,0.04);
+    --font-sans: 'Saira', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-serif: 'Saira', -apple-system, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Sidebar (shared) ---------- */
+  .sidebar {
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; }
+  .brand-mark {
+    width: 30px; height: 30px; background: var(--ink); color: var(--bg);
+    border-radius: 7px; display: grid; place-items: center;
+    font-family: var(--font-serif); font-weight: 500; font-size: 16px; font-style: italic;
+  }
+  .brand-name { font-family: var(--font-serif); font-weight: 500; font-size: 19px; letter-spacing: -0.01em; }
+  .brand-name em { font-style: italic; color: var(--accent); }
+  .nav-section { margin-bottom: 18px; }
+  .nav-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-3); padding: 8px 12px; font-weight: 500;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 12px; border-radius: 8px;
+    color: var(--ink-2); text-decoration: none;
+    font-size: 13.5px; cursor: pointer;
+    transition: background 120ms, color 120ms;
+  }
+  .nav-item i { font-size: 16px; color: var(--ink-3); }
+  .nav-item:hover { background: rgba(26,26,26,0.04); color: var(--ink); }
+  .nav-item.active { background: var(--ink); color: var(--bg); }
+  .nav-item.active i { color: var(--bg); }
+  .sidebar-foot {
+    margin-top: auto; padding: 14px 12px;
+    border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 500;
+  }
+  .user-name { font-size: 13px; font-weight: 500; line-height: 1.2; }
+  .user-plan { font-size: 11px; color: var(--ink-3); }
+
+  /* ---------- Main ---------- */
+  main { min-width: 0; padding: 28px 36px 48px; }
+
+  .topbar { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .breadcrumb { font-size: 12px; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
+  .breadcrumb i { font-size: 12px; }
+  .topbar-spacer { flex: 1; }
+  .search-wrap { position: relative; width: 260px; }
+  .search-wrap input {
+    width: 100%; height: 34px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); font: inherit; font-size: 13px;
+    color: var(--ink); outline: none; transition: border-color 120ms;
+  }
+  .search-wrap input::placeholder { color: var(--ink-3); }
+  .search-wrap input:focus { border-color: var(--ink-2); }
+  .search-wrap i {
+    position: absolute; left: 10px; top: 50%;
+    transform: translateY(-50%); font-size: 15px; color: var(--ink-3);
+  }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface);
+    display: grid; place-items: center; cursor: pointer;
+    color: var(--ink-2); transition: background 120ms;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn i { font-size: 16px; }
+
+  /* ---------- Page head: greeting + status strip ---------- */
+  .greet-block { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .greet-row { display: flex; align-items: flex-end; justify-content: space-between; }
+  .greet-title {
+    font-family: var(--font-serif); font-weight: 500;
+    font-size: 44px; line-height: 1; letter-spacing: -0.035em;
+    margin: 0 0 10px;
+  }
+  .greet-title em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .greet-sub {
+    font-size: 13px; color: var(--ink-2);
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-mono);
+  }
+  .greet-sub .sep { width: 3px; height: 3px; background: var(--ink-4); border-radius: 50%; }
+
+  /* Device sync strip */
+  .sync-strip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 100px;
+    font-size: 12px; color: var(--ink-2);
+    font-family: var(--font-mono);
+  }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--opt); position: relative; flex-shrink: 0;
+  }
+  .pulse-dot::before {
+    content: ''; position: absolute; inset: -4px;
+    border-radius: 50%; background: var(--opt);
+    opacity: 0.4; animation: pulse 1.8s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.6); opacity: 0.55; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  .device-icons { display: flex; gap: 6px; padding-left: 8px; border-left: 1px solid var(--line); }
+  .device-icons i { font-size: 14px; color: var(--ink-3); }
+
+  /* ---------- Live vitals grid (5 tiles) ---------- */
+  .vitals-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 12px; margin-bottom: 22px;
+  }
+  .vital {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 16px 18px;
+    box-shadow: var(--shadow-card); position: relative; overflow: hidden;
+  }
+  .vital.dark { background: var(--surface-3); color: var(--ink-inv); border-color: rgba(255,255,255,0.06); }
+  .vital-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .vital-source {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-3); font-weight: 500;
+  }
+  .vital.dark .vital-source { color: var(--ink-4); }
+  .vital-source i { font-size: 11px; }
+  .vital-sync {
+    font-size: 9.5px; color: var(--ink-3); font-family: var(--font-mono);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .vital.dark .vital-sync { color: var(--ink-4); }
+  .vital-live-tag {
+    background: rgba(46, 125, 90, 0.18); color: var(--opt);
+    padding: 2px 7px; border-radius: 100px;
+    font-size: 9px; font-weight: 500; letter-spacing: 0.08em;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .vital.dark .vital-live-tag { color: #4FCB91; background: rgba(79, 203, 145, 0.15); }
+  .vital-live-tag .live-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor; animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .vital-val {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 32px; font-weight: 500; line-height: 1;
+    letter-spacing: -0.035em; margin-bottom: 4px;
+  }
+  .vital-val .unit { font-family: var(--font-sans); font-size: 12px; color: var(--ink-3); margin-left: 3px; font-weight: 400; }
+  .vital.dark .vital-val .unit { color: var(--ink-4); }
+  .vital-label {
+    font-size: 12px; color: var(--ink-2); margin-bottom: 12px;
+  }
+  .vital.dark .vital-label { color: var(--ink-4); }
+  .vital-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 6px;
+  }
+  .vital-delta {
+    font-size: 10.5px; color: var(--ink-2); font-family: var(--font-mono);
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .vital.dark .vital-delta { color: var(--ink-4); }
+  .vital-delta.good { color: var(--opt); }
+  .vital.dark .vital-delta.good { color: #4FCB91; }
+  .vital-delta.bad { color: var(--att); }
+  .vital-delta i { font-size: 11px; }
+  .vital-spark { display: block; }
+
+  /* Ring progress */
+  .vital-ring { position: relative; width: 56px; height: 56px; }
+  .vital-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .vital-ring .ring-text {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  }
+
+  /* ---------- Two-column grid ---------- */
+  .grid-2 {
+    display: grid; grid-template-columns: 1.7fr 1fr;
+    gap: 14px; margin-bottom: 14px;
+  }
+
+  /* Generic card */
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 20px 22px;
+    box-shadow: var(--shadow-card);
+  }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-family: var(--font-serif); font-weight: 500;
+    font-size: 20px; letter-spacing: -0.015em; margin: 0;
+  }
+  .card-sub {
+    font-size: 11px; color: var(--ink-3); font-family: var(--font-mono);
+  }
+  .card-meta-row {
+    display: flex; gap: 22px; margin: 0 0 16px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+  .card-meta-item .lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-3); font-weight: 500; margin-bottom: 4px;
+  }
+  .card-meta-item .val {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 18px; font-weight: 500;
+  }
+  .card-meta-item .val.opt { color: var(--opt); }
+  .card-meta-item .val .unit { font-family: var(--font-sans); font-size: 11px; color: var(--ink-3); margin-left: 2px; font-weight: 400; }
+
+  /* ---------- Treatment protocol ---------- */
+  .protocol-card { position: relative; }
+  .protocol-banner {
+    background: var(--surface-3); color: var(--ink-inv);
+    margin: -20px -22px 18px; padding: 16px 22px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .protocol-banner .icon-box {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--accent); color: var(--bg);
+    display: grid; place-items: center;
+  }
+  .protocol-banner .icon-box i { font-size: 18px; }
+  .protocol-banner .name { font-size: 14px; font-weight: 500; }
+  .protocol-banner .meta { font-size: 11px; color: var(--ink-4); font-family: var(--font-mono); }
+  .protocol-banner .week {
+    margin-left: auto; font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-4);
+  }
+  .protocol-banner .week strong { color: var(--ink-inv); font-weight: 500; }
+
+  .phase-track {
+    display: flex; gap: 4px; margin-bottom: 18px;
+  }
+  .phase {
+    flex: 1; height: 4px; background: var(--line-2);
+    border-radius: 2px; position: relative;
+  }
+  .phase.done { background: var(--ink); }
+  .phase.current { background: var(--ink); }
+  .phase.current::after {
+    content: ''; position: absolute; top: -3px; right: -1px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--bg);
+  }
+  .phase-labels {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--ink-3); font-family: var(--font-mono);
+    margin-bottom: 18px;
+  }
+
+  .dose-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .dose-cell {
+    background: var(--surface); padding: 12px 14px;
+    position: relative;
+  }
+  .dose-cell .lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-3); font-weight: 500; margin-bottom: 4px;
+  }
+  .dose-cell .val {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 16px; font-weight: 500;
+  }
+  .dose-cell .val .unit { font-family: var(--font-sans); font-size: 10px; color: var(--ink-3); margin-left: 2px; font-weight: 400; }
+  .dose-cell.current { background: var(--accent-soft); }
+  .dose-cell.current .lbl { color: var(--accent); }
+  .dose-cell.current .val { color: var(--accent); }
+
+  /* ---------- Body composition chart ---------- */
+  .bc-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 18px;
+  }
+  .bc-stat .lbl {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-3); font-weight: 500; margin-bottom: 6px;
+  }
+  .bc-stat .val-row {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .bc-stat .val {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 22px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .bc-stat .val .unit { font-family: var(--font-sans); font-size: 11px; color: var(--ink-3); margin-left: 1px; font-weight: 400; }
+  .bc-stat .delta {
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--opt);
+    display: inline-flex; align-items: center; gap: 2px;
+  }
+  .bc-stat .delta.bad { color: var(--att); }
+  .bc-stat .delta.neutral { color: var(--ink-3); }
+  .bc-stat .delta i { font-size: 11px; }
+
+  .chart-legend {
+    display: flex; gap: 14px; font-size: 11px;
+    color: var(--ink-2); margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .chart-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .chart-legend .swatch { width: 12px; height: 2px; border-radius: 1px; }
+
+  /* ---------- Activity heatmap ---------- */
+  .heatmap-wrap { display: flex; gap: 14px; align-items: flex-start; }
+  .heatmap {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 3px; flex: 1;
+  }
+  .hm-cell {
+    aspect-ratio: 1; border-radius: 2px;
+    background: var(--surface-2);
+    transition: transform 100ms;
+  }
+  .hm-cell:hover { transform: scale(1.4); cursor: pointer; }
+  .hm-cell.l1 { background: rgba(155, 28, 46, 0.18); }
+  .hm-cell.l2 { background: rgba(155, 28, 46, 0.38); }
+  .hm-cell.l3 { background: rgba(155, 28, 46, 0.62); }
+  .hm-cell.l4 { background: rgba(155, 28, 46, 0.88); }
+  .heatmap-legend {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--ink-3); font-family: var(--font-mono);
+    margin-top: 10px; justify-content: flex-end;
+  }
+  .heatmap-legend .scale {
+    display: flex; gap: 3px;
+  }
+  .heatmap-legend .scale-cell {
+    width: 11px; height: 11px; border-radius: 2px;
+  }
+
+  /* ---------- Right column cards ---------- */
+  .appt-card { position: relative; }
+  .appt-when {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    margin-bottom: 14px;
+  }
+  .appt-when .date { font-size: 24px; font-weight: 500; letter-spacing: -0.01em; }
+  .appt-when .time { font-size: 14px; color: var(--ink-2); }
+  .appt-person { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .appt-person .av {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface-2); color: var(--accent);
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 500;
+  }
+  .appt-person .name { font-size: 13.5px; font-weight: 500; }
+  .appt-person .role { font-size: 11px; color: var(--ink-3); }
+  .appt-type {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--ink-2);
+    padding: 4px 10px; background: var(--surface-2);
+    border-radius: 100px; margin-bottom: 16px;
+  }
+  .btn-block {
+    display: flex; gap: 8px;
+  }
+  .btn {
+    padding: 8px 14px; border-radius: 8px;
+    border: 1px solid var(--line-2); background: var(--surface);
+    cursor: pointer; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: background 120ms, border-color 120ms;
+    color: var(--ink);
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn i { font-size: 15px; }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); flex: 1; justify-content: center; }
+  .btn.primary:hover { background: #2a2924; }
+  .btn.full { flex: 1; justify-content: center; }
+
+  /* Rx list */
+  .rx-list { display: flex; flex-direction: column; gap: 12px; }
+  .rx-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px dashed var(--line);
+  }
+  .rx-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .rx-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface-2); display: grid; place-items: center;
+    color: var(--ink-2); flex-shrink: 0;
+  }
+  .rx-icon i { font-size: 15px; }
+  .rx-body { flex: 1; min-width: 0; }
+  .rx-name { font-size: 13px; font-weight: 500; line-height: 1.2; margin-bottom: 2px; }
+  .rx-meta {
+    font-size: 11px; color: var(--ink-3); font-family: var(--font-mono);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .rx-meta .sep { width: 2px; height: 2px; background: var(--ink-4); border-radius: 50%; }
+  .rx-status {
+    font-size: 10px; padding: 3px 8px; border-radius: 100px;
+    font-weight: 500; flex-shrink: 0; margin-top: 2px;
+  }
+  .rx-status.shipped { background: var(--opt-soft); color: var(--opt); }
+  .rx-status.scheduled { background: var(--info-soft); color: var(--info); }
+  .rx-status.active { background: var(--surface-2); color: var(--ink-2); }
+
+  /* Care team */
+  .care-row { display: flex; gap: 10px; }
+  .care-member {
+    flex: 1; text-align: center;
+    padding: 10px 6px;
+    border-radius: 8px;
+    transition: background 120ms;
+    cursor: pointer;
+  }
+  .care-member:hover { background: var(--surface-2); }
+  .care-av {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface-2); margin: 0 auto 6px;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 500; color: var(--accent);
+  }
+  .care-av.online { position: relative; }
+  .care-av.online::after {
+    content: ''; position: absolute; bottom: 1px; right: 1px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--opt); border: 2px solid var(--surface);
+  }
+  .care-name { font-size: 11px; font-weight: 500; line-height: 1.2; }
+  .care-role { font-size: 10px; color: var(--ink-3); }
+
+  /* Quick actions */
+  .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .qa-btn {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px;
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 6px; cursor: pointer; transition: border-color 120ms, background 120ms;
+    text-align: left;
+  }
+  .qa-btn:hover { border-color: var(--line-2); background: var(--surface-2); }
+  .qa-btn i { font-size: 18px; color: var(--accent); }
+  .qa-btn .label { font-size: 12px; font-weight: 500; line-height: 1.2; }
+
+  /* Lab strip cross-link */
+  .lab-strip-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 8px 4px 14px;
+  }
+  .lab-strip-title {
+    font-family: var(--font-serif); font-weight: 500;
+    font-size: 22px; letter-spacing: -0.015em; margin: 0;
+  }
+  .lab-strip-action {
+    font-size: 12px; color: var(--accent);
+    background: none; border: none; padding: 0; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .lab-strip-action:hover { text-decoration: underline; }
+  .lab-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .lab-mini {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 14px 16px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer; transition: border-color 120ms;
+  }
+  .lab-mini:hover { border-color: var(--line-2); }
+  .lab-mini-h {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .lab-mini-name { font-size: 11px; font-weight: 500; color: var(--ink-2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot.opt { background: var(--opt); }
+  .dot.bord { background: var(--bord); }
+  .dot.att { background: var(--att); }
+  .lab-mini-val {
+    display: flex; align-items: baseline; gap: 3px;
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  }
+  .lab-mini-val .v { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .lab-mini-val .u { font-size: 10px; color: var(--ink-3); }
+
+  /* Status bar / footer */
+  .status-bar {
+    margin-top: 26px;
+    background: var(--surface-3); color: var(--ink-inv);
+    border-radius: var(--radius-lg);
+    padding: 10px 18px;
+    display: flex; align-items: center; gap: 18px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .status-bar .section { display: flex; align-items: center; gap: 6px; color: var(--ink-4); }
+  .status-bar .section strong { color: var(--ink-inv); font-weight: 500; }
+  .status-bar .section i { font-size: 12px; color: var(--ink-4); }
+  .status-bar .spacer { flex: 1; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .vitals-grid { grid-template-columns: repeat(3, 1fr); }
+    .vitals-grid .vital:nth-child(4), .vitals-grid .vital:nth-child(5) { grid-column: span 1; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .lab-grid { grid-template-columns: repeat(2, 1fr); }
+    .bc-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 1024px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .sync-strip { display: none; }
+  }
+  @media (max-width: 700px) {
+    main { padding: 18px; }
+    .vitals-grid { grid-template-columns: 1fr 1fr; }
+    .greet-title { font-size: 32px; }
+    .dose-row { grid-template-columns: 1fr 1fr; }
+    .lab-grid { grid-template-columns: 1fr; }
+    .qa-grid { grid-template-columns: 1fr; }
+    .status-bar { flex-wrap: wrap; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<h1 class="sr-only">Apex Health member dashboard</h1>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-name">Apex<em>MD</em></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Health</div>
+      <a class="nav-item active"><i class="ti ti-layout-dashboard"></i> Overview</a>
+      <a class="nav-item"><i class="ti ti-test-pipe"></i> Biomarkers</a>
+      <a class="nav-item"><i class="ti ti-dna"></i> Genomics</a>
+      <a class="nav-item"><i class="ti ti-body-scan"></i> Body composition</a>
+      <a class="nav-item"><i class="ti ti-heartbeat"></i> Cardiovascular</a>
+      <a class="nav-item"><i class="ti ti-moon-stars"></i> Sleep</a>
+      <a class="nav-item"><i class="ti ti-run"></i> Activity</a>
+      <a class="nav-item"><i class="ti ti-apple"></i> Nutrition</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Account</div>
+      <a class="nav-item"><i class="ti ti-stethoscope"></i> Care team</a>
+      <a class="nav-item"><i class="ti ti-file-text"></i> Reports</a>
+      <a class="nav-item"><i class="ti ti-message"></i> Messages</a>
+    </div>
+    <div class="sidebar-foot">
+      <div class="avatar">AC</div>
+      <div>
+        <div class="user-name">Alex Chen</div>
+        <div class="user-plan">Apex Longevity · Active</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span>Health</span>
+        <i class="ti ti-chevron-right"></i>
+        <span style="color: var(--ink);">Dashboard</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search records, protocols, providers..." />
+      </div>
+      <button class="icon-btn" aria-label="Notifications"><i class="ti ti-bell"></i></button>
+      <button class="icon-btn" aria-label="Settings"><i class="ti ti-settings"></i></button>
+    </div>
+
+    <div class="greet-block">
+      <div class="greet-row">
+        <div>
+          <h2 class="greet-title">Good morning, <em>Alex</em></h2>
+          <div class="greet-sub">
+            <span id="liveClock">Mon May 11, 2026 · 08:42 PDT</span>
+            <span class="sep"></span>
+            <span>Day 98 of your Apex Longevity protocol</span>
+          </div>
+        </div>
+        <div class="sync-strip">
+          <span class="pulse-dot"></span>
+          <span><strong style="color: var(--ink); font-weight: 500;">4 devices synced</strong> · last 30s</span>
+          <div class="device-icons">
+            <i class="ti ti-circle-dot" title="Oura Ring"></i>
+            <i class="ti ti-bed" title="Eight Sleep"></i>
+            <i class="ti ti-scale" title="Withings Scale"></i>
+            <i class="ti ti-droplet" title="Dexcom CGM"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live vitals strip -->
+    <div class="vitals-grid">
+
+      <div class="vital">
+        <div class="vital-head">
+          <div class="vital-source"><i class="ti ti-circle-dot"></i> Oura</div>
+          <div class="vital-sync">2m ago</div>
+        </div>
+        <div class="vital-val">54<span class="unit">bpm</span></div>
+        <div class="vital-label">Resting heart rate</div>
+        <div class="vital-foot">
+          <span class="vital-delta good"><i class="ti ti-arrow-down"></i>14 vs Jan</span>
+          <svg class="vital-spark" viewBox="0 0 70 22" width="70" height="22">
+            <polyline points="0,8 12,7 24,9 36,12 48,11 60,14 70,16" fill="none" stroke="var(--opt)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="16" r="2.5" fill="var(--opt)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vital">
+        <div class="vital-head">
+          <div class="vital-source"><i class="ti ti-activity"></i> Oura</div>
+          <div class="vital-sync">overnight</div>
+        </div>
+        <div class="vital-val">68<span class="unit">ms</span></div>
+        <div class="vital-label">Heart rate variability</div>
+        <div class="vital-foot">
+          <span class="vital-delta good"><i class="ti ti-arrow-up"></i>4 vs avg</span>
+          <svg class="vital-spark" viewBox="0 0 70 22" width="70" height="22">
+            <polyline points="0,14 12,13 24,10 36,12 48,8 60,10 70,7" fill="none" stroke="var(--opt)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="7" r="2.5" fill="var(--opt)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vital">
+        <div class="vital-head">
+          <div class="vital-source"><i class="ti ti-moon"></i> Eight Sleep</div>
+          <div class="vital-sync">06:48</div>
+        </div>
+        <div class="vital-val">86<span class="unit">/100</span></div>
+        <div class="vital-label">Sleep score · 7h 42m</div>
+        <div class="vital-foot">
+          <span class="vital-delta good"><i class="ti ti-arrow-up"></i>Excellent</span>
+          <svg class="vital-spark" viewBox="0 0 70 22" width="70" height="22">
+            <polyline points="0,12 12,14 24,9 36,11 48,6 60,8 70,5" fill="none" stroke="var(--opt)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="5" r="2.5" fill="var(--opt)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="vital">
+        <div class="vital-head">
+          <div class="vital-source"><i class="ti ti-walk"></i> Apple Health</div>
+          <div class="vital-sync">live</div>
+        </div>
+        <div class="vital-val">8,247<span class="unit">/ 10k</span></div>
+        <div class="vital-label">Steps today</div>
+        <div class="vital-foot">
+          <span class="vital-delta"><i class="ti ti-clock"></i>82% to goal</span>
+          <div class="vital-ring">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--surface-2)" stroke-width="4"/>
+              <circle cx="20" cy="20" r="16" fill="none" stroke="var(--accent)" stroke-width="4"
+                stroke-dasharray="100.5" stroke-dashoffset="18" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-text">82%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vital dark">
+        <div class="vital-head">
+          <div class="vital-source"><i class="ti ti-droplet"></i> Dexcom G7</div>
+          <span class="vital-live-tag"><span class="live-dot"></span> LIVE</span>
+        </div>
+        <div class="vital-val">92<span class="unit">mg/dL</span></div>
+        <div class="vital-label">Glucose · 14d avg 98</div>
+        <div class="vital-foot">
+          <span class="vital-delta good">In range 87%</span>
+          <svg class="vital-spark" viewBox="0 0 70 22" width="70" height="22">
+            <polyline points="0,11 8,9 16,13 24,16 32,12 40,8 48,10 56,12 64,11 70,11" fill="none" stroke="#4FCB91" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="11" r="2.5" fill="#4FCB91"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main two-column area -->
+    <div class="grid-2">
+
+      <!-- LEFT COL -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+
+        <!-- Body composition trajectory -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Body composition</h3>
+            <div class="card-sub">Last 6 months · Withings scale</div>
+          </div>
+          <div class="bc-stats">
+            <div class="bc-stat">
+              <div class="lbl">Weight</div>
+              <div class="val-row">
+                <div class="val">174.6<span class="unit">lb</span></div>
+              </div>
+              <div class="delta"><i class="ti ti-arrow-down-right"></i>23.4 lb</div>
+            </div>
+            <div class="bc-stat">
+              <div class="lbl">Body fat</div>
+              <div class="val-row">
+                <div class="val">21.2<span class="unit">%</span></div>
+              </div>
+              <div class="delta"><i class="ti ti-arrow-down-right"></i>5.6 pts</div>
+            </div>
+            <div class="bc-stat">
+              <div class="lbl">Lean mass</div>
+              <div class="val-row">
+                <div class="val">137.8<span class="unit">lb</span></div>
+              </div>
+              <div class="delta neutral"><i class="ti ti-arrow-right"></i>+0.8 lb</div>
+            </div>
+            <div class="bc-stat">
+              <div class="lbl">Goal projection</div>
+              <div class="val-row">
+                <div class="val">168<span class="unit">lb</span></div>
+              </div>
+              <div class="delta neutral"><i class="ti ti-calendar"></i>Sep 2026</div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span class="lg"><span class="swatch" style="background: var(--ink);"></span> Weight (lb)</span>
+            <span class="lg"><span class="swatch" style="background: var(--accent);"></span> Body fat (%)</span>
+          </div>
+          <svg viewBox="0 0 600 220" style="width: 100%; height: auto; display: block;" preserveAspectRatio="xMidYMid meet">
+            <!-- Y grid -->
+            <line x1="40" y1="40" x2="590" y2="40" stroke="rgba(26,26,26,0.06)" stroke-width="0.5"/>
+            <line x1="40" y1="90" x2="590" y2="90" stroke="rgba(26,26,26,0.06)" stroke-width="0.5"/>
+            <line x1="40" y1="140" x2="590" y2="140" stroke="rgba(26,26,26,0.06)" stroke-width="0.5"/>
+            <line x1="40" y1="190" x2="590" y2="190" stroke="rgba(26,26,26,0.10)" stroke-width="0.5"/>
+
+            <!-- Y axis left (weight) -->
+            <text x="34" y="44" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">200</text>
+            <text x="34" y="94" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">185</text>
+            <text x="34" y="144" font-size="10" fill="#8A8A8A" font-family="JetBrains Mono, monospace" text-anchor="end">170</text>
+
+            <!-- Y axis right (body fat %) -->
+            <text x="596" y="44" font-size="10" fill="#9B1C2E" font-family="JetBrains Mono, monospace" text-anchor="start">28%</text>
+            <text x="596" y="94" font-size="10" fill="#9B1C2E" font-family="JetBrains Mono, monospace" text-anchor="start">24%</text>
+            <text x="596" y="144" font-size="10" fill="#9B1C2E" font-family="JetBrains Mono, monospace" text-anchor="start">20%</text>
+
+            <!-- Goal line -->
+            <line x1="40" y1="155" x2="590" y2="155" stroke="rgba(155,28,46,0.3)" stroke-width="0.75" stroke-dasharray="4 4"/>
+            <text x="586" y="151" font-size="9" fill="#9B1C2E" font-family="JetBrains Mono, monospace" text-anchor="end">Goal 168 lb</text>
+
+            <!-- Weight area -->
+            <path d="M 60,42 L 130,58 L 200,75 L 270,95 L 340,115 L 410,128 L 480,140 L 560,145 L 560,200 L 60,200 Z"
+              fill="rgba(26,26,26,0.04)"/>
+
+            <!-- Weight line -->
+            <polyline points="60,42 130,58 200,75 270,95 340,115 410,128 480,140 560,145"
+              fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Body fat line -->
+            <polyline points="60,48 130,62 200,82 270,98 340,118 410,128 480,134 560,138"
+              fill="none" stroke="#9B1C2E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0"/>
+
+            <!-- Points -->
+            <circle cx="60" cy="42" r="2.5" fill="#1A1A1A"/>
+            <circle cx="200" cy="75" r="2.5" fill="#1A1A1A"/>
+            <circle cx="340" cy="115" r="2.5" fill="#1A1A1A"/>
+            <circle cx="480" cy="140" r="2.5" fill="#1A1A1A"/>
+            <circle cx="560" cy="145" r="4.5" fill="#1A1A1A" stroke="#FFFFFF" stroke-width="2"/>
+
+            <circle cx="560" cy="138" r="3.5" fill="#9B1C2E" stroke="#FFFFFF" stroke-width="2"/>
+
+            <!-- Endpoint label -->
+            <text x="556" y="158" font-size="11" fill="#1A1A1A" font-family="JetBrains Mono, monospace" font-weight="500" text-anchor="end">174.6</text>
+
+            <!-- X labels -->
+            <text x="60" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Nov</text>
+            <text x="130" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Dec</text>
+            <text x="200" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Jan</text>
+            <text x="270" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Feb</text>
+            <text x="340" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Mar</text>
+            <text x="410" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">Apr</text>
+            <text x="480" y="212" font-size="10" fill="#8A8A8A" font-family="Saira, sans-serif" text-anchor="middle">May</text>
+          </svg>
+        </div>
+
+        <!-- Treatment protocol -->
+        <div class="card protocol-card">
+          <div class="protocol-banner">
+            <div class="icon-box"><i class="ti ti-flask"></i></div>
+            <div>
+              <div class="name">GLP-1 optimization protocol</div>
+              <div class="meta">Semaglutide · Custom titrated · Tier 2</div>
+            </div>
+            <div class="week">Week <strong>14</strong> of 26</div>
+          </div>
+
+          <div class="phase-track">
+            <div class="phase done"></div>
+            <div class="phase done"></div>
+            <div class="phase current"></div>
+            <div class="phase"></div>
+            <div class="phase"></div>
+          </div>
+          <div class="phase-labels">
+            <span>Init</span>
+            <span>Titration</span>
+            <span>Maintenance</span>
+            <span>Plateau</span>
+            <span>Taper</span>
+          </div>
+
+          <div class="dose-row">
+            <div class="dose-cell">
+              <div class="lbl">Wk 1–4</div>
+              <div class="val">0.25<span class="unit">mg</span></div>
+            </div>
+            <div class="dose-cell">
+              <div class="lbl">Wk 5–12</div>
+              <div class="val">1.0<span class="unit">mg</span></div>
+            </div>
+            <div class="dose-cell current">
+              <div class="lbl">Current</div>
+              <div class="val">2.4<span class="unit">mg</span></div>
+            </div>
+            <div class="dose-cell">
+              <div class="lbl">Wk 20+</div>
+              <div class="val">2.4<span class="unit">mg</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity heatmap -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Movement</h3>
+            <div class="card-sub">Last 91 days · 327 active min this week</div>
+          </div>
+          <div class="heatmap-wrap">
+            <div class="heatmap" id="heatmap"></div>
+          </div>
+          <div class="heatmap-legend">
+            <span>13 weeks ago</span>
+            <div class="scale">
+              <div class="scale-cell" style="background: var(--surface-2);"></div>
+              <div class="scale-cell l1"></div>
+              <div class="scale-cell l2"></div>
+              <div class="scale-cell l3"></div>
+              <div class="scale-cell l4"></div>
+            </div>
+            <span>Today</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COL -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+
+        <!-- Next appointment -->
+        <div class="card appt-card">
+          <div class="card-head">
+            <h3 class="card-title">Next visit</h3>
+            <div class="card-sub">in 5 days</div>
+          </div>
+          <div class="appt-when">
+            <span class="date">Sat May 16</span>
+            <span class="time">10:30 PDT</span>
+          </div>
+          <div class="appt-person">
+            <div class="av">MP</div>
+            <div>
+              <div class="name">Dr. Maya Patel, MD</div>
+              <div class="role">Concierge physician · Apex</div>
+            </div>
+          </div>
+          <div class="appt-type">
+            <i class="ti ti-video" style="font-size: 13px;"></i>
+            Telehealth · Quarterly checkpoint
+          </div>
+          <div class="btn-block">
+            <button class="btn primary"><i class="ti ti-video"></i> Join visit</button>
+            <button class="btn"><i class="ti ti-calendar"></i></button>
+          </div>
+        </div>
+
+        <!-- Active prescriptions -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Prescriptions</h3>
+            <div class="card-sub">4 active</div>
+          </div>
+          <div class="rx-list">
+            <div class="rx-row">
+              <div class="rx-icon"><i class="ti ti-injection"></i></div>
+              <div class="rx-body">
+                <div class="rx-name">Semaglutide 2.4 mg</div>
+                <div class="rx-meta">Weekly SC · 4-wk supply<span class="sep"></span>Ships May 18</div>
+              </div>
+              <div class="rx-status scheduled">Scheduled</div>
+            </div>
+            <div class="rx-row">
+              <div class="rx-icon"><i class="ti ti-pill"></i></div>
+              <div class="rx-body">
+                <div class="rx-name">Rosuvastatin 5 mg</div>
+                <div class="rx-meta">Nightly PO · 90-day supply<span class="sep"></span>Delivered May 2</div>
+              </div>
+              <div class="rx-status shipped">Delivered</div>
+            </div>
+            <div class="rx-row">
+              <div class="rx-icon"><i class="ti ti-capsule"></i></div>
+              <div class="rx-body">
+                <div class="rx-name">Vitamin D3 + K2</div>
+                <div class="rx-meta">4000 IU / 100 mcg daily<span class="sep"></span>30 days left</div>
+              </div>
+              <div class="rx-status active">Active</div>
+            </div>
+            <div class="rx-row">
+              <div class="rx-icon"><i class="ti ti-capsule"></i></div>
+              <div class="rx-body">
+                <div class="rx-name">Methylated B-complex</div>
+                <div class="rx-meta">1 cap daily<span class="sep"></span>22 days left</div>
+              </div>
+              <div class="rx-status active">Active</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Care team -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Care team</h3>
+            <div class="card-sub">3 online</div>
+          </div>
+          <div class="care-row">
+            <div class="care-member">
+              <div class="care-av online">MP</div>
+              <div class="care-name">Dr. Patel</div>
+              <div class="care-role">MD</div>
+            </div>
+            <div class="care-member">
+              <div class="care-av online">JK</div>
+              <div class="care-name">Jess Kim</div>
+              <div class="care-role">Coach</div>
+            </div>
+            <div class="care-member">
+              <div class="care-av online">SR</div>
+              <div class="care-name">Sara Reyes</div>
+              <div class="care-role">RN</div>
+            </div>
+            <div class="care-member">
+              <div class="care-av">JB</div>
+              <div class="care-name">Dr. Bowen</div>
+              <div class="care-role">Director</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">Quick actions</h3>
+          </div>
+          <div class="qa-grid">
+            <button class="qa-btn">
+              <i class="ti ti-message-2"></i>
+              <span class="label">Message Dr. Patel</span>
+            </button>
+            <button class="qa-btn">
+              <i class="ti ti-calendar-plus"></i>
+              <span class="label">Book a visit</span>
+            </button>
+            <button class="qa-btn">
+              <i class="ti ti-refresh"></i>
+              <span class="label">Request refill</span>
+            </button>
+            <button class="qa-btn">
+              <i class="ti ti-file-upload"></i>
+              <span class="label">Upload lab</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Biomarkers cross-link strip -->
+    <div class="lab-strip-head">
+      <h2 class="lab-strip-title">Recent biomarkers</h2>
+      <button class="lab-strip-action">Open biomarkers panel <i class="ti ti-arrow-right" style="font-size: 12px;"></i></button>
+    </div>
+    <div class="lab-grid">
+      <div class="lab-mini">
+        <div class="lab-mini-h">
+          <div class="lab-mini-name">ApoB</div>
+          <span class="dot opt"></span>
+        </div>
+        <div class="lab-mini-val"><span class="v">78</span><span class="u">mg/dL</span></div>
+      </div>
+      <div class="lab-mini">
+        <div class="lab-mini-h">
+          <div class="lab-mini-name">HbA1c</div>
+          <span class="dot opt"></span>
+        </div>
+        <div class="lab-mini-val"><span class="v">5.2</span><span class="u">%</span></div>
+      </div>
+      <div class="lab-mini">
+        <div class="lab-mini-h">
+          <div class="lab-mini-name">hs-CRP</div>
+          <span class="dot opt"></span>
+        </div>
+        <div class="lab-mini-val"><span class="v">0.6</span><span class="u">mg/L</span></div>
+      </div>
+      <div class="lab-mini">
+        <div class="lab-mini-h">
+          <div class="lab-mini-name">ALT</div>
+          <span class="dot att"></span>
+        </div>
+        <div class="lab-mini-val"><span class="v">42</span><span class="u">U/L</span></div>
+      </div>
+    </div>
+
+    <!-- Status bar / footer -->
+    <div class="status-bar">
+      <div class="section"><i class="ti ti-shield-check"></i> <strong>End-to-end encrypted</strong></div>
+      <div class="section"><i class="ti ti-clock"></i> uptime <strong>99.98%</strong></div>
+      <div class="section">data refresh <strong id="refreshTime">live</strong></div>
+      <div class="spacer"></div>
+      <div class="section">build <strong>v4.7.2</strong></div>
+      <div class="section">node <strong>us-west-2</strong></div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const d = days[now.getDay()];
+    const mo = months[now.getMonth()];
+    const date = now.getDate();
+    const yr = now.getFullYear();
+    const hr = String(now.getHours()).padStart(2, '0');
+    const mn = String(now.getMinutes()).padStart(2, '0');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop().replace('_',' ');
+    const clockEl = document.getElementById('liveClock');
+    if (clockEl) clockEl.textContent = `${d} ${mo} ${date}, ${yr} · ${hr}:${mn}`;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // Refresh time counter
+  let refreshSec = 0;
+  setInterval(() => {
+    refreshSec += 1;
+    const el = document.getElementById('refreshTime');
+    if (el) el.textContent = refreshSec < 5 ? 'live' : `${refreshSec}s ago`;
+  }, 1000);
+
+  // Activity heatmap: 91 cells (13 weeks × 7 days)
+  // Levels 0-4, weighted to skew toward middle-high (active member)
+  function buildHeatmap() {
+    const hm = document.getElementById('heatmap');
+    if (!hm) return;
+    // Pre-generated activity pattern - more recent = more active (improving trend)
+    const data = [
+      0,1,1,2,0,1,1,
+      1,2,1,0,2,1,1,
+      0,2,2,1,2,2,1,
+      2,1,2,2,1,3,2,
+      1,2,2,3,2,2,1,
+      2,2,3,2,3,2,2,
+      2,3,2,3,2,3,3,
+      3,2,3,3,2,3,2,
+      2,3,3,4,3,2,3,
+      3,3,4,3,3,4,3,
+      4,3,3,4,3,4,3,
+      3,4,3,4,3,4,4,
+      3,4,4,3,4,4,4,
+    ];
+    hm.innerHTML = data.map(v => {
+      const cls = v === 0 ? '' : `l${v}`;
+      return `<div class="hm-cell ${cls}" title="Level ${v}"></div>`;
+    }).join('');
+  }
+  buildHeatmap();
+</script>
+
+</body>
+</html>

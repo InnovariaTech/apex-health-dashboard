@@ -43,10 +43,14 @@ function applyEnvironmentTokens(env) {
   const primaryFg = isLightColor(env.primaryColor) ? "0 0% 5%" : "0 0% 98%";
   // Foreground on background
   const fgHsl = textHsl;
-  // Muted backgrounds
-  const mutedBgHsl = light
-    ? hexToHsl(env.surfaceColor)
-    : hexToHsl(env.backgroundColor);
+  // Muted / secondary surface backgrounds.
+  // Prefer an explicit surface2Color (sits one step darker than the card),
+  // falling back to the legacy surface/background heuristic.
+  const mutedBgHsl = env.surface2Color
+    ? hexToHsl(env.surface2Color)
+    : light
+      ? hexToHsl(env.surfaceColor)
+      : hexToHsl(env.backgroundColor);
 
   root.style.setProperty("--background",             bgHsl);
   root.style.setProperty("--foreground",             fgHsl);

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { api } from "@/api/client";
 import { useDocuments } from "@/hooks/care-validate/useDocuments";
 import type { PatientDocumentItem } from "@/types/care-validate/document_types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,13 +16,13 @@ import { format } from "date-fns";
 import { useAiChatStore } from "@/stores/aiChatStore";
 
 const DOC_TYPES = [
-  { value: "lab_results", label: "Lab Results", icon: FlaskConical, color: "text-blue-500" },
-  { value: "dxa_scan", label: "DXA Scan", icon: Activity, color: "text-purple-500" },
-  { value: "inbody_report", label: "InBody Report", icon: Dumbbell, color: "text-green-500" },
-  { value: "imaging", label: "Imaging", icon: Activity, color: "text-orange-500" },
-  { value: "prescription", label: "Prescription", icon: Pill, color: "text-red-500" },
-  { value: "consultation_notes", label: "Consultation Notes", icon: Stethoscope, color: "text-teal-500" },
-  { value: "other", label: "Other", icon: File, color: "text-muted-foreground" },
+  { value: "lab_results", label: "Lab Results", icon: FlaskConical },
+  { value: "dxa_scan", label: "DXA Scan", icon: Activity },
+  { value: "inbody_report", label: "InBody Report", icon: Dumbbell },
+  { value: "imaging", label: "Imaging", icon: Activity },
+  { value: "prescription", label: "Prescription", icon: Pill },
+  { value: "consultation_notes", label: "Consultation Notes", icon: Stethoscope },
+  { value: "other", label: "Other", icon: File },
 ];
 
 function getDocMeta(type) {
@@ -119,159 +118,142 @@ export default function Documents() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto bg-background min-h-screen">
-      {/* Header */}
-      <div className="mb-8 pb-6 border-b-2 border-border">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary rounded-sm flex items-center justify-center">
-              <FolderOpen className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground">MY DOCUMENTS</h1>
-              <p className="text-muted-foreground font-semibold">Labs, scans, reports — AI-analyzed for insights</p>
-            </div>
-          </div>
-          {/* <Button
-            onClick={() => setShowUpload(true)}
-            className="bg-primary hover:bg-primary/80 text-primary-foreground font-bold"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            UPLOAD DOCUMENT
-          </Button> */}
+    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+      {/* Page head */}
+      <div className="mb-6 pb-5 border-b border-border flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div className="apex-eyebrow mb-1.5">Health Records</div>
+          <h1 className="apex-page-title">
+            My <em>documents</em>
+          </h1>
+          <p className="text-[13px] text-ink-2 mt-1.5">
+            Labs, scans, reports — AI-analyzed for insights
+          </p>
         </div>
+        {/* <Button onClick={() => setShowUpload(true)}>
+          <Upload className="w-4 h-4" /> Upload document
+        </Button> */}
       </div>
 
       {/* AI tip banner */}
-      <Card className="mb-6 border-2 border-primary/40 bg-primary/5">
-        <CardContent className="p-4 flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-medium text-foreground">
-            Upload your labs, DXA scans, or InBody reports and tap <strong>Analyze with AI</strong> to get personalized insights, flag abnormal values, and receive targeted recommendations from your Apex MD AI assistant.
-          </p>
-        </CardContent>
-      </Card>
+      <div
+        className="apex-card mb-6 p-4 flex items-start gap-3"
+        style={{ borderColor: "var(--apex-accent-soft)", background: "var(--apex-accent-soft)" }}
+      >
+        <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+        <p className="text-[13px] text-foreground leading-relaxed">
+          Upload your labs, DXA scans, or InBody reports and tap <strong className="font-semibold">Analyze with AI</strong> to get personalized insights, flag abnormal values, and receive targeted recommendations from your Apex MD AI assistant.
+        </p>
+      </div>
 
       {isError && (
-        <Card className="mb-6 border-2 border-destructive/30 bg-destructive/5">
-          <CardContent className="p-4">
-            <p className="text-sm font-medium text-foreground">
-              Unable to load documents right now. Please refresh and try again.
-            </p>
-          </CardContent>
-        </Card>
+        <div
+          className="apex-card mb-6 p-4 text-sm"
+          style={{ borderColor: "var(--att)", background: "var(--att-soft)", color: "var(--att)" }}
+        >
+          Unable to load documents right now. Please refresh and try again.
+        </div>
       )}
 
       {/* Filter */}
-      <div className="flex gap-2 flex-wrap mb-6">
-        <Button
-          size="sm"
-          variant="default"
-          className="font-bold bg-primary text-primary-foreground"
+      <div className="flex gap-1.5 flex-wrap mb-6">
+        <button
+          className="text-[13px] px-3.5 py-1.5 rounded-full border bg-foreground text-background border-foreground transition-colors"
         >
-          All ({documents.length})
-        </Button>
+          All <span className="font-mono text-[11px] opacity-60 ml-1">{documents.length}</span>
+        </button>
         {/* {DOC_TYPES.map((dt) => {
           const count = documents.filter((d) => d.document_type === dt.value).length;
           if (count === 0) return null;
           return (
-            <Button
+            <button
               key={dt.value}
-              size="sm"
-              variant={filterType === dt.value ? "default" : "outline"}
               onClick={() => setFilterType(dt.value)}
-              className={`font-bold ${filterType === dt.value ? "bg-primary text-primary-foreground" : "border-border"}`}
+              className={`text-[13px] px-3.5 py-1.5 rounded-full border transition-colors ${
+                filterType === dt.value
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-card text-ink-2 border-border hover:border-[var(--line-2)]"
+              }`}
             >
-              {dt.label} ({count})
-            </Button>
+              {dt.label} <span className="font-mono text-[11px] opacity-60 ml-1">{count}</span>
+            </button>
           );
         })} */}
       </div>
 
       {/* Document grid */}
       {filtered.length === 0 ? (
-        <Card className="border-2 border-border border-dashed">
-          <CardContent className="py-16 text-center">
-            <FolderOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-foreground mb-2">No documents yet</h3>
-            <p className="text-muted-foreground mb-4">Upload your lab results, scans, and reports to get started</p>
-            <Button onClick={() => setShowUpload(true)} className="bg-primary text-primary-foreground font-bold">
-              <Upload className="w-4 h-4 mr-2" /> Upload First Document
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="apex-card border-dashed py-16 text-center">
+          <FolderOpen className="w-16 h-16 text-ink-4 mx-auto mb-4" />
+          <h3 className="font-serif text-lg font-medium text-foreground mb-1">No documents yet</h3>
+          <p className="text-[13px] text-muted-foreground mb-4">
+            Upload your lab results, scans, and reports to get started
+          </p>
+          <Button onClick={() => setShowUpload(true)}>
+            <Upload className="w-4 h-4" /> Upload first document
+          </Button>
+        </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filtered.map((doc) => {
             const meta = getDocMeta(doc.document_type);
             const Icon = meta.icon;
             return (
-              <Card
+              <button
                 key={doc.id}
-                className="border-2 border-border hover:border-primary transition-all cursor-pointer"
                 onClick={() => setSelectedDoc(doc)}
+                className="apex-card text-left w-full px-5 py-[18px] transition-all duration-150 hover:-translate-y-px hover:border-[var(--line-2)] focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                      <Icon className={`w-5 h-5 ${meta.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="font-bold text-foreground text-sm truncate">{doc.file_name}</h3>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
-                          className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <Badge variant="outline" className="text-xs border-border">{meta.label}</Badge>
-                        {doc.document_date && (
-                          <Badge variant="outline" className="text-xs border-border">{doc.document_date}</Badge>
-                        )}
-                        {doc.provider && (
-                          <Badge variant="outline" className="text-xs border-border">{doc.provider}</Badge>
-                        )}
-                      </div>
-                      {doc.ai_summary ? (
-                        <p className="text-xs text-muted-foreground line-clamp-2">{doc.ai_summary.slice(0, 120)}…</p>
-                      ) : (
-                        <Button
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); handleAnalyze(doc); }}
-                          disabled={isAnalyzing === doc.id}
-                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground font-bold text-xs h-7 mt-1"
-                        >
-                          {isAnalyzing === doc.id ? (
-                            <><div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current mr-1" /> Analyzing…</>
-                          ) : (
-                            <><Sparkles className="w-3 h-3 mr-1" /> Analyze with AI</>
-                          )}
-                        </Button>
-                      )}
-                      {/* {doc.file_url && (
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-block mt-2"
-                        >
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-border font-bold text-xs h-7"
-                          >
-                            <FileText className="w-3 h-3 mr-1" /> View File
-                          </Button>
-                        </a>
-                      )} */}
-                    </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-[10px] bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-ink-2" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <h3 className="font-medium text-foreground text-[13.5px] leading-tight truncate">
+                        {doc.file_name}
+                      </h3>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); handleDelete(doc.id); } }}
+                        className="text-muted-foreground hover:text-primary transition-colors flex-shrink-0 cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <Badge variant="outline">{meta.label}</Badge>
+                      {doc.document_date && (
+                        <Badge variant="secondary" className="font-mono">{doc.document_date}</Badge>
+                      )}
+                      {doc.provider && (
+                        <Badge variant="outline">{doc.provider}</Badge>
+                      )}
+                    </div>
+                    {doc.ai_summary ? (
+                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                        {doc.ai_summary.slice(0, 120)}…
+                      </p>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => { e.stopPropagation(); handleAnalyze(doc); }}
+                        disabled={isAnalyzing === doc.id}
+                        className="h-7 mt-1"
+                      >
+                        {isAnalyzing === doc.id ? (
+                          <><div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" /> Analyzing…</>
+                        ) : (
+                          <><Sparkles className="w-3 h-3" /> Analyze with AI</>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </button>
             );
           })}
         </div>
@@ -281,13 +263,15 @@ export default function Documents() {
       <Dialog open={showUpload} onOpenChange={setShowUpload}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground">UPLOAD DOCUMENT</DialogTitle>
+            <DialogTitle className="font-serif text-2xl font-medium tracking-[-0.02em]">
+              Upload document
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-bold text-foreground uppercase mb-2 block">Document Type</label>
+              <label className="apex-eyebrow mb-2 block">Document Type</label>
               <Select value={uploadForm.document_type} onValueChange={(v) => setUploadForm({ ...uploadForm, document_type: v })}>
-                <SelectTrigger className="border-2 border-border">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -298,46 +282,45 @@ export default function Documents() {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-bold text-foreground uppercase mb-2 block">Document Date</label>
+              <label className="apex-eyebrow mb-2 block">Document Date</label>
               <input
                 type="date"
                 value={uploadForm.document_date}
                 onChange={(e) => setUploadForm({ ...uploadForm, document_date: e.target.value })}
-                className="w-full border-2 border-border rounded-md px-3 py-2 text-sm bg-background text-foreground"
+                className="w-full border border-border rounded-[10px] px-3 py-2 text-sm bg-background text-foreground font-mono"
               />
             </div>
             <div>
-              <label className="text-sm font-bold text-foreground uppercase mb-2 block">Provider / Lab Name</label>
+              <label className="apex-eyebrow mb-2 block">Provider / Lab Name</label>
               <input
                 type="text"
                 value={uploadForm.provider}
                 onChange={(e) => setUploadForm({ ...uploadForm, provider: e.target.value })}
                 placeholder="e.g., LabCorp, Quest, Apex MD"
-                className="w-full border-2 border-border rounded-md px-3 py-2 text-sm bg-background text-foreground placeholder:text-muted-foreground"
+                className="w-full border border-border rounded-[10px] px-3 py-2 text-sm bg-background text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div>
-              <label className="text-sm font-bold text-foreground uppercase mb-2 block">Notes (optional)</label>
+              <label className="apex-eyebrow mb-2 block">Notes (optional)</label>
               <Textarea
                 value={uploadForm.notes}
                 onChange={(e) => setUploadForm({ ...uploadForm, notes: e.target.value })}
                 placeholder="Any context about this document..."
-                className="border-2 border-border"
                 rows={2}
               />
             </div>
             <label className="cursor-pointer block">
               <input type="file" accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx" onChange={handleFileUpload} className="hidden" />
-              <div className={`w-full border-2 border-dashed border-primary rounded-lg p-6 text-center transition-all ${isUploading ? "opacity-60" : "hover:bg-primary/5"}`}>
+              <div className={`w-full border border-dashed border-border rounded-[14px] p-6 text-center transition-all bg-surface-2 ${isUploading ? "opacity-60" : "hover:border-[var(--line-2)]"}`}>
                 {isUploading ? (
                   <div className="flex flex-col items-center gap-2">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                    <p className="text-sm font-semibold text-foreground">Uploading…</p>
+                    <p className="text-sm font-medium text-foreground">Uploading…</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 text-primary mx-auto mb-2" />
-                    <p className="font-bold text-foreground">Click to select file</p>
+                    <Upload className="w-8 h-8 text-ink-3 mx-auto mb-2" />
+                    <p className="font-medium text-foreground">Click to select file</p>
                     <p className="text-xs text-muted-foreground mt-1">PDF, PNG, JPG, CSV, XLSX</p>
                   </>
                 )}
@@ -357,12 +340,16 @@ export default function Documents() {
               <>
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                      <Icon className={`w-5 h-5 ${meta.color}`} />
+                    <div className="w-10 h-10 rounded-[10px] bg-secondary flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-ink-2" />
                     </div>
                     <div>
-                      <DialogTitle className="text-xl font-bold text-foreground">{selectedDoc.file_name}</DialogTitle>
-                      <p className="text-sm text-muted-foreground">{meta.label}{selectedDoc.provider ? ` · ${selectedDoc.provider}` : ""}{selectedDoc.document_date ? ` · ${selectedDoc.document_date}` : ""}</p>
+                      <DialogTitle className="font-serif text-xl font-medium tracking-[-0.02em]">
+                        {selectedDoc.file_name}
+                      </DialogTitle>
+                      <p className="text-[13px] text-muted-foreground">
+                        {meta.label}{selectedDoc.provider ? ` · ${selectedDoc.provider}` : ""}{selectedDoc.document_date ? ` · ${selectedDoc.document_date}` : ""}
+                      </p>
                     </div>
                   </div>
                 </DialogHeader>
@@ -370,15 +357,15 @@ export default function Documents() {
                 <div className="space-y-4 mt-2">
                   {selectedDoc.notes && (
                     <div>
-                      <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Notes</p>
-                      <p className="text-sm text-foreground">{selectedDoc.notes}</p>
+                      <p className="apex-eyebrow mb-1">Notes</p>
+                      <p className="text-sm text-foreground leading-relaxed">{selectedDoc.notes}</p>
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <a href={selectedDoc.file_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm" className="border-2 border-border font-bold">
-                        <FileText className="w-4 h-4 mr-2" /> View File
+                      <Button variant="outline" size="sm">
+                        <FileText className="w-4 h-4" /> View File
                       </Button>
                     </a>
                     {!selectedDoc.ai_summary && (
@@ -386,12 +373,11 @@ export default function Documents() {
                         size="sm"
                         onClick={() => handleAnalyze(selectedDoc)}
                         disabled={isAnalyzing === selectedDoc.id}
-                        className="bg-primary text-primary-foreground font-bold"
                       >
                         {isAnalyzing === selectedDoc.id ? (
-                          <><div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current mr-2" /> Analyzing…</>
+                          <><div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" /> Analyzing…</>
                         ) : (
-                          <><Sparkles className="w-4 h-4 mr-2" /> Analyze with AI</>
+                          <><Sparkles className="w-4 h-4" /> Analyze with AI</>
                         )}
                       </Button>
                     )}
@@ -401,34 +387,35 @@ export default function Documents() {
                         variant="outline"
                         onClick={() => handleAnalyze(selectedDoc)}
                         disabled={isAnalyzing === selectedDoc.id}
-                        className="border-2 border-border font-bold"
                       >
-                        <Sparkles className="w-4 h-4 mr-2" /> Re-analyze
+                        <Sparkles className="w-4 h-4" /> Re-analyze
                       </Button>
                     )}
                   </div>
 
                   {isAnalyzing === selectedDoc.id && (
-                    <Card className="border-2 border-primary/30 bg-primary/5">
-                      <CardContent className="p-4 text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
-                        <p className="text-sm font-semibold text-foreground">AI is reading your document…</p>
-                        <p className="text-xs text-muted-foreground mt-1">This may take 15–30 seconds</p>
-                      </CardContent>
-                    </Card>
+                    <div
+                      className="apex-card p-4 text-center"
+                      style={{ borderColor: "var(--apex-accent-soft)", background: "var(--apex-accent-soft)" }}
+                    >
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
+                      <p className="text-sm font-medium text-foreground">AI is reading your document…</p>
+                      <p className="text-xs text-muted-foreground mt-1">This may take 15–30 seconds</p>
+                    </div>
                   )}
 
                   {selectedDoc.ai_summary && (
-                    <Card className="border-2 border-primary/30 bg-primary/5">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-primary" /> AI Analysis
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{selectedDoc.ai_summary}</p>
-                      </CardContent>
-                    </Card>
+                    <div
+                      className="apex-card p-4"
+                      style={{ borderColor: "var(--apex-accent-soft)", background: "var(--apex-accent-soft)" }}
+                    >
+                      <p className="apex-card-title flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-primary" /> AI Analysis
+                      </p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                        {selectedDoc.ai_summary}
+                      </p>
+                    </div>
                   )}
                 </div>
               </>

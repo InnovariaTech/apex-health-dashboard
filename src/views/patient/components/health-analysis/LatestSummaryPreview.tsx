@@ -57,23 +57,20 @@ export default function LatestSummaryPreview() {
   }, [summaries.data?.items]);
 
   if (summaries.isLoading) {
-    return <Skeleton className="h-full min-h-[280px] rounded-xl" />;
+    return <Skeleton className="h-full min-h-[280px] rounded-[14px]" />;
   }
 
   if (!latest || !latest.summaryText) {
     return (
-      <Card
-        className="border-2 border-dashed shadow-none h-full"
-        style={{ borderColor: `${accent}40`, background: `${accent}06` }}
-      >
+      <Card className="border-dashed shadow-none h-full">
         <CardContent className="p-6 md:p-7 h-full flex flex-col items-center justify-center text-center">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center mb-3"
-            style={{ backgroundColor: `${accent}1a` }}
+            className="w-12 h-12 rounded-[12px] flex items-center justify-center mb-3"
+            style={{ backgroundColor: "var(--apex-accent-soft)" }}
           >
-            <Brain className="w-6 h-6" style={{ color: accent }} />
+            <Brain className="w-6 h-6" style={{ color: "var(--apex-accent)" }} />
           </div>
-          <h3 className="text-base font-bold text-foreground mb-1">No summary yet</h3>
+          <h3 className="font-serif text-lg font-medium text-foreground mb-1">No summary yet</h3>
           <p className="text-sm text-muted-foreground max-w-xs">
             Run your first AI health analysis to see your score and a preview of your summary here.
           </p>
@@ -92,37 +89,22 @@ export default function LatestSummaryPreview() {
       transition={{ duration: 0.4 }}
       className="h-full"
     >
-      <Card
-        className="border-2 shadow-md h-full"
-        style={{
-          borderColor: `${accent}30`,
-          background: `linear-gradient(135deg, ${accent}08 0%, transparent 70%)`,
-        }}
-      >
+      <Card className="h-full">
         <CardContent className="p-6 md:p-7">
           {/* Header badge */}
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 border"
-            style={{
-              borderColor: `${accent}66`,
-              color: accent,
-              backgroundColor: `${accent}14`,
-            }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            AI HEALTH ANALYSIS
+          <div className="apex-eyebrow flex items-center gap-1.5 mb-4">
+            <Sparkles className="w-3 h-3" style={{ color: "var(--apex-accent)" }} />
+            AI health analysis
           </div>
 
           {/* Score block */}
           {hasScore && (
             <>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                Your latest health score
-              </p>
+              <p className="apex-eyebrow mb-3">Your latest health score</p>
               <div className="flex items-center gap-5 mb-5">
                 <HealthScoreGauge score={latest.healthScore} size={140} strokeWidth={11} />
                 <div className="min-w-0">
-                  <h2 className="text-xl md:text-2xl font-bold text-foreground leading-tight mb-1">
+                  <h2 className="font-serif text-2xl font-medium text-foreground leading-tight mb-1 tracking-[-0.015em]">
                     Analysis ready
                   </h2>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -141,8 +123,8 @@ export default function LatestSummaryPreview() {
           <div className="border-t border-border pt-4 mb-4">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2">
-                <Brain className="w-4 h-4" style={{ color: accent }} />
-                <h3 className="text-sm font-bold text-foreground">Summary preview</h3>
+                <Brain className="w-4 h-4" style={{ color: "var(--apex-accent)" }} />
+                <h3 className="text-sm font-medium text-foreground">Summary preview</h3>
               </div>
               {!hasScore && (
                 <span className="text-xs text-muted-foreground">
@@ -157,11 +139,11 @@ export default function LatestSummaryPreview() {
 
           {/* Action */}
           <Button
+            variant="dark"
             onClick={() => navigate(createPageUrl("HealthAnalysis"))}
-            className="font-bold shadow-md"
           >
             View full analysis
-            <ArrowRight className="w-4 h-4 ml-2" />
+            <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </CardContent>
       </Card>

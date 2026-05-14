@@ -49,20 +49,18 @@ function ChatAttachmentCard({
   const canPreview = meta.isPreviewable && attachment.url;
 
   return (
-    <div className="flex items-center gap-3 border border-border rounded-lg p-2 bg-background max-w-md">
-      <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+    <div className="flex items-center gap-3 border border-border rounded-[10px] p-2 bg-card max-w-md">
+      <div className="w-9 h-9 rounded-md bg-secondary border border-border flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
         {meta.icon}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-foreground truncate">{attachment.fileName}</p>
+        <p className="text-[13px] font-medium text-foreground truncate">{attachment.fileName}</p>
         <div className="mt-1 flex items-center gap-2">
-          <span className="text-[10px] uppercase text-muted-foreground">{meta.extension || "file"}</span>
-          {attachment.isPHI && (
-            <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-700">
-              PHI
-            </Badge>
-          )}
+          <span className="text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+            {meta.extension || "file"}
+          </span>
+          {attachment.isPHI && <Badge variant="warning">PHI</Badge>}
         </div>
       </div>
 
@@ -72,10 +70,10 @@ function ChatAttachmentCard({
             type="button"
             size="sm"
             variant="outline"
-            className="h-7 px-2 text-xs"
+            className="h-7 px-2"
             onClick={() => onPreview(attachment)}
           >
-            <Eye className="w-3 h-3 mr-1" />
+            <Eye className="w-3 h-3" />
             View
           </Button>
         )}
@@ -84,10 +82,10 @@ function ChatAttachmentCard({
             type="button"
             size="sm"
             variant="outline"
-            className="h-7 px-2 text-xs"
+            className="h-7 px-2"
             onClick={() => downloadAttachment(attachment)}
           >
-            <Download className="w-3 h-3 mr-1" />
+            <Download className="w-3 h-3" />
             Download
           </Button>
         )}
@@ -109,33 +107,33 @@ function ChatMessage({
 
   const bubbleClass = isPatient
     ? "bg-primary text-primary-foreground"
-    : "bg-muted text-foreground";
+    : "bg-secondary text-foreground border border-border";
   const alignmentClass = isPatient ? "items-end" : "items-start";
-  const roleColorClass =
+  const roleStyle =
     message.authorRole === "PROVIDER"
-      ? "text-emerald-700"
+      ? { color: "var(--opt)" }
       : message.authorRole === "CARE_TEAM"
-        ? "text-violet-700"
+        ? { color: "var(--info)" }
         : message.authorRole === "SUPPORT"
-          ? "text-muted-foreground"
-          : "text-primary";
+          ? { color: "var(--ink-3)" }
+          : { color: "var(--apex-accent)" };
 
   return (
     <div className={`flex flex-col ${alignmentClass} gap-1`}>
-      <div className="text-xs flex items-center gap-2">
-        <span className="font-semibold text-foreground">
+      <div className="text-[12px] flex items-center gap-2">
+        <span className="font-medium text-foreground">
           {isPatient ? "You" : message.authorName}
         </span>
         {!isPatient && (
-          <span className={`${roleColorClass}`}>({message.authorRoleLabel})</span>
+          <span style={roleStyle}>({message.authorRoleLabel})</span>
         )}
-        <span className="text-muted-foreground">
+        <span className="text-muted-foreground font-mono text-[11px]">
           {isOptimistic ? "Sending..." : formatChatTime(message.createdAt)}
         </span>
       </div>
 
-      <div className={`rounded-2xl px-4 py-2 max-w-[80%] ${bubbleClass} ${isOptimistic ? "opacity-70" : ""}`}>
-        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.text || "—"}</p>
+      <div className={`rounded-[14px] px-4 py-2 max-w-[80%] ${bubbleClass} ${isOptimistic ? "opacity-70" : ""}`}>
+        <p className="text-[13px] whitespace-pre-wrap leading-relaxed">{message.text || "—"}</p>
       </div>
 
       {message.attachments.length > 0 && (
@@ -366,22 +364,22 @@ export default function CaseChatPanel({ caseDetails, caseId }: CaseChatPanelProp
 
   return (
     <>
-      <Card className="border-2 border-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xl font-bold text-foreground">Case Messages</CardTitle>
-          <p className="text-xs text-muted-foreground">
-            {mergedMessages.length} {mergedMessages.length === 1 ? "message" : "messages"}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl">Case Messages</CardTitle>
+          <p className="text-[12px] text-muted-foreground">
+            <span className="font-mono">{mergedMessages.length}</span>{" "}
+            {mergedMessages.length === 1 ? "message" : "messages"}
           </p>
         </CardHeader>
 
         <CardContent className="p-0">
           {hasOlderMessages && (
-            <div className="border-b border-border px-4 py-2 bg-background flex justify-center">
+            <div className="border-t border-border px-4 py-2 bg-card flex justify-center">
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                className="text-xs"
                 onClick={handleLoadOlder}
                 disabled={isLoadingOlder}
               >
@@ -390,9 +388,12 @@ export default function CaseChatPanel({ caseDetails, caseId }: CaseChatPanelProp
             </div>
           )}
 
-          <div ref={scrollRef} className="max-h-[65vh] overflow-y-auto px-4 py-4 bg-muted/20 space-y-4">
+          <div
+            ref={scrollRef}
+            className="max-h-[65vh] overflow-y-auto px-4 py-4 bg-surface-2 border-t border-border space-y-4"
+          >
             {displayedMessages.length === 0 ? (
-              <div className="text-center py-10 text-sm text-muted-foreground">
+              <div className="text-center py-10 text-[13px] text-muted-foreground">
                 No messages yet.
               </div>
             ) : (
@@ -408,14 +409,14 @@ export default function CaseChatPanel({ caseDetails, caseId }: CaseChatPanelProp
 
           <form
             onSubmit={handleSend}
-            className="border-t border-border bg-background p-3 flex items-end gap-2"
+            className="border-t border-border bg-card p-3 flex items-end gap-2"
           >
             <Textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={handleComposerKeyDown}
               placeholder="Type your message... (Enter to send, Shift+Enter for newline)"
-              className="min-h-[44px] max-h-[120px] flex-1 resize-none text-sm"
+              className="min-h-[44px] max-h-[120px] flex-1 resize-none text-[13px]"
               disabled={createCommentMutation.isPending}
             />
             <Button
@@ -423,7 +424,7 @@ export default function CaseChatPanel({ caseDetails, caseId }: CaseChatPanelProp
               disabled={!draft.trim() || createCommentMutation.isPending}
               className="h-11"
             >
-              <Send className="w-4 h-4 mr-1" />
+              <Send className="w-4 h-4" />
               {createCommentMutation.isPending ? "Sending..." : "Send"}
             </Button>
           </form>

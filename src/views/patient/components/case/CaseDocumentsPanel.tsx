@@ -18,40 +18,38 @@ interface CaseDocumentsPanelProps {
 
 function getDocumentIcon(extension: string) {
   if (["png", "jpg", "jpeg", "gif", "webp"].includes(extension)) {
-    return <ImageIcon className="w-5 h-5 text-primary" />;
+    return <ImageIcon className="w-4 h-4 text-primary" />;
   }
 
   if (extension === "pdf") {
-    return <FileText className="w-5 h-5 text-primary" />;
+    return <FileText className="w-4 h-4 text-primary" />;
   }
 
-  return <Paperclip className="w-5 h-5 text-primary" />;
+  return <Paperclip className="w-4 h-4 text-primary" />;
 }
 
 function DocumentRow({ document }: { document: NormalizedDocumentItem }) {
   const content = (
-    <div className="flex items-start gap-3 p-3 rounded-md border border-border hover:bg-muted/40 transition-colors">
-      <div className="mt-0.5">{getDocumentIcon(document.extension)}</div>
+    <div className="flex items-start gap-3 p-3 rounded-[10px] border border-border bg-surface-2 hover:border-[var(--line-2)] transition-colors">
+      <div className="mt-0.5 w-8 h-8 rounded-md bg-card border border-border flex items-center justify-center shrink-0">
+        {getDocumentIcon(document.extension)}
+      </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-foreground truncate">{document.fileName}</p>
+        <p className="text-[13px] font-medium text-foreground truncate">
+          {document.fileName}
+        </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">{document.uploadedBy}</span>
-          <span className="text-xs text-muted-foreground">{formatDocumentDate(document.createdAt)}</span>
+          <span className="text-[12px] text-muted-foreground">
+            {document.uploadedBy}
+          </span>
+          <span className="text-[12px] font-mono text-muted-foreground">
+            {formatDocumentDate(document.createdAt)}
+          </span>
           {document.category && (
-            <Badge variant="secondary" className="text-[10px] font-semibold">
-              {document.category}
-            </Badge>
+            <Badge variant="secondary">{document.category}</Badge>
           )}
-          {document.isPHI && (
-            <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-700">
-              PHI
-            </Badge>
-          )}
-          {document.isRestricted && (
-            <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive">
-              Restricted
-            </Badge>
-          )}
+          {document.isPHI && <Badge variant="warning">PHI</Badge>}
+          {document.isRestricted && <Badge variant="danger">Restricted</Badge>}
         </div>
       </div>
     </div>
@@ -77,19 +75,21 @@ function DocumentSection({
   const visible = documents.slice(0, pageSize);
 
   return (
-    <Card className="border-2 border-border">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-bold text-foreground">{title}</CardTitle>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {documents.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No documents.</p>
+          <div className="py-10 text-center border border-dashed border-border rounded-[10px]">
+            <p className="text-[13px] text-muted-foreground">No documents.</p>
+          </div>
         ) : (
           <>
             {visible.map((document) => (
               <DocumentRow key={document.id} document={document} />
             ))}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] font-mono text-muted-foreground">
               1-{Math.min(pageSize, documents.length)} of {documents.length}
             </p>
           </>
@@ -111,7 +111,7 @@ export default function CaseDocumentsPanel({
     <div className="space-y-4">
       <DocumentSection title="Case Documents" documents={caseDocuments} />
       {/* {isUserDocumentsLoading ? (
-        <Card className="border-2 border-border">
+        <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Loading user documents...</p>
           </CardContent>
@@ -122,4 +122,3 @@ export default function CaseDocumentsPanel({
     </div>
   );
 }
-

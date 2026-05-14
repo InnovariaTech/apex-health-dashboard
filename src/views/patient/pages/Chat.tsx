@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Send, CheckCheck, Clock, Stethoscope } from "lucide-react";
+import { Send, CheckCheck, Clock, Stethoscope } from "lucide-react";
 import { format } from "date-fns";
 import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useSearchParams } from "react-router-dom";
@@ -193,177 +193,196 @@ export default function Chat() {
       ? `Case #${activeCase.shortId} - ${activeCase.title}`
       : "Message your care team for this case",
     icon: Stethoscope,
-    color: "#2563eb",
     placeholder: "Message your provider...",
     badge: "Medical",
-    badgeColor: "bg-blue-100 text-blue-700",
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-background text-foreground">
       {/* Header */}
-      <div className="border-b px-6 py-4 bg-card flex-shrink-0">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: environment.primaryColor }}>
-            <MessageSquare className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Care Team Messages</h1>
-            <p className="text-xs text-muted-foreground font-medium">Secure messaging with your medical team</p>
-          </div>
+      <div className="border-b border-border px-4 md:px-9 py-5 bg-background flex-shrink-0">
+        <div className="max-w-[1480px] mx-auto">
+          <div className="apex-eyebrow mb-1.5">Care Team</div>
+          <h1 className="apex-page-title">
+            Care team <em>messages</em>
+          </h1>
+          <p className="text-[13px] text-ink-2 mt-1.5">
+            Secure messaging with your medical team
+          </p>
         </div>
       </div>
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Recipient bar */}
-        {activeCase && (
-          <div className="border-b px-6 py-3 bg-muted/30 flex items-center gap-3 flex-shrink-0">
-            <Avatar className="w-9 h-9 border-2" style={{ borderColor: currentThreadConfig.color }}>
-              <AvatarFallback className="text-white text-sm font-bold" style={{ backgroundColor: currentThreadConfig.color }}>
-                {String(activeCase.title ?? "C").charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-foreground">{activeCase.title || "Current Case"}</p>
-              <p className="text-xs text-muted-foreground">{currentThreadConfig.sub}</p>
-            </div>
-            <Badge className={`text-xs font-bold border-none ${currentThreadConfig.badgeColor}`}>
-              {currentThreadConfig.badge}
-            </Badge>
-          </div>
-        )}
-
-        {/* Messages */}
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-muted/10"
-        >
-          {!isCommentsPending && comments.length >= recordsPerPage && (
-            <div className="flex justify-center mb-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleLoadOlder}
-                disabled={isLoadingOlder || isCommentsLoading}
-                className="text-xs"
-              >
-                {isLoadingOlder ? "Loading older messages..." : "Load older messages"}
-              </Button>
-            </div>
-          )}
-
-          {isCommentsPending && comments.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : isCommentsError ? (
-            <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
-              Unable to load case messages right now.
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: currentThreadConfig.color + "18" }}>
-                <currentThreadConfig.icon className="w-8 h-8" style={{ color: currentThreadConfig.color }} />
-              </div>
-              <h3 className="font-bold text-foreground mb-1">Start a conversation</h3>
-              <p className="text-sm text-muted-foreground max-w-xs">{currentThreadConfig.sub}. Messages are reviewed during business hours.</p>
-            </div>
-          ) : (
-            comments.map((msg) => {
-              const isFromMe =
-                isCurrentUserComment(msg) || String(msg.id ?? "").startsWith("optimistic-");
-              const authorName = formatAuthorName(msg.author);
-              return (
-                <div key={msg.id} className={`flex ${isFromMe ? "justify-end" : "justify-start"}`}>
-                  {!isFromMe && (
-                    <Avatar className="w-7 h-7 mr-2 mt-1 flex-shrink-0 border" style={{ borderColor: currentThreadConfig.color }}>
-                      <AvatarFallback className="text-white text-xs font-bold" style={{ backgroundColor: currentThreadConfig.color }}>
-                        {getAuthorInitial(msg)}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="max-w-[72%]">
-                    <div className={`px-4 py-3 rounded-2xl text-sm font-medium ${
-                      isFromMe
-                        ? "text-white rounded-br-sm"
-                        : "bg-card border border-border text-foreground rounded-bl-sm"
-                    }`}
-                    style={isFromMe ? { backgroundColor: currentThreadConfig.color } : {}}
-                    >
-                      {!isFromMe && (
-                        <p className="text-[10px] font-semibold mb-1 opacity-80">{authorName}</p>
-                      )}
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                      {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {msg.attachments.map((attachment, index) => (
-                            <a
-                              key={attachment.id || `${msg.id}-attachment-${index}`}
-                              href={attachment.url || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block text-xs underline opacity-90"
-                            >
-                              {attachment.fileName || "Attachment"}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className={`flex items-center gap-1.5 mt-1 px-1 ${isFromMe ? "justify-end" : "justify-start"}`}>
-                      <span className="text-[10px] text-muted-foreground font-medium">
-                        {String(msg.id ?? "").startsWith("optimistic-")
-                          ? "Sending..."
-                          : msg.createdAt
-                            ? format(new Date(msg.createdAt), "MMM d, h:mm a")
-                            : "—"}
-                      </span>
-                      {isFromMe && (msg.id
-                        ? <CheckCheck className="w-3 h-3" style={{ color: currentThreadConfig.color }} />
-                        : <Clock className="w-3 h-3 text-muted-foreground" />
-                      )}
-                    </div>
-                  </div>
+        <div className="flex-1 flex flex-col overflow-hidden max-w-[1480px] w-full mx-auto px-4 md:px-9 py-4 md:py-6">
+          <div className="apex-card flex-1 flex flex-col overflow-hidden">
+            {/* Recipient bar */}
+            {activeCase && (
+              <div className="border-b border-border px-5 py-3.5 bg-surface-2 flex items-center gap-3 flex-shrink-0">
+                <Avatar className="w-9 h-9 border border-border">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                    {String(activeCase.title ?? "C").charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {activeCase.title || "Current Case"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {currentThreadConfig.sub}
+                  </p>
                 </div>
-              );
-            })
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+                <Badge variant="info">{currentThreadConfig.badge}</Badge>
+              </div>
+            )}
 
-        {/* Disclaimer + Input */}
-        <div className="border-t px-4 py-3 bg-card flex-shrink-0">
-          <p className="text-[10px] text-muted-foreground font-medium mb-2 text-center">
-            ⚠️ For medical emergencies, call 911. This is not a crisis line.
-          </p>
-          {!activeCaseIdResolved ? (
-            <p className="text-center text-sm text-muted-foreground font-semibold py-2">
-              No active case selected.
-            </p>
-          ) : (
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder={currentThreadConfig.placeholder}
-                className="flex-1 border-2 focus:border-primary font-medium"
-                disabled={createCommentMutation.isPending}
-              />
-              <Button
-                type="submit"
-                disabled={createCommentMutation.isPending || !newMessage.trim()}
-                className="px-5 font-bold text-white"
-                style={{ backgroundColor: currentThreadConfig.color }}
-              >
-                {createCommentMutation.isPending
-                  ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  : <Send className="w-4 h-4" />
-                }
-              </Button>
-            </form>
-          )}
+            {/* Messages */}
+            <div
+              ref={scrollContainerRef}
+              className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-surface-2"
+            >
+              {!isCommentsPending && comments.length >= recordsPerPage && (
+                <div className="flex justify-center mb-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLoadOlder}
+                    disabled={isLoadingOlder || isCommentsLoading}
+                  >
+                    {isLoadingOlder ? "Loading older messages..." : "Load older messages"}
+                  </Button>
+                </div>
+              )}
+
+              {isCommentsPending && comments.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : isCommentsError ? (
+                <div
+                  className="apex-card p-4 text-sm"
+                  style={{ borderColor: "var(--att)", background: "var(--att-soft)", color: "var(--att)" }}
+                >
+                  Unable to load case messages right now.
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <div
+                    className="w-16 h-16 rounded-[14px] flex items-center justify-center mb-4"
+                    style={{ background: "var(--apex-accent-soft)" }}
+                  >
+                    <currentThreadConfig.icon className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-lg font-medium text-foreground mb-1">
+                    Start a conversation
+                  </h3>
+                  <p className="text-[13px] text-muted-foreground max-w-xs">
+                    {currentThreadConfig.sub}. Messages are reviewed during business hours.
+                  </p>
+                </div>
+              ) : (
+                comments.map((msg) => {
+                  const isFromMe =
+                    isCurrentUserComment(msg) || String(msg.id ?? "").startsWith("optimistic-");
+                  const authorName = formatAuthorName(msg.author);
+                  return (
+                    <div key={msg.id} className={`flex ${isFromMe ? "justify-end" : "justify-start"}`}>
+                      {!isFromMe && (
+                        <Avatar className="w-7 h-7 mr-2 mt-1 flex-shrink-0 border border-border">
+                          <AvatarFallback className="bg-secondary text-ink-2 text-xs font-semibold">
+                            {getAuthorInitial(msg)}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className="max-w-[72%]">
+                        <div
+                          className={`px-4 py-3 rounded-[14px] text-sm ${
+                            isFromMe
+                              ? "bg-primary text-primary-foreground rounded-br-sm"
+                              : "bg-card border border-border text-foreground rounded-bl-sm"
+                          }`}
+                        >
+                          {!isFromMe && (
+                            <p className="apex-eyebrow mb-1">{authorName}</p>
+                          )}
+                          <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                          {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {msg.attachments.map((attachment, index) => (
+                                <a
+                                  key={attachment.id || `${msg.id}-attachment-${index}`}
+                                  href={attachment.url || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-xs underline opacity-90"
+                                >
+                                  {attachment.fileName || "Attachment"}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className={`flex items-center gap-1.5 mt-1 px-1 ${
+                            isFromMe ? "justify-end" : "justify-start"
+                          }`}
+                        >
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {String(msg.id ?? "").startsWith("optimistic-")
+                              ? "Sending..."
+                              : msg.createdAt
+                                ? format(new Date(msg.createdAt), "MMM d, h:mm a")
+                                : "—"}
+                          </span>
+                          {isFromMe &&
+                            (msg.id ? (
+                              <CheckCheck className="w-3 h-3 text-primary" />
+                            ) : (
+                              <Clock className="w-3 h-3 text-muted-foreground" />
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Disclaimer + Input */}
+            <div className="border-t border-border px-4 py-3 bg-card flex-shrink-0">
+              <p className="font-mono text-[10px] text-muted-foreground mb-2 text-center uppercase tracking-[0.06em]">
+                For medical emergencies, call 911. This is not a crisis line.
+              </p>
+              {!activeCaseIdResolved ? (
+                <p className="text-center text-sm text-muted-foreground py-2">
+                  No active case selected.
+                </p>
+              ) : (
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder={currentThreadConfig.placeholder}
+                    className="flex-1"
+                    disabled={createCommentMutation.isPending}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={createCommentMutation.isPending || !newMessage.trim()}
+                    className="px-5"
+                  >
+                    {createCommentMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

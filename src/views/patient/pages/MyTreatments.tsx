@@ -1,17 +1,19 @@
 // @ts-nocheck
 import React from "react";
 import MyTreatmentsComponent from "@/components/health/MyTreatments";
-import { Pill } from "lucide-react";
 
 export default function MyTreatments() {
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-1">
-          <Pill className="w-7 h-7 text-primary" />
-          <h1 className="text-3xl font-black text-foreground uppercase tracking-wide">My Treatments</h1>
-        </div>
-        <p className="text-muted-foreground text-sm ml-10">Your personalized treatment stack prescribed by Apex MD</p>
+    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+      {/* Page head */}
+      <div className="mb-6 pb-5 border-b border-border">
+        <div className="apex-eyebrow mb-2">Protocol</div>
+        <h1 className="apex-page-title">
+          My <em>treatments</em>
+        </h1>
+        <p className="text-[13px] text-ink-2 mt-2">
+          Your personalized treatment stack prescribed by Apex MD.
+        </p>
       </div>
       <MyTreatmentsComponent />
     </div>
