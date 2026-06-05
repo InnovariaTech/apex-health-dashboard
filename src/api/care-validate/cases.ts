@@ -1,5 +1,7 @@
 import { axiosService } from "@/api/http/axiosInstance";
 import type {
+  AddCaseFormBody,
+  AddCaseFormResponse,
   CaseDetailsItem,
   CaseDetailsResponse,
   CaseFormResponseItem,
@@ -7,6 +9,8 @@ import type {
   CaseItem,
   CasesListResponse,
   CaseTreatmentsResponse,
+  CreateCaseBody,
+  CreateCaseResponse,
   FetchCaseDetailsParams,
   GetCaseFormResponsesParams,
   GetCasesParams,
@@ -180,4 +184,29 @@ export async function getLatestCaseId(): Promise<string> {
   }
 
   return "";
+}
+
+/**
+ * `POST /api/patient/my-requests/cases` (doc #2) — creates a dynamic case
+ * on CareValidate. `email` must match the authenticated user's email.
+ */
+export async function createCase(body: CreateCaseBody): Promise<CaseItem> {
+  const res = await axiosService.post<CreateCaseResponse>(CASES_ENDPOINT, body);
+  return mapCaseItem(res.data?.data);
+}
+
+/**
+ * `POST /api/patient/my-requests/cases/:caseId/forms` (doc #7) — attaches a
+ * new dynamic form to an existing case.
+ */
+export async function addCaseForm(
+  caseId: string,
+  body: AddCaseFormBody
+): Promise<unknown> {
+  const safeCaseId = encodeURIComponent(caseId);
+  const res = await axiosService.post<AddCaseFormResponse>(
+    `${CASES_ENDPOINT}/${safeCaseId}/forms`,
+    body
+  );
+  return res.data?.data ?? null;
 }

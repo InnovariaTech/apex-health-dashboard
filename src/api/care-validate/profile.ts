@@ -1,10 +1,12 @@
 import { axiosService } from "@/api/http/axiosInstance";
 import type {
+  FetchCheckUserParams,
   FetchPatientProfileGlobalSettingsResponse,
   FetchPatientProfilePartnerIntegrationParams,
   FetchPatientProfilePartnerIntegrationResponse,
   FetchPatientProfilePromoCodeParams,
   FetchPatientProfilePromoCodeResponse,
+  FetchPatientProfileResponse,
   FetchPatientProfileUserStatusParams,
   FetchPatientProfileUserStatusResponse,
   PatientProfileGlobalSettingsInfo,
@@ -12,14 +14,21 @@ import type {
   PatientProfilePromoCodeInfo,
   PatientProfileUserInfo,
   PatientProfileUserStatus,
+  PaymentInfoShippingAddress,
   UpdatePatientProfileEmailBody,
   UpdatePatientProfileEmailResponse,
   UpdatePatientProfileUserBody,
   UpdatePatientProfileUserResponse,
+  UpdatePaymentInfoBody,
+  UpdatePaymentInfoData,
+  UpdatePaymentInfoResponse,
 } from "@/types/care-validate/profile_types";
 
 const PATIENT_PROFILE_USER_ENDPOINT = "/api/patient/profile/user";
 const PATIENT_PROFILE_USER_EMAIL_ENDPOINT = "/api/patient/profile/user/email";
+const PATIENT_PROFILE_USER_PAYMENT_INFO_ENDPOINT =
+  "/api/patient/profile/user/payment-info";
+const PATIENT_PROFILE_CHECK_USER_ENDPOINT = "/api/patient/profile/check-user";
 const PATIENT_PROFILE_PARTNER_INTEGRATION_ENDPOINT =
   "/api/patient/profile/partner-integration";
 const PATIENT_PROFILE_GLOBAL_SETTINGS_ENDPOINT = "/api/patient/profile/global-settings";
@@ -65,21 +74,48 @@ function mapPatientProfileUser(raw: unknown): PatientProfileUserInfo {
   };
 }
 
-export async function fetchPatientProfileUserStatus(
-  params: FetchPatientProfileUserStatusParams = {}
+/**
+ * `GET /api/patient/profile/user` (doc #23) — fetches the authenticated
+ * user's full CareValidate profile. Portal-JWT protected, so requires
+ * OTP verification to have completed at login.
+ */
+export async function fetchPatientProfile(): Promise<PatientProfileUserInfo> {
+  const res = await axiosService.get<FetchPatientProfileResponse>(
+    PATIENT_PROFILE_USER_ENDPOINT
+  );
+
+  return mapPatientProfileUser(res.data?.data?.profile);
+}
+
+/**
+ * `GET /api/patient/profile/check-user` (doc #25) — looks up whether a
+ * user (by email or phone) exists on CareValidate. Uses the `cv-api-key`
+ * header, **not** the portal JWT, so it works pre-OTP.
+ */
+export async function fetchCheckUser(
+  params: FetchCheckUserParams = {}
 ): Promise<PatientProfileUserStatus> {
-  const email = params.email;
+  const { email, phoneNumber } = params;
   const res = await axiosService.get<FetchPatientProfileUserStatusResponse>(
-    PATIENT_PROFILE_USER_ENDPOINT,
+    PATIENT_PROFILE_CHECK_USER_ENDPOINT,
     {
       params: {
         ...(email ? { email } : {}),
+        ...(phoneNumber ? { phoneNumber } : {}),
       },
     }
   );
 
   return mapPatientProfileUserStatus(res.data?.data);
 }
+
+/**
+ * @deprecated Old name that conflated `/profile/user` with `/profile/check-user`.
+ * Use {@link fetchCheckUser} (status lookup) or {@link fetchPatientProfile}
+ * (the real profile) depending on what you need. Kept so existing callers
+ * keep working.
+ */
+export const fetchPatientProfileUserStatus = fetchCheckUser;
 
 export async function updatePatientProfileUser(
   body: UpdatePatientProfileUserBody
@@ -89,7 +125,9 @@ export async function updatePatientProfileUser(
     body
   );
 
-  return mapPatientProfileUser(res.data?.data?.user);
+  // Per doc #24 the response is `{ data: { profile: {...} } }`. Some
+  // CareValidate environments still emit `data.user`, so we fall through.
+  return mapPatientProfileUser(res.data?.data?.profile ?? res.data?.data?.user);
 }
 
 export async function updatePatientProfileUserEmail(
@@ -100,7 +138,49 @@ export async function updatePatientProfileUserEmail(
     body
   );
 
-  return mapPatientProfileUser(res.data?.data?.user);
+  return mapPatientProfileUser(res.data?.data?.profile ?? res.data?.data?.user);
+}
+
+/**
+ * `POST /api/patient/profile/user/payment-info` (doc #27) — updates the
+ * stored payment method on CareValidate. Exactly one of `stripeSetupId`
+ * or `nmiPaymentToken` must be present.
+ */
+export async function updatePatientProfilePaymentInfo(
+  body: UpdatePaymentInfoBody
+): Promise<unknown> {
+  const res = await axiosService.post<UpdatePaymentInfoResponse>(
+    PATIENT_PROFILE_USER_PAYMENT_INFO_ENDPOINT,
+    body
+  );
+  return res.data?.data ?? null;
+}
+
+/** Builder that asserts the "exactly one of" rule from doc #27. */
+export function buildUpdatePaymentInfoPayload(args: {
+  email: string;
+  shippingAddress: PaymentInfoShippingAddress;
+  stripeSetupId?: string;
+  nmiPaymentToken?: string;
+}): UpdatePaymentInfoBody {
+  const { email, shippingAddress, stripeSetupId, nmiPaymentToken } = args;
+  if (
+    (Boolean(stripeSetupId) && Boolean(nmiPaymentToken)) ||
+    (!stripeSetupId && !nmiPaymentToken)
+  ) {
+    throw new Error(
+      "buildUpdatePaymentInfoPayload: provide exactly one of stripeSetupId or nmiPaymentToken"
+    );
+  }
+
+  const data: UpdatePaymentInfoData = {
+    email,
+    shippingAddress,
+    ...(stripeSetupId ? { stripeSetupId } : {}),
+    ...(nmiPaymentToken ? { nmiPaymentToken } : {}),
+  };
+
+  return { action: "UPDATE_PAYMENT_INFO", data };
 }
 
 export function buildUpdateEmailPayload(
@@ -193,5 +273,9 @@ export async function fetchPatientProfilePromoCode(
   return mapPatientProfilePromoCode(res.data);
 }
 
-// Backward-compatible alias (old naming)
-export const fetchPatientProfileUser = fetchPatientProfileUserStatus;
+/**
+ * @deprecated Use {@link fetchPatientProfile} directly.
+ * Previously aliased the broken `fetchPatientProfileUserStatus`; now points
+ * to the real profile fetcher so legacy callers actually get the profile.
+ */
+export const fetchPatientProfileUser = fetchPatientProfile;

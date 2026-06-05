@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAvailableTreatmentBundles, fetchTreatmentBundleById } from "@/api/care-validate/treatments";
+import {
+  fetchAvailableTreatmentBundles,
+  fetchTreatmentBundleById,
+  fetchTreatmentProducts,
+} from "@/api/care-validate/treatments";
 import { queryKeys } from "@/hooks/queryKeys";
 import {
   resolveTreatmentCategory,
@@ -9,7 +13,9 @@ import {
 import type {
   FetchAvailableTreatmentBundlesParams,
   FetchTreatmentBundleByIdParams,
+  FetchTreatmentProductsParams,
   TreatmentBundleItem,
+  TreatmentProductItem,
 } from "@/types/care-validate/treatments_types";
 
 export function useTreatments(
@@ -21,6 +27,22 @@ export function useTreatments(
     queryKey: queryKeys.careValidate.treatmentBundles(isVisible),
     queryFn: () =>
       fetchAvailableTreatmentBundles({
+        ...(typeof isVisible === "boolean" ? { isVisible } : {}),
+      }),
+    staleTime: 60_000,
+  });
+}
+
+/** `GET /api/patient/browse-treatments/products` (doc #19). */
+export function useTreatmentProducts(
+  params: FetchTreatmentProductsParams = { isVisible: true }
+) {
+  const isVisible = params.isVisible;
+
+  return useQuery<TreatmentProductItem[]>({
+    queryKey: queryKeys.careValidate.treatmentProducts(isVisible),
+    queryFn: () =>
+      fetchTreatmentProducts({
         ...(typeof isVisible === "boolean" ? { isVisible } : {}),
       }),
     staleTime: 60_000,

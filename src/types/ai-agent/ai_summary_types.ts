@@ -28,3 +28,10 @@ export interface PatientSummariesData {
   items: PatientSummary[];
   total: number;
 }
+
+export interface FetchAllPatientSummariesParams {
+  /** Default 10 per doc #38. */
+  take?: number;
+  /** Default 0 per doc #38. */
+  skip?: number;
+}

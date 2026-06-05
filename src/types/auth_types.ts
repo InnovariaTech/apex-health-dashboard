@@ -29,10 +29,36 @@ export interface ResetPasswordPayload {
   newPassword: string;
 }
 
+export interface VerifyOtpPayload {
+  /** Exactly 6 digits — matches the backend `^\d{6}$` schema. */
+  code: string;
+}
+
 export interface AuthResponseBody {
   user?: AuthUser;
+  /**
+   * Returned only by `POST /api/auth/login`.
+   *
+   * `true`  → a one-time code has just been emailed; the client must call
+   *           `verifyPortalOtp({ code })` before hitting any CareValidate
+   *           portal-JWT-protected route (profile, documents, files).
+   * `false` → the user's existing portal refresh token was still valid;
+   *           portal routes are ready to use immediately.
+   */
+  requiredOtp?: boolean;
   message?: string;
 }
+
+/** Shape returned by `AuthApi.login()` — surfaces `requiredOtp` to the UI. */
+export interface LoginResult {
+  user: AuthUser | null;
+  requiredOtp: boolean;
+}
+
+export interface VerifyOtpResult {
+  otpVerified: boolean;
+}
+
 export interface ApiError {
   message: string;
   status: number;
@@ -42,12 +68,17 @@ export interface ApiError {
 
 export interface AuthApi {
   signup(payload: SignupPayload): Promise<AuthUser | null>;
-  login(payload: LoginPayload): Promise<AuthUser | null>;
+  login(payload: LoginPayload): Promise<LoginResult>;
   me(): Promise<AuthUser | null>;
   refresh(): Promise<AuthUser | null>;
   logout(): Promise<void>;
   forgotPassword(payload: ForgotPasswordPayload): Promise<unknown>;
   resetPassword(payload: ResetPasswordPayload): Promise<unknown>;
+  /**
+   * Exchanges the 6-digit OTP delivered after login for a CareValidate portal
+   * session. Auth-cookie protected — the user must already be logged in.
+   */
+  verifyPortalOtp(payload: VerifyOtpPayload): Promise<VerifyOtpResult>;
   // updateMe(form: Partial<AuthUser>): Promise<AuthUser | null>;
   redirectToLogin(): void;
 }

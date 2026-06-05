@@ -1,13 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  addCaseForm,
+  createCase,
   fetchCaseDetails,
   getLatestCaseId,
   getMyCases,
 } from "@/api/care-validate/cases";
 import { queryKeys } from "@/hooks/queryKeys";
 import type {
+  AddCaseFormBody,
   CaseDetailsItem,
   CaseItem,
+  CreateCaseBody,
   FetchCaseDetailsParams,
   GetCasesParams,
 } from "@/types/care-validate/case_types";
@@ -108,5 +112,49 @@ export function useLatestCaseId() {
     queryKey: queryKeys.careValidate.latestCaseId(),
     queryFn: getLatestCaseId,
     staleTime: 60_000,
+  });
+}
+
+function useInvalidateCases() {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["care-validate", "cases"],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.careValidate.latestCaseId(),
+      }),
+    ]);
+}
+
+/** `POST /api/patient/my-requests/cases` (doc #2). */
+export function useCreateCase() {
+  const invalidate = useInvalidateCases();
+  return useMutation<CaseItem, unknown, CreateCaseBody>({
+    mutationFn: (body) => createCase(body),
+    onSuccess: () => invalidate(),
+  });
+}
+
+/** `POST /api/patient/my-requests/cases/:caseId/forms` (doc #7). */
+export function useAddCaseForm(caseId: string) {
+  const queryClient = useQueryClient();
+  const invalidate = useInvalidateCases();
+  return useMutation<unknown, unknown, AddCaseFormBody>({
+    mutationFn: (body) => addCaseForm(caseId, body),
+    onSuccess: async () => {
+      await invalidate();
+      // Case-detail GET embeds form responses under `responses[]`, and the
+      // case-details page derives its forms list from there via
+      // `normalizeCaseForms(caseDetails)`. Invalidating the per-case detail
+      // key triggers an immediate refetch so the new follow-up appears
+      // without waiting on the 15 s poll cycle.
+      await queryClient.invalidateQueries({
+        queryKey: ["care-validate", "case-details", caseId],
+      });
+      // NOTE: When a dedicated `useCaseFormResponses` hook gets added (doc #6),
+      // also invalidate ["care-validate", "case-form-responses", caseId] here.
+    },
   });
 }

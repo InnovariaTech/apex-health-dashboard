@@ -5,8 +5,11 @@ import type {
   AuthUser,
   ForgotPasswordPayload,
   LoginPayload,
+  LoginResult,
   ResetPasswordPayload,
   SignupPayload,
+  VerifyOtpPayload,
+  VerifyOtpResult,
 } from "@/types/auth_types";
 
 const AUTH_BASE = "/api/auth";
@@ -33,6 +36,12 @@ function getUserFromResponse(data: unknown): AuthUser | null {
   return mapUser(body.user);
 }
 
+function getRequiredOtpFromResponse(data: unknown): boolean {
+  if (!data || typeof data !== "object") return false;
+  const body = data as AuthResponseBody;
+  return body.requiredOtp === true;
+}
+
 export function createAuthApi(): AuthApi {
   return {
     async signup({ full_name, email, phone, password, role = "patient" }: SignupPayload) {
@@ -45,11 +54,16 @@ export function createAuthApi(): AuthApi {
       });
       return getUserFromResponse(res.data);
     },
-    async login({ email, password }: LoginPayload) {
-      const res = await axiosService.post<AuthResponseBody>(`${AUTH_BASE}/login`, { email, password });
-      return getUserFromResponse(res.data);
+    async login({ email, password }: LoginPayload): Promise<LoginResult> {
+      const res = await axiosService.post<AuthResponseBody>(`${AUTH_BASE}/login`, {
+        email,
+        password,
+      });
+      return {
+        user: getUserFromResponse(res.data),
+        requiredOtp: getRequiredOtpFromResponse(res.data),
+      };
     },
-   
     async me() {
       const res = await axiosService.get<AuthResponseBody>(`${AUTH_BASE}/me`);
       return getUserFromResponse(res.data);
@@ -68,6 +82,13 @@ export function createAuthApi(): AuthApi {
     async resetPassword({ token, newPassword }: ResetPasswordPayload) {
       const res = await axiosService.post(`${AUTH_BASE}/reset-password`, { token, newPassword });
       return res.data;
+    },
+    async verifyPortalOtp({ code }: VerifyOtpPayload): Promise<VerifyOtpResult> {
+      const res = await axiosService.post<{ otpVerified?: boolean }>(
+        `${AUTH_BASE}/portal/verify-otp`,
+        { code }
+      );
+      return { otpVerified: res.data?.otpVerified === true };
     },
     // async updateMe(form: Partial<AuthUser>) {
     //   const current = await this.me();

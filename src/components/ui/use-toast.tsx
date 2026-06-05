@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 
 const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+// Lowered from the shadcn default of 1,000,000 ms (~16 minutes) so dismissed
+// toasts actually leave the DOM. Keep enough room for the close animation.
+const TOAST_REMOVE_DELAY = 300;
+// Default time a toast is visible before auto-dismissing. Callers can override
+// per-toast by passing `duration` to `toast({...})`.
+const DEFAULT_TOAST_DURATION = 4000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -111,13 +116,13 @@ function dispatch(action) {
   });
 }
 
-function toast({ ...props }) {
+function toast({ duration, ...props } = {}) {
   const id = genId();
 
-  const update = (props) =>
+  const update = (next) =>
     dispatch({
       type: actionTypes.UPDATE_TOAST,
-      toast: { ...props, id },
+      toast: { ...next, id },
     });
 
   const dismiss = () =>
@@ -134,6 +139,15 @@ function toast({ ...props }) {
       },
     },
   });
+
+  // The Toast component in this repo is just a styled <div> (no Radix), so
+  // it has no built-in auto-dismiss timer. Schedule one here. Passing
+  // `duration: Infinity` opts out for sticky toasts.
+  const effectiveDuration =
+    typeof duration === "number" ? duration : DEFAULT_TOAST_DURATION;
+  if (Number.isFinite(effectiveDuration)) {
+    setTimeout(dismiss, effectiveDuration);
+  }
 
   return {
     id,

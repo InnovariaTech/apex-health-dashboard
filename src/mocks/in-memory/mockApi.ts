@@ -143,8 +143,11 @@ export const mockAuth = {
       initialUsers.find((u) => u.email.toLowerCase() === normalizedEmail) ||
       initialUsers[0];
     setStoredEmail(user.email);
-    return Promise.resolve({ ...user });
+    // Mirror the http contract — `{ user, requiredOtp }`. The in-memory
+    // backend has no CareValidate portal, so OTP is never required.
+    return Promise.resolve({ user: { ...user }, requiredOtp: false });
   },
+  verifyPortalOtp: () => Promise.resolve({ otpVerified: true }),
   signup: ({ full_name, email, phone, password }) => {
     const normalizedEmail = String(email || "").trim().toLowerCase();
     if (!normalizedEmail || !full_name) return Promise.reject(new Error("invalid_payload"));

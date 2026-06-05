@@ -6,6 +6,8 @@ import type {
   FetchTreatmentBundleByIdResponse,
   FetchTreatmentProductByIdParams,
   FetchTreatmentProductByIdResponse,
+  FetchTreatmentProductsParams,
+  FetchTreatmentProductsResponse,
   TreatmentBundleItem,
   TreatmentProductItem,
 } from "@/types/care-validate/treatments_types";
@@ -92,6 +94,24 @@ export async function fetchAvailableTreatmentBundles(
   const rows = Array.isArray(res.data?.data) ? res.data.data : [];
 
   return rows.map(mapTreatmentBundle);
+}
+
+/** `GET /api/patient/browse-treatments/products` (doc #19). */
+export async function fetchTreatmentProducts(
+  params: FetchTreatmentProductsParams = {}
+): Promise<TreatmentProductItem[]> {
+  const isVisible = params.isVisible;
+  const res = await axiosService.get<FetchTreatmentProductsResponse>(
+    TREATMENT_PRODUCTS_ENDPOINT,
+    {
+      params: {
+        ...(typeof isVisible === "boolean" ? { isVisible } : {}),
+      },
+    }
+  );
+  const rows = Array.isArray(res.data?.data) ? res.data.data : [];
+
+  return rows.map(mapTreatmentProduct);
 }
 
 export async function fetchTreatmentProductById(

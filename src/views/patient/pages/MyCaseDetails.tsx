@@ -1,11 +1,12 @@
 // @ts-nocheck
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ClipboardPen } from "lucide-react";
 import { useCaseDetails } from "@/hooks/care-validate/useCases";
 import { useDocuments } from "@/hooks/care-validate/useDocuments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPageUrl } from "@/utils";
 import type { CaseDetailsItem } from "@/types/care-validate/case_types";
@@ -14,6 +15,7 @@ import CaseDocumentsPanel from "@/views/patient/components/case/CaseDocumentsPan
 import CaseTimeline from "@/views/patient/components/case/CaseTimeline";
 import CaseAppointmentsPanel from "@/views/patient/components/case/CaseAppointmentsPanel";
 import CaseChatPanel from "@/views/patient/components/case/CaseChatPanel";
+import FollowupFormDialog from "@/views/patient/components/case/FollowupFormDialog";
 import { normalizeCaseForms } from "@/views/patient/utils/caseFormUtils";
 
 function formatCaseLabel(value: string) {
@@ -80,6 +82,13 @@ export default function MyCaseDetails() {
     [caseDetails]
   );
 
+  const [followupOpen, setFollowupOpen] = useState(false);
+  const caseStatus = String(caseDetails?.status ?? caseDetails?.raw?.status ?? "").toUpperCase();
+  const isCaseTerminal = caseStatus === "CLOSED" || caseStatus === "ARCHIVED";
+  const canSubmitFollowup = Boolean(caseId) && !isCaseTerminal;
+  const caseTitleForFollowup =
+    caseDetails?.title || caseDetails?.raw?.title || "";
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
@@ -99,14 +108,32 @@ export default function MyCaseDetails() {
       </Link>
 
       {/* Page head */}
-      <div className="mb-6 pb-5 border-b border-border">
-        <p className="apex-eyebrow">Care portal</p>
-        <h1 className="apex-page-title mt-1">
-          Case <em>details</em>
-        </h1>
-        <p className="text-[13px] text-ink-2 mt-2">
-          Review your case information and timeline.
-        </p>
+      <div className="mb-6 pb-5 border-b border-border flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <p className="apex-eyebrow">Care portal</p>
+          <h1 className="apex-page-title mt-1">
+            Case <em>details</em>
+          </h1>
+          <p className="text-[13px] text-ink-2 mt-2">
+            Review your case information and timeline.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="dark"
+            size="sm"
+            onClick={() => setFollowupOpen(true)}
+            disabled={!canSubmitFollowup}
+            title={
+              isCaseTerminal
+                ? "Closed cases can't accept new follow-ups."
+                : "Submit a structured update to this case."
+            }
+          >
+            <ClipboardPen className="w-3.5 h-3.5" />
+            Submit follow-up
+          </Button>
+        </div>
       </div>
 
       {isError || !caseDetails ? (
@@ -215,6 +242,15 @@ export default function MyCaseDetails() {
             </TabsContent>
           </Tabs>
         </div>
+      )}
+
+      {caseId && (
+        <FollowupFormDialog
+          caseId={caseId}
+          caseTitle={caseTitleForFollowup}
+          open={followupOpen}
+          onOpenChange={setFollowupOpen}
+        />
       )}
     </div>
   );

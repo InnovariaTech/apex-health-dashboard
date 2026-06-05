@@ -1,3 +1,7 @@
+/**
+ * Result of `GET /api/patient/profile/check-user` (doc #25).
+ * NOT to be confused with the actual patient profile (`/profile/user`, doc #23).
+ */
 export interface PatientProfileUserStatus {
   createdAt: string;
   existsInCurrentOrganization: boolean;
@@ -13,9 +17,14 @@ export interface FetchPatientProfileUserStatusResponse {
   data: PatientProfileUserStatus;
 }
 
-export interface FetchPatientProfileUserStatusParams {
+/** Params for `GET /api/patient/profile/check-user` (doc #25). */
+export interface FetchCheckUserParams {
   email?: string;
+  phoneNumber?: string;
 }
+
+/** Legacy alias preserved for backward compatibility. */
+export type FetchPatientProfileUserStatusParams = FetchCheckUserParams;
 
 export type PatientProfileGender = "MALE" | "FEMALE" | "OTHER" | string;
 
@@ -57,10 +66,27 @@ export interface PatientProfileUserInfo {
   [key: string]: unknown;
 }
 
+/**
+ * Response of `GET /api/patient/profile/user` (doc #23) — the real,
+ * portal-JWT-protected patient profile.
+ */
+export interface FetchPatientProfileResponse {
+  success?: boolean;
+  data?: {
+    profile?: unknown;
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * The doc shows `data.profile`; older CareValidate responses sometimes used
+ * `data.user`. Accept both — the mapper picks whichever is present.
+ */
 export interface UpdatePatientProfileUserResponse {
   success?: boolean;
   message?: string;
   data?: {
+    profile?: unknown;
     user?: unknown;
     [key: string]: unknown;
   };
@@ -80,9 +106,43 @@ export interface UpdatePatientProfileEmailResponse {
   success?: boolean;
   message?: string;
   data?: {
+    profile?: unknown;
     user?: unknown;
     [key: string]: unknown;
   };
+}
+
+// ─── Payment info (doc #27) ────────────────────────────────────────────────
+
+export interface PaymentInfoShippingAddress {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+}
+
+export type UpdatePaymentInfoAction = "UPDATE_PAYMENT_INFO";
+
+export interface UpdatePaymentInfoData {
+  email: string;
+  /** Provide exactly one of `stripeSetupId` or `nmiPaymentToken`. */
+  stripeSetupId?: string;
+  /** Provide exactly one of `stripeSetupId` or `nmiPaymentToken`. */
+  nmiPaymentToken?: string;
+  shippingAddress: PaymentInfoShippingAddress;
+}
+
+export interface UpdatePaymentInfoBody {
+  action: UpdatePaymentInfoAction;
+  data: UpdatePaymentInfoData;
+}
+
+export interface UpdatePaymentInfoResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string | null;
 }
 
 export interface PatientProfilePartnerIntegrationInfo {

@@ -161,3 +161,115 @@ export interface GetCasesParams {
   includeCalendarEvents?: boolean;
   documentFormat?: CaseDocumentFormat;
 }
+
+// ─── Create case (doc #2) ───────────────────────────────────────────────────
+
+/**
+ * Question-type enum from the CareValidate doc — covers both built-in
+ * inputs and "widget" form questions.
+ */
+export type CaseQuestionType =
+  | "TEXT"
+  | "BOOLEAN"
+  | "DATE"
+  | "DATERANGE"
+  | "SINGLESELECT"
+  | "MULTISELECT"
+  | "FILE"
+  | "WIDGET_USER_ID_DOCUMENT"
+  | "WIDGET_BMI"
+  | "WIDGET_STATE_PICKER"
+  | "WIDGET_VISIT_TYPE"
+  | "STATEMENT"
+  | string;
+
+export type CaseQuestionGender = "MALE" | "FEMALE";
+
+/**
+ * Answer payload shape on case creation. Either an existing question
+ * (`{ questionId, answer }`) or a new dynamic question
+ * (`{ question, type, required, answer? }`).
+ */
+export type CreateCaseQuestionAnswer =
+  | { questionId: string; answer: string }
+  | {
+      question: string;
+      type: CaseQuestionType;
+      required: boolean;
+      answer?: string;
+    };
+
+export interface CaseShippingAddress {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+}
+
+export interface CreateCaseBody {
+  firstName: string;
+  lastName: string;
+  email: string;
+  dob?: string;
+  gender?: CaseQuestionGender;
+  phoneNumber?: string;
+  password?: string;
+  status?: CaseStatus;
+  /** Required when `formId` is absent. */
+  formTitle?: string;
+  formDescription?: string;
+  /** Required when `formTitle` is absent. */
+  formId?: string;
+  shippingAddress?: CaseShippingAddress;
+  languagePreferences?: string[];
+  /** Min 1 item — see {@link CreateCaseQuestionAnswer}. */
+  questions: CreateCaseQuestionAnswer[];
+  paymentDescription?: string;
+  paymentAmount?: number;
+  stripeSetupId?: string;
+  stripePaymentId?: string;
+  nmiPaymentToken?: string;
+  productBundleId?: string;
+}
+
+export interface CreateCaseResponse {
+  success: boolean;
+  data: CaseItem;
+  message?: string | null;
+}
+
+// ─── Add dynamic form to existing case (doc #7) ─────────────────────────────
+
+export interface AddCaseFormQuestion {
+  /** UUID of an existing question, or a new one to create. */
+  questionId: string;
+  question: string;
+  type: CaseQuestionType;
+  required: boolean;
+  /**
+   * Answer payload — shape depends on the question type per CareValidate's
+   * Form-Title-based encoding rules. Strings for most types, a JSON-stringified
+   * array for MULTISELECT, a JSON-stringified object for WIDGET_BMI, and an
+   * array of `{ name, data, contentType }` for FILE / WIDGET_USER_ID_DOCUMENT.
+   */
+  answer?: unknown;
+  /** Required for SINGLESELECT / MULTISELECT. */
+  options?: string[];
+  phi?: boolean;
+  hint?: string;
+  placeholder?: string;
+}
+
+export interface AddCaseFormBody {
+  formTitle: string;
+  formDescription?: string;
+  questions: AddCaseFormQuestion[];
+}
+
+export interface AddCaseFormResponse {
+  success: boolean;
+  data?: unknown;
+  message?: string | null;
+}

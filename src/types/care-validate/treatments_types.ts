@@ -74,6 +74,15 @@ export interface FetchAvailableTreatmentBundlesResponse {
   data: TreatmentBundleItem[];
 }
 
+export interface FetchTreatmentProductsParams {
+  isVisible?: boolean;
+}
+
+export interface FetchTreatmentProductsResponse {
+  success?: boolean;
+  data: TreatmentProductItem[];
+}
+
 export interface FetchTreatmentProductByIdResponse {
   success?: boolean;
   data?: unknown;

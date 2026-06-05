@@ -4,10 +4,21 @@ import {
   fetchLatestPatientSummary,
   generatePatientSummary,
 } from "@/api/ai-agent/ai_summary";
+import type { FetchAllPatientSummariesParams } from "@/types/ai-agent/ai_summary_types";
 
 const AI_SUMMARY_QUERY_KEYS = {
   latest: ["ai-agent", "patient-summary", "latest"] as const,
-  all: ["ai-agent", "patient-summary", "all"] as const,
+  allRoot: ["ai-agent", "patient-summary", "all"] as const,
+  all: (params?: FetchAllPatientSummariesParams) =>
+    [
+      "ai-agent",
+      "patient-summary",
+      "all",
+      {
+        take: params?.take ?? "all",
+        skip: params?.skip ?? 0,
+      },
+    ] as const,
 };
 
 export function useLatestPatientSummary(enabled = true) {
@@ -19,10 +30,25 @@ export function useLatestPatientSummary(enabled = true) {
   });
 }
 
-export function useAllPatientSummaries(enabled = true) {
+/**
+ * Backwards-compatible overload: existing call sites pass either nothing or
+ * a single boolean `enabled`. New callers can pass `(params, enabled?)` to
+ * paginate via `take`/`skip` (doc #38).
+ */
+export function useAllPatientSummaries(
+  paramsOrEnabled: FetchAllPatientSummariesParams | boolean = true,
+  maybeEnabled?: boolean
+) {
+  const params: FetchAllPatientSummariesParams =
+    typeof paramsOrEnabled === "boolean" ? {} : paramsOrEnabled;
+  const enabled =
+    typeof paramsOrEnabled === "boolean"
+      ? paramsOrEnabled
+      : maybeEnabled ?? true;
+
   return useQuery({
-    queryKey: AI_SUMMARY_QUERY_KEYS.all,
-    queryFn: fetchAllPatientSummaries,
+    queryKey: AI_SUMMARY_QUERY_KEYS.all(params),
+    queryFn: () => fetchAllPatientSummaries(params),
     enabled,
     staleTime: 60_000,
   });
@@ -35,7 +61,8 @@ export function useGeneratePatientSummary() {
     mutationFn: generatePatientSummary,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: AI_SUMMARY_QUERY_KEYS.latest });
-      void queryClient.invalidateQueries({ queryKey: AI_SUMMARY_QUERY_KEYS.all });
+      // Invalidate every paginated variant of the all-summaries query.
+      void queryClient.invalidateQueries({ queryKey: AI_SUMMARY_QUERY_KEYS.allRoot });
     },
   });
 }

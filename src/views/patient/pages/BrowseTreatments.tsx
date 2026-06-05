@@ -1,16 +1,28 @@
 // @ts-nocheck
-import React from "react";
+import React, { useState } from "react";
 import { useGroupedTreatments } from "@/hooks/care-validate/useTreatments";
 import { htmlToPlainText } from "@/lib/htmlUtils";
 import { useEnvironment } from "@/lib/EnvironmentContext";
 import { resolveTreatmentFormUrl } from "@/lib/formLinks";
 import { Button } from "@/components/ui/button";
 import { ImageOff } from "lucide-react";
+import IntakeFormDialog from "@/views/patient/components/treatments/IntakeFormDialog";
+import type { TreatmentBundleItem } from "@/types/care-validate/treatments_types";
 
 export default function BrowseTreatments() {
   const { groups, isLoading, isError } = useGroupedTreatments({ isVisible: true });
   const { environment } = useEnvironment();
   const envId = environment?.id;
+
+  // Apex MD members open an in-app intake; gym envs keep their external form.
+  const usesInAppIntake = envId === "apex-md";
+  const [activeBundle, setActiveBundle] = useState<TreatmentBundleItem | null>(null);
+  const [intakeOpen, setIntakeOpen] = useState(false);
+
+  const openIntake = (bundle: TreatmentBundleItem) => {
+    setActiveBundle(bundle);
+    setIntakeOpen(true);
+  };
 
   return (
     <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
@@ -66,16 +78,31 @@ export default function BrowseTreatments() {
 
             <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {group.items.map((item) => (
-                <TreatmentCard key={item.id} item={item} envId={envId} />
+                <TreatmentCard
+                  key={item.id}
+                  item={item}
+                  envId={envId}
+                  usesInAppIntake={usesInAppIntake}
+                  onStartIntake={() => openIntake(item)}
+                />
               ))}
             </div>
           </section>
         ))}
+
+      <IntakeFormDialog
+        bundle={activeBundle}
+        open={intakeOpen}
+        onOpenChange={(open) => {
+          setIntakeOpen(open);
+          if (!open) setActiveBundle(null);
+        }}
+      />
     </div>
   );
 }
 
-function TreatmentCard({ item, envId }) {
+function TreatmentCard({ item, envId, usesInAppIntake, onStartIntake }) {
   const descriptionPreview = htmlToPlainText(item.description || "");
   const formUrl = resolveTreatmentFormUrl({
     envId,
@@ -124,11 +151,17 @@ function TreatmentCard({ item, envId }) {
         ) : null}
 
         <div className="mt-auto pt-3">
-          <Button asChild variant="dark" className="w-full">
-            <a href={formUrl} target="_blank" rel="noopener noreferrer">
+          {usesInAppIntake ? (
+            <Button variant="dark" className="w-full" onClick={onStartIntake}>
               Get Started
-            </a>
-          </Button>
+            </Button>
+          ) : (
+            <Button asChild variant="dark" className="w-full">
+              <a href={formUrl} target="_blank" rel="noopener noreferrer">
+                Get Started
+              </a>
+            </Button>
+          )}
         </div>
       </div>
     </article>
