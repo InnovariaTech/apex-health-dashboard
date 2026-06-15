@@ -156,9 +156,8 @@ export default function UploadPhotoDialog({
           <div className="flex items-start gap-2 text-xs text-muted-foreground border border-border rounded-sm p-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>
-              Photos are stored in Trainerize. They'll appear in the gallery
-              shortly after upload — date and pose are reflected from the
-              Trainerize record.
+              Photos will appear in the gallery shortly after upload — date
+              and pose are reflected from your saved record.
             </span>
           </div>
         </div>

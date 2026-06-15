@@ -9,12 +9,27 @@ import {
   useFileDownloadUrl,
   useAnalyzeDocument,
 } from "@/hooks/care-validate/useDocuments";
-import { useLatestCaseId } from "@/hooks/care-validate/useCases";
+import { useCases, useLatestCaseId } from "@/hooks/care-validate/useCases";
 import { fileToBase64, isAllowedUploadMimeType } from "@/api/care-validate/files";
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
   type PatientDocumentItem,
 } from "@/types/care-validate/document_types";
+import {
+  usePatientDocuments,
+  useUploadPatientDocument,
+  useDeletePatientDocument,
+  useDownloadPatientDocument,
+} from "@/hooks/documents/usePatientDocuments";
+import {
+  DOCUMENT_CATEGORY_META,
+  ALLOWED_UPLOAD_ACCEPT as GENERAL_UPLOAD_ACCEPT,
+  isAllowedUploadMimeType as isGeneralUploadMime,
+  type DocumentCategory,
+  type PatientDocument as GeneralPatientDocument,
+} from "@/types/documents/document_types";
+import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -114,10 +129,34 @@ export default function AiDocumentsTab() {
 
   const { data: apiDocuments = [], isLoading, isError } = useDocuments();
   const latestCaseQuery = useLatestCaseId();
+  // Wide cases window so the picker can show every case the patient owns
+  // (CareValidate refuses requests with no startTime/endTime).
+  const casesDateRange = React.useMemo(() => getCasesDateRange(), []);
+  const casesQuery = useCases({
+    startTime: casesDateRange.startTime,
+    endTime: casesDateRange.endTime,
+  });
+  const cases = casesQuery.data ?? [];
   const uploadFileMutation = useUploadFile();
   const deleteFileMutation = useDeleteFile();
   const fileDownloadMutation = useFileDownloadUrl();
   const analyzeMutation = useAnalyzeDocument();
+
+  // Picked case for the "Case documents" section. Defaults to the latest
+  // case once that resolves; if there's exactly one case, the dropdown
+  // hides itself and stays pinned to it.
+  const [selectedCaseId, setSelectedCaseId] = useState<string>("");
+  useEffect(() => {
+    if (selectedCaseId) return;
+    const latest = latestCaseQuery.data;
+    if (typeof latest === "string" && latest) {
+      setSelectedCaseId(latest);
+      return;
+    }
+    if (cases.length === 1) {
+      setSelectedCaseId(cases[0].id);
+    }
+  }, [selectedCaseId, latestCaseQuery.data, cases]);
 
   useEffect(() => {
     api.auth
@@ -127,22 +166,31 @@ export default function AiDocumentsTab() {
   }, []);
 
   const documents = apiDocuments.map(mapApiDocumentToPageDocument);
-  const filtered = documents;
+  // Case section list: scoped to the case the user picked. If nothing is
+  // picked (rare — both auto-select branches above missed) we show empty.
+  const filtered = selectedCaseId
+    ? documents.filter((d) => d.case_id === selectedCaseId)
+    : documents;
   const isUploading = uploadFileMutation.isPending;
-  const latestCaseId = latestCaseQuery.data;
-  const canUpload = Boolean(latestCaseId);
+  const canUpload = Boolean(selectedCaseId);
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    // Clear the input so the same file can be re-selected after a failure.
-    e.target.value = "";
+  // Drag-state for the case upload zone — toggled in the dragover/leave
+  // handlers so the dashed border switches to the primary color while a
+  // file is being held over it.
+  const [isCaseDraggingOver, setIsCaseDraggingOver] = useState(false);
+
+  /**
+   * Shared case-upload pipeline used by the click-to-pick input AND the
+   * drag-and-drop handler — same checks (case selected, MIME allowed),
+   * same upload + toast, so behavior is identical either way.
+   */
+  const processCaseFile = async (file: File | null) => {
     if (!file) return;
-
-    if (!latestCaseId) {
+    if (!selectedCaseId) {
       toast({
-        title: "No active case",
+        title: "No case selected",
         description:
-          "Uploads attach to your most recent case. Once you have an open case, try again.",
+          "Pick a case in the Case documents section before uploading.",
         variant: "destructive",
       });
       return;
@@ -161,7 +209,7 @@ export default function AiDocumentsTab() {
       await uploadFileMutation.mutateAsync({
         name: file.name,
         data,
-        caseId: latestCaseId,
+        caseId: selectedCaseId,
         mimeType: file.type,
       });
       toast({
@@ -182,6 +230,31 @@ export default function AiDocumentsTab() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    // Clear so the same file can be re-selected after a validation reject.
+    e.target.value = "";
+    await processCaseFile(file ?? null);
+  };
+
+  const handleCaseDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    if (!isCaseDraggingOver) setIsCaseDraggingOver(true);
+  };
+
+  const handleCaseDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsCaseDraggingOver(false);
+  };
+
+  const handleCaseDrop = async (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsCaseDraggingOver(false);
+    if (!canUpload || isUploading) return;
+    await processCaseFile(e.dataTransfer.files?.[0] ?? null);
   };
 
   const handleAnalyze = async (doc) => {
@@ -256,11 +329,75 @@ export default function AiDocumentsTab() {
   }
 
   return (
-    <div>
+    <div className="space-y-10">
+      {/* ────────────────────────────────────────────────────────────────────
+       * Section 1 — General documents (no case)
+       * Uses the new `POST /api/patient/documents` flow with `cv_upload=true`
+       * so the file is mirrored to CareValidate as a general document.
+       * ──────────────────────────────────────────────────────────────────── */}
+      <GeneralDocumentsSection />
+
+      {/* ────────────────────────────────────────────────────────────────────
+       * Section 2 — Case documents (case-attached, AI-analyzed)
+       * Same CareValidate file flow as before; the case picker replaces
+       * the implicit "latest case" target.
+       * ──────────────────────────────────────────────────────────────────── */}
+      <section>
+        <div className="mb-5">
+          <h2 className="apex-card-title flex items-center gap-2 mb-1">
+            <FlaskConical className="w-4 h-4 text-primary" /> Case documents
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Attach files to a specific case. Each upload is AI-analyzable.
+          </p>
+        </div>
+
+        {/* Case picker */}
+        {casesQuery.isLoading ? (
+          <p className="text-sm text-muted-foreground mb-5">Loading cases…</p>
+        ) : cases.length === 0 ? (
+          <div
+            className="apex-card mb-5 p-4 text-sm"
+            style={{
+              borderColor: "var(--bord)",
+              background: "var(--bord-soft)",
+              color: "var(--bord)",
+            }}
+          >
+            You don't have any cases yet. Submit a case from{" "}
+            <strong>My Cases</strong> to start attaching documents.
+          </div>
+        ) : cases.length === 1 ? (
+          <p className="text-sm text-muted-foreground mb-5">
+            Attaching to case{" "}
+            <strong className="text-foreground">
+              {cases[0].shortId ? `#${cases[0].shortId} · ` : ""}
+              {cases[0].title || "Untitled"}
+            </strong>
+          </p>
+        ) : (
+          <div className="mb-5 flex items-center gap-3 flex-wrap">
+            <label className="text-sm text-muted-foreground">Case:</label>
+            <Select value={selectedCaseId} onValueChange={setSelectedCaseId}>
+              <SelectTrigger className="w-[320px] max-w-full">
+                <SelectValue placeholder="Pick a case" />
+              </SelectTrigger>
+              <SelectContent>
+                {cases.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.shortId ? `#${c.shortId} · ` : ""}
+                    {c.title || "Untitled"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
       {/* Tab-local actions */}
       <div className="mb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Labs, scans, reports — AI-analyzed for insights. Uploads attach to your active case.
+          Labs, scans, reports — AI-analyzed for insights. Uploads attach to the case picked above.
         </p>
         <Button onClick={() => setShowUpload(true)} disabled={!canUpload} className="gap-2">
           <Upload className="w-4 h-4" /> Upload document
@@ -491,6 +628,10 @@ export default function AiDocumentsTab() {
               />
             </div>
             <label
+              onDragOver={handleCaseDragOver}
+              onDragEnter={handleCaseDragOver}
+              onDragLeave={handleCaseDragLeave}
+              onDrop={handleCaseDrop}
               className={`block ${
                 canUpload ? "cursor-pointer" : "cursor-not-allowed"
               }`}
@@ -503,12 +644,14 @@ export default function AiDocumentsTab() {
                 disabled={!canUpload || isUploading}
               />
               <div
-                className={`w-full border border-dashed border-border rounded-[14px] p-6 text-center transition-all bg-surface-2 ${
+                className={`w-full border border-dashed rounded-[14px] p-6 text-center transition-all ${
                   isUploading
-                    ? "opacity-60"
-                    : canUpload
-                    ? "hover:border-[var(--line-2)]"
-                    : "opacity-50"
+                    ? "opacity-60 border-border bg-surface-2"
+                    : isCaseDraggingOver && canUpload
+                      ? "border-primary bg-primary/5"
+                      : canUpload
+                        ? "border-border bg-surface-2 hover:border-[var(--line-2)]"
+                        : "opacity-50 border-border bg-surface-2"
                 }`}
               >
                 {isUploading ? (
@@ -522,9 +665,11 @@ export default function AiDocumentsTab() {
                   <>
                     <Upload className="w-8 h-8 text-ink-3 mx-auto mb-2" />
                     <p className="font-medium text-foreground">
-                      {canUpload
-                        ? "Click to select file"
-                        : "Open a case before uploading"}
+                      {isCaseDraggingOver && canUpload
+                        ? "Drop your file here"
+                        : canUpload
+                          ? "Drop a file here or click to browse"
+                          : "Open a case before uploading"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       PDF, DOC, CSV, TXT, JPEG, PNG, SVG, TIFF, WebP
@@ -668,6 +813,435 @@ export default function AiDocumentsTab() {
             })()}
         </DialogContent>
       </Dialog>
+      </section>
     </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// General documents — `/api/patient/documents` with `cv_upload=true`. Lets
+// the user upload to CareValidate without picking a case. Mirrors the My
+// Uploads tab visually but with an explicit "Upload to CareValidate" CTA
+// and a list scoped to docs that actually live in CareValidate.
+// ────────────────────────────────────────────────────────────────────────────
+
+const GENERAL_MAX_SIZE_BYTES = 20 * 1024 * 1024;
+
+function formatGeneralBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function GeneralDocumentsSection() {
+  const navigate = useNavigate();
+  const setSessionId = useAiChatStore((s) => s.setSessionId);
+  const setPendingPrompt = useAiChatStore((s) => s.setPendingPrompt);
+
+  const { data: documents = [], isLoading, isError } =
+    usePatientDocuments({ cvUpload: true });
+  const uploadMutation = useUploadPatientDocument();
+  const deleteMutation = useDeletePatientDocument();
+  const downloadMutation = useDownloadPatientDocument();
+  const analyzeMutation = useAnalyzeDocument();
+
+  const [showUpload, setShowUpload] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<DocumentCategory>("lab_report");
+  const [uploadError, setUploadError] = useState("");
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
+  // Drag-and-drop tracking — toggled on dragenter/dragleave so the drop
+  // zone can highlight while the user is holding a file over it.
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const resetForm = () => {
+    setPendingFile(null);
+    setUploadError("");
+    setCategory("lab_report");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  /**
+   * Shared file-validation path used by both the click-to-pick `<input>`
+   * and the drag-and-drop handler — same MIME + size guards, same error
+   * messages either way.
+   */
+  const acceptFile = (file: File | null) => {
+    setUploadError("");
+    if (!file) {
+      setPendingFile(null);
+      return;
+    }
+    if (!isGeneralUploadMime(file.type)) {
+      setUploadError(
+        `${file.type || "Unknown"} isn't accepted. Allowed: PDF, JPEG, PNG.`,
+      );
+      setPendingFile(null);
+      return;
+    }
+    if (file.size > GENERAL_MAX_SIZE_BYTES) {
+      setUploadError(
+        `File is ${formatGeneralBytes(file.size)} — limit is ${formatGeneralBytes(GENERAL_MAX_SIZE_BYTES)}.`,
+      );
+      setPendingFile(null);
+      return;
+    }
+    setPendingFile(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    acceptFile(e.target.files?.[0] ?? null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    if (!isDraggingOver) setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    acceptFile(e.dataTransfer.files?.[0] ?? null);
+  };
+
+  const handleUpload = async () => {
+    if (!pendingFile) {
+      setUploadError("Choose a file first.");
+      return;
+    }
+    try {
+      await uploadMutation.mutateAsync({
+        file: pendingFile,
+        category,
+        cvUpload: true,
+      });
+      toast({
+        title: "Document uploaded to CareValidate",
+        description: pendingFile.name,
+      });
+      setShowUpload(false);
+      resetForm();
+    } catch (err) {
+      setUploadError(describeUploadError(err));
+    }
+  };
+
+  const handleDelete = async (doc: GeneralPatientDocument) => {
+    if (!confirm(`Delete "${doc.originalName}"? This can't be undone.`)) return;
+    try {
+      await deleteMutation.mutateAsync(doc.id);
+      toast({ title: "Document deleted", description: doc.originalName });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Couldn't delete",
+        description: describeUploadError(err),
+      });
+    }
+  };
+
+  const handleDownload = async (doc: GeneralPatientDocument) => {
+    try {
+      await downloadMutation.mutateAsync({
+        id: doc.id,
+        filename: doc.originalName,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Couldn't download",
+        description: describeUploadError(err),
+      });
+    }
+  };
+
+  /**
+   * "Analyze" isn't a dedicated backend endpoint or a separate page.
+   * `AIAssistantBar` is mounted globally in `AppLayout` and watches the
+   * zustand `pendingPrompt` — when one appears it consumes the prompt,
+   * posts it through the streaming-chat endpoint, AND auto-expands the
+   * floating panel (`AIAssistantBar.tsx:189`).
+   *
+   * So all we do here is seed the prompt; the user stays on the Documents
+   * tab and the AI panel pops open with the seed message hidden, ready to
+   * stream the assistant's response.
+   *
+   * (The previous `navigate("/Chat")` was a mistake — `/Chat` is the
+   * care-team messaging page, completely unrelated to the AI assistant.)
+   */
+  const handleAnalyze = (doc: GeneralPatientDocument) => {
+    const cvId = doc.careValidateFileId;
+    if (!cvId) {
+      toast({
+        variant: "destructive",
+        title: "Can't analyze this document",
+        description:
+          "This document isn't linked to CareValidate. Re-upload with the CareValidate option enabled.",
+      });
+      return;
+    }
+    setPendingPrompt({
+      message: `Please analyse my document "${doc.originalName}" (CareValidate file id: ${cvId}).`,
+      isHidden: true,
+      documentId: cvId,
+    });
+  };
+
+  return (
+    <section>
+      <div className="mb-5 flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div>
+          <h2 className="apex-card-title flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4 text-primary" /> General documents
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Upload directly to CareValidate without picking a case.
+          </p>
+        </div>
+        <Button onClick={() => setShowUpload(true)} className="gap-2">
+          <Upload className="w-4 h-4" /> Upload to CareValidate
+        </Button>
+      </div>
+
+      {isError ? (
+        <div
+          className="apex-card mb-2 p-4 text-sm"
+          style={{
+            borderColor: "var(--att)",
+            background: "var(--att-soft)",
+            color: "var(--att)",
+          }}
+        >
+          Unable to load CareValidate documents right now.
+        </div>
+      ) : isLoading ? (
+        <div className="py-8 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+        </div>
+      ) : documents.length === 0 ? (
+        <div className="apex-card border-dashed py-10 text-center">
+          <FolderOpen className="w-12 h-12 text-ink-4 mx-auto mb-3" />
+          <p className="text-sm font-medium text-foreground mb-1">
+            No general documents yet
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Click "Upload to CareValidate" above to add your first one.
+          </p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {documents.map((doc) => {
+            const isDeleting =
+              deleteMutation.isPending && deleteMutation.variables === doc.id;
+            const isDownloading =
+              downloadMutation.isPending &&
+              (downloadMutation.variables as { id?: string } | undefined)?.id === doc.id;
+            const isAnalyzing = analyzingDocId === doc.id;
+            // Analyze hits CareValidate, so the doc must have been mirrored
+            // there via cv_upload=true. Local-only docs disable the button.
+            const canAnalyze = Boolean(doc.careValidateFileId);
+            return (
+              <div key={doc.id} className="apex-card p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-[10px] bg-secondary flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-ink-2" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="font-medium text-foreground text-[13.5px] truncate"
+                      title={doc.originalName}
+                    >
+                      {doc.originalName}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      <Badge variant="outline">
+                        {DOCUMENT_CATEGORY_META.find(
+                          (m) => m.value === doc.category,
+                        )?.label ?? doc.category}
+                      </Badge>
+                      <Badge variant="secondary" className="font-mono">
+                        {formatGeneralBytes(doc.size)}
+                      </Badge>
+                      {doc.careValidateFileId && (
+                        <Badge
+                          variant="outline"
+                          className="border-primary text-primary"
+                        >
+                          CareValidate
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <Button
+                        size="sm"
+                        onClick={() => void handleAnalyze(doc)}
+                        disabled={!canAnalyze || isAnalyzing}
+                        title={
+                          canAnalyze
+                            ? "Run AI analysis on this document"
+                            : "Re-upload with the CareValidate option to enable analysis."
+                        }
+                        className="gap-1.5 h-8"
+                      >
+                        {isAnalyzing ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" />
+                        ) : (
+                          <Sparkles className="w-3 h-3" />
+                        )}
+                        {isAnalyzing ? "Analyzing…" : "Analyze with AI"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 h-8"
+                        onClick={() => void handleDownload(doc)}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
+                        Download
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1.5 h-8 text-destructive"
+                        onClick={() => void handleDelete(doc)}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog
+        open={showUpload}
+        onOpenChange={(open) => {
+          setShowUpload(open);
+          if (!open) resetForm();
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload to CareValidate</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="apex-eyebrow mb-1.5 block">Category</label>
+              <Select
+                value={category}
+                onValueChange={(v) => setCategory(v as DocumentCategory)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DOCUMENT_CATEGORY_META.map((meta) => (
+                    <SelectItem key={meta.value} value={meta.value}>
+                      {meta.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="apex-eyebrow mb-1.5 block">File</label>
+              <label
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`block w-full cursor-pointer border border-dashed rounded-[14px] p-6 text-center transition-colors ${
+                  isDraggingOver
+                    ? "border-primary bg-primary/5"
+                    : "border-border bg-surface-2 hover:border-[var(--line-2)]"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={GENERAL_UPLOAD_ACCEPT}
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Upload className="w-8 h-8 text-ink-3 mx-auto mb-2" />
+                <p className="font-medium text-foreground text-sm">
+                  {isDraggingOver
+                    ? "Drop your file here"
+                    : pendingFile
+                      ? "Click to pick a different file"
+                      : "Drop a file here or click to browse"}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  PDF, JPEG, or PNG · up to{" "}
+                  {formatGeneralBytes(GENERAL_MAX_SIZE_BYTES)}
+                </p>
+                {pendingFile && (
+                  <p className="text-xs mt-3 text-foreground font-mono truncate">
+                    {pendingFile.name} · {formatGeneralBytes(pendingFile.size)}
+                  </p>
+                )}
+              </label>
+            </div>
+            {uploadError && (
+              <div
+                className="apex-card p-3 text-sm flex items-start gap-2"
+                style={{
+                  borderColor: "var(--att)",
+                  background: "var(--att-soft)",
+                  color: "var(--att)",
+                }}
+              >
+                <span>{uploadError}</span>
+              </div>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowUpload(false);
+                  resetForm();
+                }}
+                disabled={uploadMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => void handleUpload()}
+                disabled={uploadMutation.isPending || !pendingFile}
+                className="gap-2"
+              >
+                {uploadMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                Upload to CareValidate
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 }

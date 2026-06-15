@@ -39,11 +39,33 @@ export interface PatientDocument {
   category: DocumentCategory;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Set to the CareValidate file id when the document was uploaded with
+   * `cv_upload=true`. `null` for local-only uploads. Lets the UI mark
+   * CV-linked rows and pivot the list endpoint on the same field.
+   */
+  careValidateFileId?: string | null;
 }
 
 export interface UploadDocumentPayload {
   file: File;
   category: DocumentCategory;
+  /**
+   * Optional CareValidate flag — when `true` the backend ALSO uploads the
+   * file to CareValidate as a general (no-case) document and echoes back
+   * `careValidateFileId`. Default (omitted / false) → local-only upload.
+   */
+  cvUpload?: boolean;
+}
+
+/**
+ * Optional filter for `GET /api/patient/documents`:
+ *   - omitted → all local documents
+ *   - `true`  → only docs also linked to CareValidate
+ *   - `false` → only local-only docs (never sent to CV)
+ */
+export interface ListPatientDocumentsParams {
+  cvUpload?: boolean;
 }
 
 /**

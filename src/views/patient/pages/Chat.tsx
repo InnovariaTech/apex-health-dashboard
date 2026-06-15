@@ -255,7 +255,28 @@ export default function Chat() {
                 </div>
               )}
 
-              {isCommentsPending && comments.length === 0 ? (
+              {!activeCaseIdResolved ? (
+                // No case exists yet (latest-case-id returned "" and the
+                // cases list is empty). React Query keeps a disabled
+                // comments query in `isPending: true` forever, which used
+                // to show a perpetual spinner — render an explicit empty
+                // state instead.
+                <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <div
+                    className="w-16 h-16 rounded-[14px] flex items-center justify-center mb-4"
+                    style={{ background: "var(--apex-accent-soft)" }}
+                  >
+                    <Stethoscope className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-lg font-medium text-foreground mb-1">
+                    No case to chat against yet
+                  </h3>
+                  <p className="text-[13px] text-muted-foreground max-w-xs">
+                    Once you submit a case from My Cases, your conversation
+                    with the care team will appear here.
+                  </p>
+                </div>
+              ) : isCommentsPending && comments.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>

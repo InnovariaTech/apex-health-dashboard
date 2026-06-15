@@ -46,7 +46,7 @@ export const apexPatientNavItems = [
   // { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
   { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
+  // { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
 ];
 
 /** Gym-branded portals — fitness-focused subset. */
@@ -71,7 +71,7 @@ export const gymPatientNavItems = [
   // { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
   // { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
   { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
+  // { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
 ];
 
 export function getPatientNavItems(isGymEnv) {

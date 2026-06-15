@@ -36,7 +36,7 @@ import {
   useTrainerizeSettings,
 } from "@/hooks/trainerize/useLinkage";
 import {
-  localDateTimeInputToUtc,
+  localDateTimeInputToWire,
   type AppointmentType,
   type BookAppointmentPayload,
 } from "@/types/trainerize/appointments_types";
@@ -119,7 +119,7 @@ export default function BookAppointmentDialog({
       toast({
         title: "Can't book yet",
         description:
-          "No trainer or Trainerize link found on your account. Contact your trainer to get set up.",
+          "No trainer linked to your account. Contact your trainer to get set up.",
       });
       return;
     }
@@ -138,8 +138,8 @@ export default function BookAppointmentDialog({
 
     const payload: BookAppointmentPayload = {
       userId: trainerId as number,
-      startDate: localDateTimeInputToUtc(startLocal),
-      endDate: localDateTimeInputToUtc(endLocal),
+      startDate: localDateTimeInputToWire(startLocal),
+      endDate: localDateTimeInputToWire(endLocal),
       appointmentTypeId: Number(appointmentTypeId),
       attendents: [{ userId: clientId as number }],
       ...(notes.trim() ? { notes: notes.trim() } : {}),
@@ -182,7 +182,7 @@ export default function BookAppointmentDialog({
             <div>
               <p className="font-semibold mb-0.5">No trainer assigned</p>
               <p className="text-xs">
-                Booking needs a trainer on your Trainerize account. Contact
+                Booking needs a trainer assigned to your account. Contact
                 your trainer to get assigned, then come back here.
               </p>
             </div>
@@ -254,7 +254,8 @@ export default function BookAppointmentDialog({
                 Video call
               </Label>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Trainerize creates a meeting link if your trainer supports it.
+                A meeting link is generated automatically if your trainer
+                supports it.
               </p>
             </div>
             <Switch
@@ -278,7 +279,7 @@ export default function BookAppointmentDialog({
           <div className="flex items-start gap-2 text-xs text-muted-foreground border border-border rounded-sm p-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>
-              Cancel or reschedule from the Trainerize app — those actions
+              Cancel or reschedule from your trainer's app — those actions
               aren't available here yet. Recurring bookings are coming soon.
             </span>
           </div>

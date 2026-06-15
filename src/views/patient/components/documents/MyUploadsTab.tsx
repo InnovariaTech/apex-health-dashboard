@@ -9,7 +9,9 @@ import {
   Image as ImageIcon,
   AlertCircle,
   Loader2,
+  Sparkles,
 } from "lucide-react";
+import { useAiChatStore } from "@/stores/aiChatStore";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +78,10 @@ export default function MyUploadsTab() {
   const uploadMutation = useUploadPatientDocument();
   const deleteMutation = useDeletePatientDocument();
   const downloadMutation = useDownloadPatientDocument();
+  // Same hook used by the AI Documents tab. The global `AIAssistantBar`
+  // watches this store and auto-opens with a streaming response when a
+  // prompt lands — no navigation, no analyze endpoint needed.
+  const setPendingPrompt = useAiChatStore((s) => s.setPendingPrompt);
 
   const [showUpload, setShowUpload] = useState(false);
   const [category, setCategory] = useState<DocumentCategory>("lab_report");
@@ -155,6 +161,31 @@ export default function MyUploadsTab() {
     }
   };
 
+  /**
+   * Same flow as AI Documents → General: seed the AI store with a hidden
+   * prompt that references the document, then let the global `AIAssistantBar`
+   * pop open and stream the response. Requires `careValidateFileId` because
+   * the AI only has visibility into docs that were also uploaded to
+   * CareValidate (i.e. `cv_upload=true`). Local-only docs disable the button.
+   */
+  const handleAnalyze = (doc: PatientDocument) => {
+    const cvId = doc.careValidateFileId;
+    if (!cvId) {
+      toast({
+        variant: "destructive",
+        title: "Can't analyze this document",
+        description:
+          "Only documents linked to CareValidate can be analyzed. Upload from the AI Documents tab to enable analysis.",
+      });
+      return;
+    }
+    setPendingPrompt({
+      message: `Please analyse my document "${doc.originalName}" (CareValidate file id: ${cvId}).`,
+      isHidden: true,
+      documentId: cvId,
+    });
+  };
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
@@ -219,7 +250,21 @@ export default function MyUploadsTab() {
                     <p className="text-[11px] text-muted-foreground mt-2">
                       Uploaded {safeFormat(doc.createdAt, "MMM d, yyyy 'at' h:mm a")}
                     </p>
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      <Button
+                        size="sm"
+                        className="gap-1.5 h-8"
+                        onClick={() => handleAnalyze(doc)}
+                        disabled={!doc.careValidateFileId}
+                        title={
+                          doc.careValidateFileId
+                            ? "Run AI analysis on this document"
+                            : "Only available for CareValidate-linked uploads."
+                        }
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Analyze with AI
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

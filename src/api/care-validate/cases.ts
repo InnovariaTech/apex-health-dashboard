@@ -20,6 +20,25 @@ import type {
 const CASES_ENDPOINT = "/api/patient/my-requests/cases";
 const LATEST_CASE_ID_ENDPOINT = "/api/patient/my-requests/latest-case-id";
 
+/**
+ * Default lookback / lookahead for the cases list. The CareValidate backend
+ * now requires `startTime` and `endTime` (ISO 8601 with milliseconds + `Z`,
+ * e.g. `2026-04-18T23:59:59.000Z`) and 400s otherwise. We default to a wide
+ * window so callers that don't care about the range still get every case.
+ */
+const CASES_DEFAULT_LOOKBACK_DAYS = 365 * 5;
+const CASES_DEFAULT_LOOKAHEAD_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Emit the exact ISO 8601 shape the backend validates against — `Date`'s
+ * own `toISOString()` returns `YYYY-MM-DDTHH:mm:ss.sssZ`, which already
+ * matches the doc example (`2026-04-18T23:59:59.000Z`).
+ */
+function toCasesIsoDateTime(date: Date): string {
+  return date.toISOString();
+}
+
 function toArray(value: unknown): unknown[] {
   if (Array.isArray(value)) return value;
   if (!value || typeof value !== "object") return [];
@@ -81,8 +100,16 @@ export async function getMyCases(
   const includeOrders = params.includeOrders ?? true;
   const includeCalendarEvents = params.includeCalendarEvents ?? false;
   const documentFormat = params.documentFormat ?? "url";
-  const startTime = params.startTime;
-  const endTime = params.endTime;
+  // Backend (since recent change) 400s without a valid ISO 8601 datetime on
+  // both bounds. Always send something — caller-supplied if present,
+  // otherwise a wide default window so the list isn't accidentally empty.
+  const now = Date.now();
+  const startTime =
+    params.startTime ??
+    toCasesIsoDateTime(new Date(now - CASES_DEFAULT_LOOKBACK_DAYS * DAY_MS));
+  const endTime =
+    params.endTime ??
+    toCasesIsoDateTime(new Date(now + CASES_DEFAULT_LOOKAHEAD_DAYS * DAY_MS));
 
   const res = await axiosService.get<CasesListResponse>(CASES_ENDPOINT, {
     params: {
@@ -92,8 +119,8 @@ export async function getMyCases(
       includeOrders,
       includeCalendarEvents,
       documentFormat,
-      ...(startTime ? { startTime } : {}),
-      ...(endTime ? { endTime } : {}),
+      startTime,
+      endTime,
     },
   });
 
@@ -174,16 +201,29 @@ export async function getCaseFormResponses(
 }
 
 export async function getLatestCaseId(): Promise<string> {
-  const res = await axiosService.get<LatestCaseIdResponse>(LATEST_CASE_ID_ENDPOINT);
-  const data = res.data?.data as unknown;
+  try {
+    const res = await axiosService.get<LatestCaseIdResponse>(
+      LATEST_CASE_ID_ENDPOINT,
+    );
+    const data = res.data?.data as unknown;
 
-  if (typeof data === "string") return data;
-  if (data && typeof data === "object") {
-    const row = data as Record<string, unknown>;
-    return String(row.caseId ?? row.id ?? "");
+    if (typeof data === "string") return data;
+    if (data && typeof data === "object") {
+      const row = data as Record<string, unknown>;
+      return String(row.caseId ?? row.id ?? "");
+    }
+
+    return "";
+  } catch (err) {
+    // CareValidate returns 400 + `CASE_ERROR` when the user simply has no
+    // case yet ("No Case found for provided details!"). Surface that as an
+    // empty string so the Chat / AI Documents UIs render a proper "no case"
+    // empty state instead of a perpetual spinner or red error banner.
+    const status = (err as { response?: { status?: number } })?.response
+      ?.status;
+    if (status === 400) return "";
+    throw err;
   }
-
-  return "";
 }
 
 /**

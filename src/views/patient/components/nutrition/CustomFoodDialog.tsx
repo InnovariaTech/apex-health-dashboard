@@ -297,8 +297,9 @@ export default function CustomFoodDialog({
           <div className="flex items-start gap-2 text-xs text-muted-foreground border border-border rounded-sm p-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>
-              Trainerize accepts {Object.keys(NUTRIENT_BY_NO).length} USDA-aligned
-              nutrient codes. Energy (kcal) is required; the rest are optional.
+              Up to {Object.keys(NUTRIENT_BY_NO).length} USDA-aligned nutrient
+              codes are supported. Energy (kcal) is required; the rest are
+              optional.
             </span>
           </div>
         </div>

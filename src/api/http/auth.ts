@@ -85,7 +85,7 @@ export function createAuthApi(): AuthApi {
     },
     async verifyPortalOtp({ code }: VerifyOtpPayload): Promise<VerifyOtpResult> {
       const res = await axiosService.post<{ otpVerified?: boolean }>(
-        `${AUTH_BASE}/portal/verify-otp`,
+        `${AUTH_BASE}/carevalidate/verify-otp`,
         { code }
       );
       return { otpVerified: res.data?.otpVerified === true };

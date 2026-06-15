@@ -27,7 +27,7 @@ const DEVICE_TYPES = [
     id: "health-apps",
     name: "Health Apps",
     description: "Import data from fitness and health platforms",
-    devices: ["Apple Health", "Google Fit", "MyFitnessPal", "Trainerize", "Demotu"],
+    devices: ["Apple Health", "Google Fit", "MyFitnessPal", "Demotu"],
     icon: Smartphone,
     color: "bg-purple-50 border-purple-200",
     iconColor: "text-purple-600",

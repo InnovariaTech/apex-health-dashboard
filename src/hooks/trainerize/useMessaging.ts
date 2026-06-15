@@ -12,11 +12,23 @@ import type {
   SendMessagePayload,
 } from "@/types/trainerize/messaging_types";
 
+/**
+ * Polling cadence for the chat surfaces. Trainerize doesn't push, so we
+ * poll on a fixed interval to surface new messages without a manual
+ * refresh. Background tabs stop polling (`refetchIntervalInBackground`
+ * defaults to false), so this costs no traffic when the user isn't
+ * looking. Re-focusing the tab triggers an immediate refetch.
+ */
+const THREADS_POLL_MS = 30 * 1000;
+const THREAD_MESSAGES_POLL_MS = 15 * 1000;
+
 export function useThreads(view = "inbox", start = 0, count = 20) {
   return useQuery({
     queryKey: queryKeys.trainerize.threads(view, start, count),
     queryFn: () => listThreads({ view, start, count }),
     staleTime: 30 * 1000,
+    refetchInterval: THREADS_POLL_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -31,6 +43,8 @@ export function useThreadMessages(
       listThreadMessages({ threadId: threadId as number, start, count }),
     enabled: typeof threadId === "number" && threadId > 0,
     staleTime: 15 * 1000,
+    refetchInterval: THREAD_MESSAGES_POLL_MS,
+    refetchOnWindowFocus: true,
   });
 }
 

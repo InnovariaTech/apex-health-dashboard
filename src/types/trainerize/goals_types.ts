@@ -1,19 +1,27 @@
 /**
  * Trainerize goals — backs `src/api/trainerize/goals.ts`.
- * See `docs/trainerize/goals/` (README + per-endpoint docs).
+ * See `docs/trainerize/goals/` (README + per-endpoint docs) and the resolution
+ * doc `docs/trainerize/goals/goals-issue-responses.md`.
  *
  * Wire contract is a discriminated union on `type`:
  *   - textGoal       → free-text goal with optional progress
  *   - weightGoal     → weight target, start/current/weekly rate, activity level
  *   - nutritionGoal  → caloric + macro targets, tracking source
  *
- * Doc gaps tracked in `docs/trainerize/goals/goals_clarification.md`:
- *   §1  PUT /goals body has no `id` — Edit affordance is held.
- *   §2  PUT /goals/progress may not apply to weight/nutrition — UI gates by type.
- *   §3  `achieved` write path is unclear — no "Mark achieved" UI for now.
- *   §6  nutritionGoal grams/percent validation is unconfirmed — lenient form.
- *   §7  weightGoal required fields are unconfirmed — lenient form.
- *   §9  `progress` field on read is undocumented — UI tolerates absence.
+ * Resolved (responses doc):
+ *   §1  PUT /goals updates by `type` (one slot per type), not by `goalId`.
+ *       Edit dialog is live; warns when multiple goals share a type.
+ *   §2  PUT /goals/progress is text-only — UI gates by type.
+ *   §3  `achieved` is read-only — no manual "Mark achieved" write path.
+ *       Text goals flip via progress=100; weight via bodystats crossing target.
+ *   §6  nutritionGoal — Strategy A (calories + percents only, sum to 100).
+ *   §7  weightGoal — `type + unitWeight + weightGoal` required at minimum.
+ *
+ * Still partial / open:
+ *   §8  Cap on goals per type unknown — no hard gate; surface upstream errors.
+ *   §9  `progress` on read tolerated as optional — Trainerize may or may not
+ *       echo it back; UI shows last known value when absent.
+ *   §10 DELETE-with-body — Fastify supports it; gateway pass-through unverified.
  */
 
 // ─── Enums ────────────────────────────────────────────────────────────────
@@ -187,9 +195,8 @@ export type CreateGoalPayload =
   | CreateNutritionGoalPayload;
 
 /**
- * Doc §1: PUT /goals has no `id` in the documented body — the wire shape
- * matches add exactly. We keep them as separate aliases so the call sites
- * read clearly, but the type is intentionally identical.
+ * §1 (resolved): PUT /goals shares the POST body shape — no `goalId` on wire.
+ * Updates the type-level slot. Send the full target set you want active.
  */
 export type UpdateGoalPayload = CreateGoalPayload;
 

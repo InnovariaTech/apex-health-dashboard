@@ -37,9 +37,13 @@ import {
   useTrainerizeProfile,
 } from "@/hooks/trainerize/useLinkage";
 import {
+  getThreadDisplayName,
   readMessageSentAt,
   readSenderId,
   readThreadId,
+  readThreadPreview,
+  readThreadUnreadCount,
+  readThreadUpdatedAt,
 } from "@/types/trainerize/messaging_types";
 
 /**
@@ -104,7 +108,7 @@ function TrainerChatInner() {
               Trainer Messages
             </h1>
             <p className="text-sm text-muted-foreground">
-              Conversations with your Trainerize trainer
+              Conversations with your trainer
               {profile.data?.firstName ? ` (${profile.data.firstName}'s inbox)` : ""}.
             </p>
           </div>
@@ -149,6 +153,7 @@ function TrainerChatInner() {
           <ThreadList
             threads={threads}
             activeId={effectiveThreadId}
+            selfId={selfId}
             isLoading={threadsQuery.isLoading}
             isError={threadsQuery.isError}
             start={threadStart}
@@ -209,6 +214,7 @@ function TrainerChatInner() {
 function ThreadList({
   threads,
   activeId,
+  selfId,
   isLoading,
   isError,
   start,
@@ -217,6 +223,7 @@ function ThreadList({
 }: {
   threads: any[];
   activeId: number | undefined;
+  selfId: number | undefined;
   isLoading: boolean;
   isError: boolean;
   start: number;
@@ -271,8 +278,12 @@ function ThreadList({
           <ul className="divide-y">
             {threads.map((t) => {
               const id = readThreadId(t);
+              const displayName = getThreadDisplayName(t, selfId);
+              const preview = readThreadPreview(t);
+              const updatedAt = readThreadUpdatedAt(t);
+              const unread = readThreadUnreadCount(t);
               return (
-                <li key={id ?? t.subject}>
+                <li key={id ?? displayName}>
                   <button
                     onClick={() => id && onSelect(id)}
                     className={`w-full text-left p-3 hover:bg-muted/50 transition-colors ${
@@ -282,24 +293,24 @@ function ThreadList({
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-sm truncate">
-                          {t.subject || `Thread ${id ?? ""}`}
+                          {displayName}
                         </p>
                         <p className="text-xs text-muted-foreground line-clamp-2">
-                          {t.lastMessage || "—"}
+                          {preview || "—"}
                         </p>
                       </div>
-                      {typeof t.unreadCount === "number" && t.unreadCount > 0 && (
+                      {unread > 0 && (
                         <Badge
                           variant="default"
                           className="text-[10px] h-5 min-w-[1.25rem] flex items-center justify-center px-1"
                         >
-                          {t.unreadCount}
+                          {unread}
                         </Badge>
                       )}
                     </div>
-                    {t.updatedAt && (
+                    {updatedAt && (
                       <p className="text-[11px] text-muted-foreground mt-1.5">
-                        {safeFormat(t.updatedAt, "MMM d, h:mm a")}
+                        {safeFormat(updatedAt, "MMM d, h:mm a")}
                       </p>
                     )}
                   </button>
@@ -332,6 +343,35 @@ function MessagesPane({
   setStart: (n: number) => void;
   selfId: number | undefined;
 }) {
+  /**
+   * Auto-scroll: pin the chat to the bottom whenever the message list
+   * changes — on poll ticks that bring a new message, on send/reply
+   * success (which triggers a cache refetch), on thread switch, and on
+   * initial load. Uses raw `scrollTop = scrollHeight` because it's more
+   * reliable cross-browser than `scrollIntoView` (which can no-op when
+   * the parent's scrollHeight hasn't been recomputed yet).
+   *
+   * The double-pass (rAF + 50ms timeout) catches the case where bubbles
+   * grow taller after the first measure — e.g. avatar images loading.
+   */
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const lastMessageId = messages[messages.length - 1]?.id;
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const pin = () => {
+      const el = scrollContainerRef.current;
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+    };
+    const rafId = requestAnimationFrame(pin);
+    const timeoutId = setTimeout(pin, 50);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+    };
+  }, [threadId, lastMessageId, messages.length]);
+
   if (!threadId) {
     return (
       <Card>
@@ -352,7 +392,7 @@ function MessagesPane({
         {/* Header */}
         <div className="p-3 border-b bg-muted/50 flex items-center justify-between">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Thread {threadId}
+            Messages
           </p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {messages.length > 0 && (
@@ -400,7 +440,10 @@ function MessagesPane({
             </p>
           </div>
         ) : (
-          <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+          <div
+            ref={scrollContainerRef}
+            className="p-4 space-y-3 max-h-[60vh] overflow-y-auto"
+          >
             {messages.map((m) => (
               <MessageBubble
                 key={m.id}
@@ -536,7 +579,7 @@ function ComposeDialog({
         <DialogHeader>
           <DialogTitle>New conversation</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Sending to your assigned trainer (Trainerize user {trainerUserId}).
+            Sending to your assigned trainer (user {trainerUserId}).
           </p>
         </DialogHeader>
 

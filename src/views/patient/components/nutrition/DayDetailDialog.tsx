@@ -388,7 +388,7 @@ function EmptyDay() {
     <div className="text-center text-muted-foreground py-10">
       <Apple className="w-10 h-10 mx-auto mb-2 opacity-40" />
       <p className="font-semibold mb-1">No nutrition record for this day</p>
-      <p className="text-xs">Log meals from the Trainerize app or MFP / Fitbit.</p>
+      <p className="text-xs">Log meals from your trainer's app or MFP / Fitbit.</p>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Target,
   Loader2,
@@ -11,8 +11,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Pencil,
   Trash2,
   TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,22 +39,23 @@ import {
   type TextGoal,
   type WeightGoal,
 } from "@/types/trainerize/goals_types";
-import AddGoalDialog from "./AddGoalDialog";
+import GoalDialog from "./GoalDialog";
 import DeleteGoalDialog from "./DeleteGoalDialog";
 import UpdateProgressDialog from "./UpdateProgressDialog";
 
 /**
  * Goals tab — Trainerize goals on the patient Progress page.
- * See `docs/trainerize/goals/` and `goals_clarification.md`.
+ * See `docs/trainerize/goals/goals-issue-responses.md` for the latest
+ * resolutions to clarification questions.
  *
- * Read-only first pass:
  *  - Active / Achieved tab toggle (drives `achieved` query param)
  *  - Paginated list of cards
  *  - Card renders by `type`: text / weight / nutrition
- *
- * Write affordances (Add / Delete / Update progress) are landing as
- * follow-on tasks. Edit and "Mark achieved" are held on backend clarification
- * (§1, §3 in `goals_clarification.md`).
+ *  - Add + Edit via unified GoalDialog (PUT body = POST body; §1)
+ *  - Edit gated when multiple goals of same `type` exist (§1 caveat)
+ *  - Text progress dialog flips `achieved` server-side at 100% (§3)
+ *  - No manual "Mark achieved" button — `achieved` is read-only (§3)
+ *  - Weight current-weight updates routed to Progress → Measurements (§7)
  */
 
 const PAGE_SIZE = 25;
@@ -63,6 +66,7 @@ export default function GoalsTab() {
   const [view, setView] = useState<View>("active");
   const [start, setStart] = useState(0);
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<Goal | null>(null);
   const [deleting, setDeleting] = useState<Goal | null>(null);
   const [updatingProgress, setUpdatingProgress] = useState<TextGoal | null>(null);
   const { unitWeight } = useTrainerizeUnits();
@@ -74,6 +78,17 @@ export default function GoalsTab() {
   const goals = data?.goals ?? [];
   const hasPrev = start > 0;
   const hasNext = start + PAGE_SIZE < total;
+
+  // §1 caveat: PUT /goals updates the type-level slot, not a specific row.
+  // If the user has multiple goals of the same type, editing any of them is
+  // unsafe — flag both list and dialog with a warning, but don't hard-block.
+  const typeCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const g of goals) c[g.type] = (c[g.type] ?? 0) + 1;
+    return c;
+  }, [goals]);
+  const editingMultiple =
+    editing != null && (typeCounts[editing.type] ?? 0) > 1;
 
   const onViewChange = (next: string) => {
     setView(next as View);
@@ -89,7 +104,7 @@ export default function GoalsTab() {
             Goals
           </h2>
           <p className="text-sm text-muted-foreground">
-            Text, weight, and nutrition goals from Trainerize.
+            Text, weight, and nutrition goals.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -136,6 +151,8 @@ export default function GoalsTab() {
                 key={g.id}
                 goal={g}
                 unitWeight={unitWeight}
+                multipleOfType={(typeCounts[g.type] ?? 0) > 1}
+                onEdit={() => setEditing(g)}
                 onDelete={() => setDeleting(g)}
                 onUpdateProgress={
                   isTextGoal(g) ? () => setUpdatingProgress(g) : undefined
@@ -175,7 +192,14 @@ export default function GoalsTab() {
         </>
       )}
 
-      <AddGoalDialog open={addOpen} onClose={() => setAddOpen(false)} />
+      <GoalDialog open={addOpen} mode="create" onClose={() => setAddOpen(false)} />
+      <GoalDialog
+        open={editing != null}
+        mode="edit"
+        goal={editing}
+        multipleOfType={editingMultiple}
+        onClose={() => setEditing(null)}
+      />
       <DeleteGoalDialog goal={deleting} onClose={() => setDeleting(null)} />
       <UpdateProgressDialog
         goal={updatingProgress}
@@ -198,7 +222,7 @@ function EmptyState({ view }: { view: View }) {
         <p className="text-sm text-muted-foreground">
           {view === "achieved"
             ? "Goals you complete will appear here."
-            : "Your trainer can add goals from the Trainerize app, or you can add one here once available."}
+            : "Your trainer can add goals from their app, or you can add one here once available."}
         </p>
       </CardContent>
     </Card>
@@ -210,11 +234,15 @@ function EmptyState({ view }: { view: View }) {
 function GoalCard({
   goal,
   unitWeight,
+  multipleOfType,
+  onEdit,
   onDelete,
   onUpdateProgress,
 }: {
   goal: Goal;
   unitWeight: string;
+  multipleOfType: boolean;
+  onEdit: () => void;
   onDelete: () => void;
   onUpdateProgress?: () => void;
 }) {
@@ -222,16 +250,31 @@ function GoalCard({
     return (
       <TextGoalCard
         goal={goal}
+        multipleOfType={multipleOfType}
+        onEdit={onEdit}
         onDelete={onDelete}
         onUpdateProgress={onUpdateProgress}
       />
     );
   if (isWeightGoal(goal))
     return (
-      <WeightGoalCard goal={goal} fallbackUnit={unitWeight} onDelete={onDelete} />
+      <WeightGoalCard
+        goal={goal}
+        fallbackUnit={unitWeight}
+        multipleOfType={multipleOfType}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     );
   if (isNutritionGoal(goal))
-    return <NutritionGoalCard goal={goal} onDelete={onDelete} />;
+    return (
+      <NutritionGoalCard
+        goal={goal}
+        multipleOfType={multipleOfType}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
   // Defensive: unknown type — render a minimal stub so users see *something*
   // and we never crash on a wire shape we didn't model.
   return (
@@ -244,6 +287,47 @@ function GoalCard({
         <DeleteButton onClick={onDelete} />
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Edit action — disabled when multiple goals share the same `type` (§1).
+ * Renders a tooltip explaining why the button is inert in that case.
+ */
+function EditButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onClick}
+      disabled={disabled}
+      title={
+        disabled
+          ? "Multiple goals of this type — delete duplicates to edit"
+          : "Edit goal"
+      }
+      className="text-muted-foreground hover:text-foreground flex-shrink-0"
+    >
+      <Pencil className="w-4 h-4" />
+    </Button>
+  );
+}
+
+function MultipleTypeWarning() {
+  return (
+    <div className="flex items-start gap-1.5 text-[11px] text-amber-700 border border-amber-300 bg-amber-50 rounded-sm p-1.5">
+      <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+      <span>
+        Multiple goals of this type — Edit is disabled (it would update them
+        as a group).
+      </span>
+    </div>
   );
 }
 
@@ -274,10 +358,14 @@ function AchievedBadge({ achieved }: { achieved: boolean }) {
 
 function TextGoalCard({
   goal,
+  multipleOfType,
+  onEdit,
   onDelete,
   onUpdateProgress,
 }: {
   goal: TextGoal;
+  multipleOfType: boolean;
+  onEdit: () => void;
   onDelete: () => void;
   onUpdateProgress?: () => void;
 }) {
@@ -307,9 +395,12 @@ function TextGoalCard({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <AchievedBadge achieved={goal.achieved} />
+            <EditButton onClick={onEdit} disabled={multipleOfType} />
             <DeleteButton onClick={onDelete} />
           </div>
         </div>
+
+        {multipleOfType && <MultipleTypeWarning />}
 
         {showProgress && (
           <div>
@@ -349,10 +440,14 @@ function TextGoalCard({
 function WeightGoalCard({
   goal,
   fallbackUnit,
+  multipleOfType,
+  onEdit,
   onDelete,
 }: {
   goal: WeightGoal;
   fallbackUnit: string;
+  multipleOfType: boolean;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   const unit = goal.unitWeight || fallbackUnit;
@@ -394,9 +489,12 @@ function WeightGoalCard({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <AchievedBadge achieved={goal.achieved} />
+            <EditButton onClick={onEdit} disabled={multipleOfType} />
             <DeleteButton onClick={onDelete} />
           </div>
         </div>
+
+        {multipleOfType && <MultipleTypeWarning />}
 
         <div className="flex flex-wrap gap-2 text-xs">
           {typeof goal.weeklyWeightGoal === "number" && (
@@ -436,6 +534,10 @@ function WeightGoalCard({
             </div>
           </div>
         )}
+
+        <p className="text-[11px] text-muted-foreground border-t border-border pt-2">
+          To log today's weight, use Progress → Measurements.
+        </p>
       </CardContent>
     </Card>
   );
@@ -445,9 +547,13 @@ function WeightGoalCard({
 
 function NutritionGoalCard({
   goal,
+  multipleOfType,
+  onEdit,
   onDelete,
 }: {
   goal: NutritionGoal;
+  multipleOfType: boolean;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   return (
@@ -469,9 +575,12 @@ function NutritionGoalCard({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <AchievedBadge achieved={goal.achieved} />
+            <EditButton onClick={onEdit} disabled={multipleOfType} />
             <DeleteButton onClick={onDelete} />
           </div>
         </div>
+
+        {multipleOfType && <MultipleTypeWarning />}
 
         <div className="grid grid-cols-3 gap-2">
           <MacroTile

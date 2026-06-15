@@ -112,6 +112,10 @@ export function useLatestCaseId() {
     queryKey: queryKeys.careValidate.latestCaseId(),
     queryFn: getLatestCaseId,
     staleTime: 60_000,
+    // "No case yet" is a real terminal state — retrying just hammers the
+    // endpoint with the same 400. `getLatestCaseId` already maps that 400
+    // to "" so the consumer sees an empty string rather than an error.
+    retry: false,
   });
 }
 

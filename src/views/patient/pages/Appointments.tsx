@@ -23,30 +23,33 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TrainerizeGate from "@/components/trainerize/TrainerizeGate";
-import {
-  useAppointments,
-  useAppointmentTypes,
-} from "@/hooks/trainerize/useAppointments";
+import { useAppointmentTypes } from "@/hooks/trainerize/useAppointments";
+import { useTrainerizeCalendar } from "@/hooks/trainerize/useCalendar";
 import {
   APPOINTMENT_STATUS_LABELS,
   appointmentDurationMinutes,
   type Appointment,
   type AppointmentType,
 } from "@/types/trainerize/appointments_types";
-import BookAppointmentDialog from "@/views/patient/components/appointments/BookAppointmentDialog";
+import type { CalendarEntry } from "@/types/trainerize/calendar_types";
+import SelfBookDialog from "@/views/patient/components/appointments/SelfBookDialog";
 
 /**
  * Trainerize appointments page.
  *
- * What ships here today (against the current doc):
+ * What ships here today:
  *   - Upcoming + Past list (split by `endDate < now`)
- *   - Appointment types list (read-only)
- *   - Single, non-recurring booking (via BookAppointmentDialog)
+ *   - Self-book stepper (location → type → slot → confirm) via SelfBookDialog,
+ *     wiring up the flow in
+ *     `docs/trainerize/appointments/availableslot-self-book-apis.md` and
+ *     `docs/trainerize/locations/trainerize-locations.md`.
+ *   - Appointment types list (read-only) on the Types tab.
  *
  * Held (see `docs/trainerize/appointment_issue.md`):
- *   - Cancel / reschedule (§3) — UI surfaces "use Trainerize app" copy
- *   - Recurring booking (§4)
- *   - Multi-attendee group booking (§7)
+ *   - Cancel / reschedule (§3) — UI surfaces "use Trainerize app" copy.
+ *     `cancellationStatus` and `allowCancelBeforeDate` are display-only.
+ *   - Recurring booking (§4) — self-book is single-slot only per the doc.
+ *   - Multi-attendee group booking (§7).
  */
 
 const RANGE_PRESETS = {
@@ -69,18 +72,32 @@ function AppointmentsInner() {
   const [rangeKey, setRangeKey] = useState<RangeKey>("30d");
   const [bookOpen, setBookOpen] = useState(false);
 
+  // `GET /me/appointments` returns an empty list even when bookings exist
+  // (verified — backend bug). The same bookings show up on `GET /me/calendar`
+  // as `appointmentV2` entries, so we read from calendar and project them
+  // into the `Appointment` shape the existing card already renders. When
+  // `/me/appointments` is fixed upstream we can flip the read path back.
   const { startDate, endDate } = useMemo(() => {
     const today = new Date();
     return {
-      startDate: format(subDays(today, RANGE_PRESETS[rangeKey].days), "yyyy-MM-dd"),
-      endDate: format(addDays(today, RANGE_PRESETS[rangeKey].days), "yyyy-MM-dd"),
+      startDate: format(
+        subDays(today, RANGE_PRESETS[rangeKey].days),
+        "yyyy-MM-dd",
+      ),
+      endDate: format(
+        addDays(today, RANGE_PRESETS[rangeKey].days),
+        "yyyy-MM-dd",
+      ),
     };
   }, [rangeKey]);
 
-  const appointmentsQuery = useAppointments(startDate, endDate);
+  const calendarQuery = useTrainerizeCalendar(startDate, endDate);
   const typesQuery = useAppointmentTypes();
 
-  const appointments = appointmentsQuery.data?.appointments ?? [];
+  const appointments = useMemo(
+    () => projectAppointmentsFromCalendar(calendarQuery.data ?? []),
+    [calendarQuery.data],
+  );
   const types = typesQuery.data?.appointmentTypes ?? [];
 
   const now = Date.now();
@@ -110,7 +127,7 @@ function AppointmentsInner() {
             My Appointments
           </h1>
           <p className="text-muted-foreground">
-            Sessions with your trainer — powered by Trainerize.
+            Sessions with your trainer.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -152,7 +169,7 @@ function AppointmentsInner() {
           <AppointmentList
             list={upcoming}
             empty="No upcoming appointments in this window."
-            query={appointmentsQuery}
+            query={calendarQuery}
             onBook={() => setBookOpen(true)}
           />
         </TabsContent>
@@ -161,7 +178,7 @@ function AppointmentsInner() {
           <AppointmentList
             list={past}
             empty="No past appointments in this window."
-            query={appointmentsQuery}
+            query={calendarQuery}
           />
         </TabsContent>
 
@@ -175,7 +192,7 @@ function AppointmentsInner() {
         </TabsContent>
       </Tabs>
 
-      <BookAppointmentDialog
+      <SelfBookDialog
         open={bookOpen}
         onClose={() => setBookOpen(false)}
       />
@@ -193,7 +210,11 @@ function AppointmentList({
 }: {
   list: Appointment[];
   empty: string;
-  query: ReturnType<typeof useAppointments>;
+  query: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+  };
   onBook?: () => void;
 }) {
   if (query.isLoading) {
@@ -256,6 +277,14 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
   const isRecurring = appointment.actionInfo?.isRecurring === true;
   const typeName = appointment.appointmentType?.name;
 
+  const isSelfBooked = appointment.isSelfBooked === true;
+  const cancellationStatus = appointment.cancellationStatus;
+  const cancelBefore = appointment.allowCancelBeforeDate;
+  const cancelBeforeLabel =
+    typeof cancelBefore === "string" && cancelBefore
+      ? safeFormat(cancelBefore, "MMM d, h:mm a")
+      : null;
+
   return (
     <Card className="border-2">
       <CardContent className="p-4">
@@ -290,10 +319,33 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
               Recurring
             </Badge>
           )}
-          {typeof appointment.userId === "number" && (
-            <Badge variant="outline" className="text-muted-foreground gap-1">
-              <User className="w-3 h-3" /> Trainer #{appointment.userId}
+          {isSelfBooked && (
+            <Badge variant="outline" className="border-primary text-primary">
+              Self-booked
             </Badge>
+          )}
+          {cancellationStatus === "requested" && (
+            <Badge variant="outline" className="border-amber-500 text-amber-600">
+              Cancellation requested
+            </Badge>
+          )}
+          {cancellationStatus === "denied" && (
+            <Badge variant="outline" className="border-destructive text-destructive">
+              Cancellation denied
+            </Badge>
+          )}
+          {typeof (appointment as { trainerName?: unknown }).trainerName ===
+          "string" ? (
+            <Badge variant="outline" className="text-muted-foreground gap-1">
+              <User className="w-3 h-3" />{" "}
+              {(appointment as { trainerName: string }).trainerName}
+            </Badge>
+          ) : (
+            typeof appointment.userId === "number" && (
+              <Badge variant="outline" className="text-muted-foreground gap-1">
+                <User className="w-3 h-3" /> Trainer #{appointment.userId}
+              </Badge>
+            )
           )}
         </div>
 
@@ -304,7 +356,9 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
         )}
 
         <p className="mt-3 text-xs text-muted-foreground border-t border-border pt-2">
-          To cancel or reschedule, use the Trainerize app.
+          {cancelBeforeLabel
+            ? `Cancel before ${cancelBeforeLabel} in your trainer's app.`
+            : "To cancel or reschedule, use your trainer's app."}
         </p>
       </CardContent>
     </Card>
@@ -415,6 +469,81 @@ function TypesList({
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * Calendar entry types that represent a booked appointment. `appointmentV2`
+ * is the modern shape; `appointment` is the legacy doc-aligned variant.
+ */
+const APPOINTMENT_ENTRY_TYPES: ReadonlySet<string> = new Set([
+  "appointmentV2",
+  "appointment",
+]);
+
+/**
+ * Project a flat calendar entry list into `Appointment[]` so the existing
+ * card renderer keeps working. Calendar `appointmentV2` items keep the
+ * date/trainer fields under `detail`; we hoist the ones the card reads so
+ * `appointment.startDate`, `appointmentType.name`, `allowCancelBeforeDate`,
+ * etc. are populated.
+ *
+ * Fields not present on the calendar shape (`isSelfBooked`,
+ * `cancellationStatus`, `actionInfo.isVideoCall/.isRecurring`) stay
+ * undefined — the card renderer already guards those.
+ */
+function projectAppointmentsFromCalendar(
+  entries: CalendarEntry[],
+): Appointment[] {
+  const out: Appointment[] = [];
+  for (const entry of entries) {
+    if (
+      typeof entry.type !== "string" ||
+      !APPOINTMENT_ENTRY_TYPES.has(entry.type)
+    ) {
+      continue;
+    }
+    const detail = (entry.detail as Record<string, unknown> | undefined) ?? {};
+    const startDate =
+      typeof detail.startDate === "string" ? detail.startDate : undefined;
+    const endDate =
+      typeof detail.endDate === "string" ? detail.endDate : undefined;
+    const trainerId =
+      typeof detail.trainerID === "number" ? detail.trainerID : undefined;
+    const trainerName =
+      typeof detail.trainerName === "string" && detail.trainerName
+        ? detail.trainerName
+        : undefined;
+    const isVideoCall =
+      typeof entry.title === "string" &&
+      /\b(virtual|video|online)\b/i.test(entry.title);
+    const projected: Appointment = {
+      id: typeof entry.id === "number" ? entry.id : 0,
+      ...(startDate ? { startDate } : {}),
+      ...(endDate ? { endDate } : {}),
+      ...(typeof entry.status === "string"
+        ? { status: entry.status as Appointment["status"] }
+        : {}),
+      appointmentType:
+        typeof entry.title === "string" && entry.title
+          ? ({ id: 0, name: entry.title } as AppointmentType)
+          : null,
+      allowCancelBeforeDate:
+        typeof detail.allowCancelBeforeDate === "string"
+          ? detail.allowCancelBeforeDate
+          : null,
+      ...(typeof trainerId === "number" ? { userId: trainerId } : {}),
+      // `trainerName` lives outside the doc-canonical `Appointment` fields
+      // but the type carries `[key: string]: unknown`. The card prefers it
+      // over the numeric "Trainer #id" badge when present.
+      ...(trainerName ? { trainerName } : {}),
+      // Calendar entries don't expose `actionInfo`, but the title usually
+      // carries the modality ("virtual"). Best-effort inference so the
+      // Video badge surfaces for video-call appointments.
+      ...(isVideoCall ? { actionInfo: { isVideoCall: true } } : {}),
+    };
+    out.push(projected);
+  }
+  return out;
+}
 
 function tsOf(a: Appointment): number {
   const t = a.startDate ? Date.parse(a.startDate) : NaN;

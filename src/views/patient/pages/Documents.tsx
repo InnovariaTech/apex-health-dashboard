@@ -28,7 +28,7 @@ export default function Documents() {
       <Tabs defaultValue="ai" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="ai" className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" /> AI Documents
+            <Sparkles className="w-4 h-4" /> Care Documents
           </TabsTrigger>
           <TabsTrigger value="uploads" className="flex items-center gap-2">
             <Upload className="w-4 h-4" /> My Uploads

@@ -10,8 +10,8 @@
  *   §3  No cancel/reschedule documented — UI surfaces a "Trainerize app" note
  *       instead of broken affordances.
  *   §4  Recurrence semantics ambiguous — UI exposes single bookings only.
- *   §5  startDate / endDate timezone — doc says "UTC datetime" but the
- *       example shows no `Z`. We append `Z` defensively when serializing.
+ *   §5  Range-query format confirmed: `YYYY-MM-DD HH:MM:SS` (space, seconds).
+ *       Booking body still uses ISO `T` separator per the original doc example.
  *   §6  `attendents` typo — preserved as wire format until backend confirms.
  *   §7  Multi-attendee group sessions undocumented — UI books for self only.
  */
@@ -82,15 +82,33 @@ export interface Appointment {
   notes?: string;
   actionInfo?: ActionInfo;
   createdAt?: string;
+  /**
+   * Self-book fields (per
+   * `docs/trainerize/appointments/availableslot-self-book-apis.md` §Verify).
+   */
+  isSelfBooked?: boolean;
+  organizer?: unknown;
+  /** `unrequested` | `requested` | `denied` — read-only from upstream. */
+  cancellationStatus?: "unrequested" | "requested" | "denied" | string;
+  /** Cancel deadline (UTC) or `null` if not cancellable. */
+  allowCancelBeforeDate?: string | null;
   /** Unknown wire fields are preserved so the UI can show them in a JSON drawer. */
   [key: string]: unknown;
 }
 
 // ─── Appointment type ─────────────────────────────────────────────────────
 
-/** Best-effort shape; §2 — list/detail responses aren't documented. */
+/**
+ * Best-effort shape; §2 — list/detail responses aren't documented. Field
+ * naming varies in the wild: some Trainerize responses ship the canonical
+ * `id`, others use `appointmentTypeId` / `appointmentTypeID` (same names
+ * used for the query/body params). The `readAppointmentTypeId` helper
+ * below covers all three.
+ */
 export interface AppointmentType {
-  id: number;
+  id?: number;
+  appointmentTypeId?: number;
+  appointmentTypeID?: number;
   name?: string;
   description?: string;
   /** Duration in minutes (typical Trainerize convention). */
@@ -99,6 +117,22 @@ export interface AppointmentType {
   isBookable?: boolean;
   trainerID?: number;
   [key: string]: unknown;
+}
+
+/**
+ * Resolve the appointment type's numeric id across the field-name variants
+ * Trainerize uses (`id`, `appointmentTypeId`, `appointmentTypeID`). Returns
+ * `undefined` when none of them are a finite number — the caller's job to
+ * gate any request that needs the id.
+ */
+export function readAppointmentTypeId(
+  t: AppointmentType | null | undefined,
+): number | undefined {
+  if (!t) return undefined;
+  for (const v of [t.id, t.appointmentTypeId, t.appointmentTypeID]) {
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+  }
+  return undefined;
 }
 
 // ─── Query params ─────────────────────────────────────────────────────────
@@ -142,24 +176,94 @@ export interface BookAppointmentResult {
   [key: string]: unknown;
 }
 
+// ─── Timeslots (self-book flow) ───────────────────────────────────────────
+
+/**
+ * `availabilityStatus` values per
+ * `docs/trainerize/appointments/availableslot-self-book-apis.md`. Any other
+ * `unavailable_*` is treated as not bookable.
+ */
+export type TimeslotAvailability =
+  | "available"
+  | "unavailable_BookingWindow"
+  | string;
+
+export interface Timeslot {
+  /** Slot start — pass verbatim to `selfBook` as `appointmentTime`. */
+  timeslot: string;
+  availabilityStatus: TimeslotAvailability;
+  [key: string]: unknown;
+}
+
+export interface DailyTimeslot {
+  availableCount: number;
+  timeslots: Timeslot[];
+}
+
+/** Map of day key (e.g. `"2026-06-08 00:00:00"`) → day's slot bucket. */
+export type DailyTimeslotsMap = Record<string, DailyTimeslot>;
+
+export interface ListTimeslotsResult {
+  dailyTimeslots: DailyTimeslotsMap;
+}
+
+export interface ListTimeslotsParams {
+  locationId: number;
+  appointmentTypeId: number;
+  /** `YYYY-MM-DD HH:MM:SS` — start of range (typically midnight). */
+  startTime: string;
+  /** `YYYY-MM-DD HH:MM:SS` — end of range. */
+  endTime: string;
+}
+
+// ─── Self-book payload ────────────────────────────────────────────────────
+
+export interface SelfBookPayload {
+  locationId: number;
+  appointmentTypeId: number;
+  /** Exact slot string echoed back from the timeslots response. */
+  appointmentTime: string;
+}
+
+export interface SelfBookResult {
+  /** Trainerize envelope code — `0` on success. */
+  code?: number;
+  message?: string;
+  [key: string]: unknown;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 /**
- * §5 — doc says "UTC datetime" but the example shows no `Z`. We tolerate
- * both on read and append `Z` on write so the server never has to guess.
+ * Range-query format for `GET /me/appointments?startDate&endDate`.
+ *
+ * Confirmed format: `YYYY-MM-DD HH:MM:SS` (space-separated, down to seconds).
+ * Example accepted by upstream: `2026-06-17 14:00:00`.
+ *
+ * The boundary value depends on which side of the range we're emitting:
+ *   - startDate (default)  → `YYYY-MM-DD 00:00:00`  (inclusive day start)
+ *   - endDate (endOfDay=true) → `YYYY-MM-DD 23:59:59`  (inclusive day end)
  */
-export function toUtcDateTime(input: string): string {
-  if (!input) return input;
-  if (input.endsWith("Z") || /[+-]\d\d:?\d\d$/.test(input)) return input;
-  return `${input}Z`;
+export function toAppointmentRangeDateTime(
+  date: Date | string,
+  endOfDay = false,
+): string {
+  const d = typeof date === "string" ? new Date(`${date}T00:00:00`) : date;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const time = endOfDay ? "23:59:59" : "00:00:00";
+  return `${yyyy}-${mm}-${dd} ${time}`;
 }
 
-/** Formats datetime-local input (`YYYY-MM-DDTHH:MM`) → full ISO UTC. */
-export function localDateTimeInputToUtc(input: string): string {
+/**
+ * `POST /me/appointments` body — booking startDate / endDate.
+ * Original doc example uses `YYYY-MM-DDTHH:MM:SS` (ISO `T` separator, no `Z`).
+ */
+export function localDateTimeInputToWire(input: string): string {
   if (!input) return input;
   // Browser datetime-local omits seconds; pad to keep Trainerize happy.
-  const withSeconds = input.length === 16 ? `${input}:00` : input;
-  return toUtcDateTime(withSeconds);
+  return input.length === 16 ? `${input}:00` : input;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { axiosService } from "@/api/http/axiosInstance";
 import type {
+  ListPatientDocumentsParams,
   PatientDocument,
   UploadDocumentPayload,
 } from "@/types/documents/document_types";
@@ -31,8 +32,18 @@ function unwrap<T>(payload: unknown): T {
   return payload as T;
 }
 
-export async function listDocuments(): Promise<PatientDocument[]> {
-  const res = await axiosService.get<Envelope<PatientDocument[]>>(BASE);
+export async function listDocuments(
+  params: ListPatientDocumentsParams = {},
+): Promise<PatientDocument[]> {
+  // Only include the `cv_upload` query param when the caller explicitly
+  // passed `true`/`false`. Omission tells the backend "give me everything".
+  const query: Record<string, string> = {};
+  if (typeof params.cvUpload === "boolean") {
+    query.cv_upload = String(params.cvUpload);
+  }
+  const res = await axiosService.get<Envelope<PatientDocument[]>>(BASE, {
+    params: query,
+  });
   return unwrap<PatientDocument[]>(res.data) ?? [];
 }
 
@@ -42,6 +53,12 @@ export async function uploadDocument(
   const form = new FormData();
   form.append("file", payload.file);
   form.append("category", payload.category);
+  // `cv_upload=true` flips the backend to also send the file to CareValidate
+  // and populate `careValidateFileId` on the response. Only send the field
+  // when the caller explicitly opted in/out — backend defaults to false.
+  if (typeof payload.cvUpload === "boolean") {
+    form.append("cv_upload", String(payload.cvUpload));
+  }
 
   const res = await axiosService.post<Envelope<PatientDocument>>(BASE, form, {
     // Let the browser set the multipart boundary — overriding the default

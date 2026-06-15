@@ -206,7 +206,7 @@ function ProgressInner() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-1">My Progress</h1>
           <p className="text-muted-foreground">
-            Body stats & transformation — powered by Trainerize.
+            Body stats & transformation.
           </p>
         </div>
         <div className="flex items-center gap-3">

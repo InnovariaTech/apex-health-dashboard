@@ -132,7 +132,12 @@ export const queryKeys = {
     biomarkersSummary: () => ["patients", "biomarkers-summary"] as const,
   },
   patientDocuments: {
-    list: () => ["patient-documents", "list"] as const,
+    list: (cvUpload?: boolean) =>
+      [
+        "patient-documents",
+        "list",
+        { cvUpload: typeof cvUpload === "boolean" ? cvUpload : "all" },
+      ] as const,
   },
   trainerize: {
     link: () => ["trainerize", "link"] as const,
@@ -183,6 +188,18 @@ export const queryKeys = {
     appointmentTypes: () => ["trainerize", "appointment-types"] as const,
     appointmentType: (appointmentTypeId: number) =>
       ["trainerize", "appointment-type", appointmentTypeId] as const,
+    locations: () => ["trainerize", "locations"] as const,
+    timeslots: (
+      locationId: number,
+      appointmentTypeId: number,
+      startTime: string,
+      endTime: string,
+    ) =>
+      [
+        "trainerize",
+        "timeslots",
+        { locationId, appointmentTypeId, startTime, endTime },
+      ] as const,
     nutritionLogs: (startDate: string, endDate: string) =>
       ["trainerize", "nutrition-logs", { startDate, endDate }] as const,
     nutritionDay: (date?: string, nutritionId?: number) =>
@@ -202,5 +219,7 @@ export const queryKeys = {
         "custom-foods",
         { searchTerm, sort, start, count },
       ] as const,
+    mealPlan: (mealPlanId?: number) =>
+      ["trainerize", "meal-plan", { mealPlanId: mealPlanId ?? null }] as const,
   },
 };

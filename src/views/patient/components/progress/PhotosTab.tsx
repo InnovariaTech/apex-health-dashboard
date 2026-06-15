@@ -89,7 +89,7 @@ export default function PhotosTab() {
             Progress photos
           </h2>
           <p className="text-sm text-muted-foreground">
-            Stored in Trainerize. {RANGE_PRESETS[rangeKey].label} • {total} total
+            {RANGE_PRESETS[rangeKey].label} • {total} total
           </p>
         </div>
         <div className="flex items-center gap-3">

@@ -6,6 +6,7 @@
  * Create: `id: 0`. Update: existing id. Same shape for both.
  */
 import type { WeightUnit, DistanceUnit } from "./linkage_types";
+import type { ExerciseMedia } from "./plan_types";
 
 export type WorkoutType = "strength" | "cardio" | string;
 export type WorkoutStatus = "completed" | "scheduled" | string;
@@ -44,6 +45,8 @@ export interface DailyWorkoutExercise {
     name?: string;
     description?: string;
   };
+  /** Some daily-workouts/query payloads put `name` at the top level too. */
+  name?: string;
   sets?: number;
   target?: string;
   targetDetail?: string;
@@ -52,6 +55,13 @@ export interface DailyWorkoutExercise {
   recordType?: string;
   type?: string;
   stats?: ExerciseSetStat[];
+  /**
+   * Optional media block — same shape as on workout-defs exercises. When
+   * the query response carries it we can render thumbnails directly; if it
+   * doesn't, the logger falls back to a `defId → thumbnail` map built from
+   * the loaded workout-defs (see Workouts.tsx).
+   */
+  media?: ExerciseMedia | null;
 }
 
 export interface DailyWorkout {

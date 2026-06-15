@@ -30,14 +30,14 @@ export default function TrainerizeGate({ children }: TrainerizeGateProps) {
   if (isError) {
     const message =
       (error as { message?: string } | undefined)?.message ??
-      "Could not check Trainerize linkage";
+      "Could not check your trainer account";
     return (
       <div className="p-4 md:p-9 max-w-[720px] mx-auto bg-background text-foreground">
         <Card className="border-2 border-border">
           <CardContent className="p-6 flex items-start gap-3 text-destructive">
             <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-semibold mb-1">Trainerize unavailable</p>
+              <p className="font-semibold mb-1">Service unavailable</p>
               <p className="text-sm text-muted-foreground">{message}</p>
             </div>
           </CardContent>
@@ -55,12 +55,11 @@ export default function TrainerizeGate({ children }: TrainerizeGateProps) {
               <Dumbbell className="w-6 h-6 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-bold mb-2">
-              Trainerize isn't connected yet
+              Trainer account isn't connected yet
             </h2>
             <p className="text-sm text-muted-foreground">
-              Your workouts, programs, and trainer messages are powered by
-              Trainerize. Your account hasn't been linked yet — please contact
-              your trainer or admin to get set up.
+              Your account hasn't been linked to your trainer yet — please
+              contact your trainer or admin to get set up.
             </p>
           </CardContent>
         </Card>

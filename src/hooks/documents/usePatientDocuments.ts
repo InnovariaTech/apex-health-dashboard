@@ -7,23 +7,35 @@ import {
 } from "@/api/documents/patientDocuments";
 import { queryKeys } from "@/hooks/queryKeys";
 import type {
+  ListPatientDocumentsParams,
   UploadDocumentPayload,
 } from "@/types/documents/document_types";
 
 /**
  * Hooks for `/api/patient/documents/*`. Distinct from care-validate hooks.
+ *
+ * The `cvUpload` filter mirrors the backend's optional `cv_upload` query
+ * param — omit to fetch everything, pass `true`/`false` to slice by
+ * CareValidate linkage.
  */
 
-export function usePatientDocuments() {
+export function usePatientDocuments(
+  params: ListPatientDocumentsParams = {},
+) {
   return useQuery({
-    queryKey: queryKeys.patientDocuments.list(),
-    queryFn: listDocuments,
+    queryKey: queryKeys.patientDocuments.list(params.cvUpload),
+    queryFn: () => listDocuments(params),
     staleTime: 30 * 1000,
   });
 }
 
+/**
+ * Invalidate every patientDocuments-list flavor (all/true/false) so an
+ * upload from one section refreshes the lists in every section that might
+ * be visible.
+ */
 function invalidate(qc: ReturnType<typeof useQueryClient>) {
-  qc.invalidateQueries({ queryKey: queryKeys.patientDocuments.list() });
+  qc.invalidateQueries({ queryKey: ["patient-documents", "list"] });
 }
 
 export function useUploadPatientDocument() {
