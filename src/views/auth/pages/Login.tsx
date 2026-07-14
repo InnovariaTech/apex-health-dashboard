@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
 import { useLoginMutation, useVerifyOtp } from "@/hooks/auth/useAuth";
@@ -107,12 +107,11 @@ export default function Login() {
               {step === "credentials" ? (
                 <>
                   <CardHeader className="space-y-3 px-0 pt-0 items-center text-center">
-                    <div className="w-11 h-11 rounded-[12px] bg-foreground grid place-items-center">
-                      <span className="font-serif text-xl font-semibold text-background leading-none">
-                        A
-                      </span>
-                    </div>
-                    <div className="apex-eyebrow">Apex MD Health</div>
+                    <img
+                      src="/images/apex-md-logo.png"
+                      alt="Apex MD Health"
+                      className="h-9 w-auto"
+                    />
                     <h1 className="apex-page-title">
                       Welcome <em>back</em>
                     </h1>
@@ -173,6 +172,14 @@ export default function Login() {
                               <Eye className="w-4 h-4" />
                             )}
                           </button>
+                        </div>
+                        <div className="flex justify-end">
+                          <Link
+                            to="/reset-password"
+                            className="text-[12px] text-ink-3 hover:text-foreground transition-colors"
+                          >
+                            Forgot password?
+                          </Link>
                         </div>
                       </div>
                       <Button

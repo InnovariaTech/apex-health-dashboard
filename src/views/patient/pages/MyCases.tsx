@@ -1,12 +1,16 @@
-import { useMemo } from "react";
-import { useCases } from "@/hooks/care-validate/useCases";
-import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
+import { useCasesYearRolling } from "@/hooks/care-validate/useCases";
+import { useProfile } from "@/hooks/care-validate/useProfile";
+import { usePatientData } from "@/hooks/patients/usePatientData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import type { CaseItem } from "@/types/care-validate/case_types";
+import {
+  derivePersonName,
+  sanitizeCaseTitle,
+} from "@/views/patient/utils/caseTitleUtils";
 
 interface AssigneeInitial {
   id: string;
@@ -123,11 +127,23 @@ function getAssigneeInitials(caseItem: CaseItem): AssigneeInitial[] {
 
 export default function MyCases() {
   const navigate = useNavigate();
-  const dateRange = useMemo(() => getCasesDateRange(), []);
-  const { data: cases = [], isLoading, isError } = useCases({
-    startTime: dateRange.startTime,
-    endTime: dateRange.endTime,
-  });
+  // Six 50-day windows = ~10 months on first paint. The "Load older"
+  // button below adds another ~10 months per click (up to 5 years).
+  const {
+    data: cases = [],
+    isLoading,
+    isError,
+    loadOlder,
+    canLoadOlder,
+    isLoadingOlder,
+    daysCovered,
+  } = useCasesYearRolling();
+
+  // The patient's own name — used to strip it from auto-generated case
+  // titles ("Case for {name}") so the card never surfaces their identity.
+  const { data: profileData } = useProfile();
+  const { data: authData } = usePatientData();
+  const patientName = derivePersonName(profileData, authData);
 
   if (isLoading) {
     return (
@@ -161,7 +177,7 @@ export default function MyCases() {
         </div>
       )}
 
-      {cases.length === 0 ? (
+      {cases.length === 0 && !canLoadOlder ? (
         <div className="apex-card border-dashed p-10 text-center">
           <p className="font-serif text-lg font-medium text-foreground mb-1">
             No cases yet
@@ -170,11 +186,26 @@ export default function MyCases() {
             Your active and past care requests will appear here once created.
           </p>
         </div>
+      ) : cases.length === 0 ? (
+        <div className="apex-card border-dashed p-10 text-center">
+          <p className="font-serif text-lg font-medium text-foreground mb-1">
+            No cases in the last {Math.round(daysCovered / 30)} months
+          </p>
+          <p className="text-[13px] text-muted-foreground">
+            Try loading older cases below.
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {cases.map((caseItem, index) => {
             const assigneeInitials = getAssigneeInitials(caseItem);
-            const caseTitle = caseItem.title || caseItem.raw?.title || "Untitled Case";
+            // Strip the patient name using their profile name, falling back
+            // to the case's own submitter if the profile hasn't loaded.
+            const submitterName = derivePersonName(caseItem.raw?.submitter);
+            const caseTitle = sanitizeCaseTitle(
+              caseItem.title || caseItem.raw?.title,
+              patientName || submitterName,
+            );
             const caseShortId = caseItem.shortId || caseItem.raw?.shortId || caseItem.id;
             const caseCreatedAt = caseItem.createdAt || caseItem.raw?.createdAt || "";
             const caseStatus = deriveCaseStatus(caseItem);
@@ -276,6 +307,30 @@ export default function MyCases() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {(canLoadOlder || isLoadingOlder) && (
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={loadOlder}
+            disabled={!canLoadOlder || isLoadingOlder}
+          >
+            {isLoadingOlder ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading older cases…
+              </>
+            ) : (
+              "Load older cases"
+            )}
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            Showing the last {Math.round(daysCovered / 30)} months
+          </p>
         </div>
       )}
     </div>

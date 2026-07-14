@@ -17,37 +17,47 @@ import {
   ListChecks,
   CalendarDays,
   Apple,
+  TestTube,
+  ShoppingBag,
+  Watch,
+  Dna,
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
-/** Full clinical nav (Apex MD environment). */
-export const apexPatientNavItems = [
+/** Apex MD (clinical) section — top of sidebar. */
+export const apexMdNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
   { title: "Health Analysis", url: createPageUrl("HealthAnalysis"), icon: Sparkles },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
-  // { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
-
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
-  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
+  { title: "Genetics", url: createPageUrl("Genetics"), icon: Dna },
   { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
-  { title: "Trainer Messages", url: createPageUrl("TrainerChat"), icon: MessagesSquare },
-  { title: "Habits", url: createPageUrl("Habits"), icon: ListChecks },
-  { title: "Appointments", url: createPageUrl("Appointments"), icon: CalendarDays },
-  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-
-  // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  // { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  // { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
-  // { title: "Health", url: createPageUrl("Health"), icon: Activity },
+  { title: "Lab Kits", url: createPageUrl("LabKits"), icon: TestTube },
+  { title: "Wearables", url: createPageUrl("Wearables"), icon: Watch },
+  // { title: "Appointments", url: createPageUrl("Appointments"), icon: CalendarDays }, // hidden — no backend yet
   { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  // { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  // { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  // { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
-  { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
-  { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  // { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
+  { title: "My Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
+  { title: "Shop", url: createPageUrl("Shop"), icon: ShoppingBag },
 ];
+
+/** Apex Fit section — merged into the single sidebar list (no separate divider/logo). */
+export const apexFitNavItems = [
+  { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
+  { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
+  { title: "Habits", url: createPageUrl("Habits"), icon: ListChecks },
+  { title: "Trainer Messages", url: createPageUrl("TrainerChat"), icon: MessagesSquare },
+];
+
+/** Profile — always pinned to the very bottom of the sidebar. */
+export const profileNavItem = {
+  title: "Profile",
+  url: createPageUrl("Profile"),
+  icon: UserCircle,
+};
+
+/** Legacy flat list — used by callers that iterate without group context. */
+export const apexPatientNavItems = [...apexMdNavItems, ...apexFitNavItems, profileNavItem];
 
 /** Gym-branded portals — fitness-focused subset. */
 export const gymPatientNavItems = [
@@ -56,24 +66,29 @@ export const gymPatientNavItems = [
   { title: "browse-treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
+  { title: "Lab Kits", url: createPageUrl("LabKits"), icon: TestTube },
   { title: "Workouts", url: createPageUrl("Workouts"), icon: Dumbbell },
   { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
+  { title: "Wearables", url: createPageUrl("Wearables"), icon: Watch },
   { title: "Trainer Messages", url: createPageUrl("TrainerChat"), icon: MessagesSquare },
   { title: "Habits", url: createPageUrl("Habits"), icon: ListChecks },
   { title: "Appointments", url: createPageUrl("Appointments"), icon: CalendarDays },
   { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  // { title: "Advanced Biomarkers", url: createPageUrl("AdvancedBiomarkers"), icon: Dna },
-  // { title: "Nutrition", url: createPageUrl("Nutrition"), icon: Apple },
-  // { title: "Sleep", url: createPageUrl("Sleep"), icon: Moon },
-  // { title: "Store", url: createPageUrl("Marketplace"), icon: ShoppingBag },
   { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  // { title: "Sync Devices", url: createPageUrl("SyncDevices"), icon: Watch },
-  // { title: "Referral", url: createPageUrl("Referral"), icon: Gift },
-  // { title: "Rewards", url: createPageUrl("Rewards"), icon: Trophy },
+  { title: "Shop", url: createPageUrl("Shop"), icon: ShoppingBag },
   { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
-  // { title: "Billing", url: createPageUrl("Billing"), icon: CreditCard },
 ];
 
+/** Flat nav items — used by callers that only need a single list (e.g. breadcrumb lookup). */
 export function getPatientNavItems(isGymEnv) {
   return isGymEnv ? gymPatientNavItems : apexPatientNavItems;
+}
+
+/** Grouped nav items for the sidebar. Everything now lives in a single list
+ *  (`md`); the Fit items are merged in and Profile is pinned to the bottom. */
+export function getPatientNavGroups(isGymEnv) {
+  if (isGymEnv) {
+    return { md: gymPatientNavItems, fit: [] };
+  }
+  return { md: [...apexMdNavItems, ...apexFitNavItems, profileNavItem], fit: [] };
 }

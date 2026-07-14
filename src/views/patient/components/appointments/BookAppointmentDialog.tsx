@@ -279,7 +279,7 @@ export default function BookAppointmentDialog({
           <div className="flex items-start gap-2 text-xs text-muted-foreground border border-border rounded-sm p-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>
-              Cancel or reschedule from your trainer's app — those actions
+              Cancel or reschedule from the Apex Fit app — those actions
               aren't available here yet. Recurring bookings are coming soon.
             </span>
           </div>

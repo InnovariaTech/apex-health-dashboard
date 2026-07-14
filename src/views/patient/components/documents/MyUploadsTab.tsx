@@ -175,12 +175,12 @@ export default function MyUploadsTab() {
         variant: "destructive",
         title: "Can't analyze this document",
         description:
-          "Only documents linked to CareValidate can be analyzed. Upload from the AI Documents tab to enable analysis.",
+          "Only documents linked for AI analysis can be analyzed. Upload from the AI Documents tab to enable analysis.",
       });
       return;
     }
     setPendingPrompt({
-      message: `Please analyse my document "${doc.originalName}" (CareValidate file id: ${cvId}).`,
+      message: `Please analyse my document "${doc.originalName}".`,
       isHidden: true,
       documentId: cvId,
     });
@@ -259,7 +259,7 @@ export default function MyUploadsTab() {
                         title={
                           doc.careValidateFileId
                             ? "Run AI analysis on this document"
-                            : "Only available for CareValidate-linked uploads."
+                            : "Only available for AI-linked uploads."
                         }
                       >
                         <Sparkles className="w-3 h-3" />

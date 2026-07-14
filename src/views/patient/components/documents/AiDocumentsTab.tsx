@@ -9,7 +9,8 @@ import {
   useFileDownloadUrl,
   useAnalyzeDocument,
 } from "@/hooks/care-validate/useDocuments";
-import { useCases, useLatestCaseId } from "@/hooks/care-validate/useCases";
+import { useCasesYearRolling, useLatestCaseId } from "@/hooks/care-validate/useCases";
+import { ELIGIBLE_CASE_STATUSES } from "@/types/care-validate/case_types";
 import { fileToBase64, isAllowedUploadMimeType } from "@/api/care-validate/files";
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
@@ -28,7 +29,6 @@ import {
   type DocumentCategory,
   type PatientDocument as GeneralPatientDocument,
 } from "@/types/documents/document_types";
-import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -129,27 +129,30 @@ export default function AiDocumentsTab() {
 
   const { data: apiDocuments = [], isLoading, isError } = useDocuments();
   const latestCaseQuery = useLatestCaseId();
-  // Wide cases window so the picker can show every case the patient owns
-  // (CareValidate refuses requests with no startTime/endTime).
-  const casesDateRange = React.useMemo(() => getCasesDateRange(), []);
-  const casesQuery = useCases({
-    startTime: casesDateRange.startTime,
-    endTime: casesDateRange.endTime,
-  });
+  // Six parallel 2-month windows (1 year), pre-filtered server-side to
+  // the 4 statuses the user can actually attach documents against
+  // (OPEN/ASSIGNED/IN_PROGRESS/APPROVED). Closed / rejected cases never
+  // enter the picker.
+  const casesQuery = useCasesYearRolling({ status: ELIGIBLE_CASE_STATUSES });
   const cases = casesQuery.data ?? [];
   const uploadFileMutation = useUploadFile();
   const deleteFileMutation = useDeleteFile();
   const fileDownloadMutation = useFileDownloadUrl();
   const analyzeMutation = useAnalyzeDocument();
 
-  // Picked case for the "Case documents" section. Defaults to the latest
-  // case once that resolves; if there's exactly one case, the dropdown
+  // Picked case for the "Case documents" section. Auto-default picks from
+  // the eligible cases only — if `latestCaseQuery` points at a now-closed
+  // case it's ignored. If there's exactly one eligible case the dropdown
   // hides itself and stays pinned to it.
   const [selectedCaseId, setSelectedCaseId] = useState<string>("");
   useEffect(() => {
     if (selectedCaseId) return;
     const latest = latestCaseQuery.data;
-    if (typeof latest === "string" && latest) {
+    if (
+      typeof latest === "string" &&
+      latest &&
+      cases.some((c) => c.id === latest)
+    ) {
       setSelectedCaseId(latest);
       return;
     }
@@ -157,6 +160,16 @@ export default function AiDocumentsTab() {
       setSelectedCaseId(cases[0].id);
     }
   }, [selectedCaseId, latestCaseQuery.data, cases]);
+
+  // If the currently selected case drops out of the eligible list (e.g. it
+  // got closed since the page mounted), clear the selection so the user
+  // either picks a new one or sees the empty state.
+  useEffect(() => {
+    if (!selectedCaseId) return;
+    if (!cases.some((c) => c.id === selectedCaseId)) {
+      setSelectedCaseId("");
+    }
+  }, [selectedCaseId, cases]);
 
   useEffect(() => {
     api.auth
@@ -356,6 +369,10 @@ export default function AiDocumentsTab() {
         {casesQuery.isLoading ? (
           <p className="text-sm text-muted-foreground mb-5">Loading cases…</p>
         ) : cases.length === 0 ? (
+          // Covers both "no cases at all" and "every case the user has
+          // is closed/rejected" — eligible-status filter already strips
+          // the non-attachable ones server-side, so this single banner is
+          // accurate in either situation.
           <div
             className="apex-card mb-5 p-4 text-sm"
             style={{
@@ -364,7 +381,7 @@ export default function AiDocumentsTab() {
               color: "var(--bord)",
             }}
           >
-            You don't have any cases yet. Submit a case from{" "}
+            You don't have any active cases. Submit or reopen a case from{" "}
             <strong>My Cases</strong> to start attaching documents.
           </div>
         ) : cases.length === 1 ? (
@@ -431,20 +448,6 @@ export default function AiDocumentsTab() {
           }}
         >
           Unable to load documents right now. Please refresh and try again.
-        </div>
-      )}
-
-      {!canUpload && !latestCaseQuery.isLoading && (
-        <div
-          className="apex-card mb-6 p-4 text-sm"
-          style={{
-            borderColor: "var(--bord)",
-            background: "var(--bord-soft)",
-            color: "var(--bord)",
-          }}
-        >
-          Uploads need an active case. Open or continue a case before adding new
-          documents.
         </div>
       )}
 
@@ -923,7 +926,7 @@ function GeneralDocumentsSection() {
         cvUpload: true,
       });
       toast({
-        title: "Document uploaded to CareValidate",
+        title: "Document uploaded for AI analysis",
         description: pendingFile.name,
       });
       setShowUpload(false);
@@ -983,12 +986,12 @@ function GeneralDocumentsSection() {
         variant: "destructive",
         title: "Can't analyze this document",
         description:
-          "This document isn't linked to CareValidate. Re-upload with the CareValidate option enabled.",
+          "This document isn't linked for AI analysis. Re-upload from the AI Documents tab to enable analysis.",
       });
       return;
     }
     setPendingPrompt({
-      message: `Please analyse my document "${doc.originalName}" (CareValidate file id: ${cvId}).`,
+      message: `Please analyse my document "${doc.originalName}".`,
       isHidden: true,
       documentId: cvId,
     });
@@ -1002,11 +1005,11 @@ function GeneralDocumentsSection() {
             <Sparkles className="w-4 h-4 text-primary" /> General documents
           </h2>
           <p className="text-sm text-muted-foreground">
-            Upload directly to CareValidate without picking a case.
+            Upload documents for AI analysis without picking a case.
           </p>
         </div>
         <Button onClick={() => setShowUpload(true)} className="gap-2">
-          <Upload className="w-4 h-4" /> Upload to CareValidate
+          <Upload className="w-4 h-4" /> Upload for AI Analysis
         </Button>
       </div>
 
@@ -1019,7 +1022,7 @@ function GeneralDocumentsSection() {
             color: "var(--att)",
           }}
         >
-          Unable to load CareValidate documents right now.
+          Unable to load documents right now.
         </div>
       ) : isLoading ? (
         <div className="py-8 flex items-center justify-center">
@@ -1032,7 +1035,7 @@ function GeneralDocumentsSection() {
             No general documents yet
           </p>
           <p className="text-xs text-muted-foreground">
-            Click "Upload to CareValidate" above to add your first one.
+            Click "Upload for AI Analysis" above to add your first one.
           </p>
         </div>
       ) : (
@@ -1074,7 +1077,7 @@ function GeneralDocumentsSection() {
                           variant="outline"
                           className="border-primary text-primary"
                         >
-                          CareValidate
+                          AI Ready
                         </Badge>
                       )}
                     </div>
@@ -1086,7 +1089,7 @@ function GeneralDocumentsSection() {
                         title={
                           canAnalyze
                             ? "Run AI analysis on this document"
-                            : "Re-upload with the CareValidate option to enable analysis."
+                            : "Re-upload from the AI Documents tab to enable analysis."
                         }
                         className="gap-1.5 h-8"
                       >
@@ -1143,7 +1146,7 @@ function GeneralDocumentsSection() {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Upload to CareValidate</DialogTitle>
+            <DialogTitle>Upload for AI Analysis</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1236,7 +1239,7 @@ function GeneralDocumentsSection() {
                 ) : (
                   <Upload className="w-4 h-4" />
                 )}
-                Upload to CareValidate
+                Upload for AI Analysis
               </Button>
             </div>
           </div>

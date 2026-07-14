@@ -357,8 +357,8 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
 
         <p className="mt-3 text-xs text-muted-foreground border-t border-border pt-2">
           {cancelBeforeLabel
-            ? `Cancel before ${cancelBeforeLabel} in your trainer's app.`
-            : "To cancel or reschedule, use your trainer's app."}
+            ? `Cancel before ${cancelBeforeLabel} in the Apex Fit app.`
+            : "To cancel or reschedule, use the Apex Fit app."}
         </p>
       </CardContent>
     </Card>

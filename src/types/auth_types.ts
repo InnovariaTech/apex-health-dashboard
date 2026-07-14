@@ -24,8 +24,17 @@ export interface ForgotPasswordPayload {
   email: string;
 }
 
+/**
+ * Backend contract (see `docs/auth/frontend-carevalidate-auth-admin-handoff.md`
+ * §"Step 2: Submit Reset OTP + New Password"). The old `{ token, newPassword }`
+ * shape is deprecated — `POST /api/auth/forgot-password` no longer issues a
+ * token; users receive a 6-digit OTP by email.
+ */
 export interface ResetPasswordPayload {
-  token: string;
+  email: string;
+  /** Exactly 6 digits — matches the backend `^\d{6}$` schema. */
+  code: string;
+  /** Minimum 8 characters. */
   newPassword: string;
 }
 

@@ -1,0 +1,27 @@
+{
+  "trainer": {
+    "name": "Colton Reyes",
+    "status": "Online · Strength & Conditioning",
+    "initials": "C",
+    "avatar": "assets/img/colton-reyes.png"
+  },
+  "showing": "1–14",
+  "timeline": [
+    { "day": "Mon, Jun 15" },
+    { "from": "trainer", "time": "8:42 AM", "text": "Morning Robert — solid work closing out week 3. Your squat volume's up 12% from last block. 💪" },
+    { "from": "you", "time": "8:55 AM", "text": "Thanks Colton. Knees felt a lot better this week with the new warmup." },
+    { "from": "trainer", "time": "9:01 AM", "text": "Exactly what I want to hear. Keep the banded walks before every lower day." },
+    { "day": "Tue, Jun 16" },
+    { "from": "you", "time": "7:18 AM", "text": "Quick one — should I push for a deadlift PR Friday, or hold back?" },
+    { "from": "trainer", "time": "7:45 AM", "text": "Hold at RPE 8. We test maxes at the end of the block, not mid-cycle." },
+    { "from": "you", "time": "7:47 AM", "text": "Got it. Also, sleep's been rough — about 5.5 hrs the last few nights." },
+    { "from": "trainer", "time": "8:30 AM", "text": "Noted. Let's pull Friday's accessory work and keep the main lifts. Recovery comes first." },
+    { "from": "you", "time": "8:31 AM", "text": "Appreciate it 🙏" },
+    { "day": "Wed, Jun 17" },
+    { "from": "trainer", "time": "4:12 PM", "text": "Just assigned next week — “Hypertrophy Block · Wk 4.” Take a look when you get a sec." },
+    { "from": "you", "time": "5:03 PM", "text": "Just opened it. Bulgarian split squats are back I see 😅" },
+    { "from": "trainer", "time": "5:09 PM", "text": "They build character. Hit your protein target and you'll fly through them." },
+    { "from": "you", "time": "5:11 PM", "text": "On it. 180g a day, locked in." },
+    { "from": "trainer", "time": "5:15 PM", "text": "That's my guy. Check in after Monday's session." }
+  ]
+}

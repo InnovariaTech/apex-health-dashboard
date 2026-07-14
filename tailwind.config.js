@@ -5,8 +5,8 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['Saira', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-  			serif: ['Saira', '-apple-system', 'sans-serif'],
+  			sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+  			serif: ['Inter', '-apple-system', 'sans-serif'],
   			mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
   		},
   		borderRadius: {

@@ -10,20 +10,27 @@ const GENERATE_SUMMARY_ENDPOINT = "/api/patient/summary";
 const GET_LATEST_SUMMARY_ENDPOINT = "/api/patient/summary";
 const GET_ALL_SUMMARIES_ENDPOINT = "/api/patient/summaries";
 
+/**
+ * Map a raw patient-summary row to the strongly-typed shape consumed by the
+ * UI. The backend ships either a full row with `report` populated (the
+ * latest summary) or a stub row with `report: null` (older entries that
+ * pre-date the structured-report rollout). Pass-through is intentional —
+ * the report object is large and well-typed, so the mapper trusts it
+ * verbatim and only normalises the envelope fields.
+ */
 function mapPatientSummary(raw: unknown): PatientSummary {
   const row = (raw ?? {}) as Record<string, unknown>;
 
   return {
     id: String(row.id ?? ""),
-    patientId: String(row.patientId ?? ""),
-    summaryText: String(row.summaryText ?? ""),
+    userId: String(row.userId ?? ""),
     healthScore: typeof row.healthScore === "number" ? row.healthScore : null,
-    metadata:
-      row.metadata && typeof row.metadata === "object"
-        ? (row.metadata as PatientSummary["metadata"])
-        : null,
     createdAt: String(row.createdAt ?? ""),
     updatedAt: String(row.updatedAt ?? ""),
+    report:
+      row.report && typeof row.report === "object"
+        ? (row.report as PatientSummary["report"])
+        : null,
   };
 }
 

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX MD — Genetics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img class="logo logo-md" src="assets/img/apex-md-logo.png" alt="APEX MD">
+    </div>
+    <div class="menu-label">MENU</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Health Analysis</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z"/></svg>My Treatments</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Chat</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M9 3v6l-4 8a3 3 0 003 4h8a3 3 0 003-4l-4-8V3M8 3h8"/></svg>Biomarkers</a>
+      <a href="#" class="active"><svg viewBox="0 0 24 24"><path d="M8 3c4 4 4 10 0 14s-4 8 0 8M16 3c-4 4-4 10 0 14s4 8 0 8M8 6h8M7 12h10M8 18h8"/></svg>Genetics</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 4 7-9"/><path d="M17 7h3v3"/></svg>Progress</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M9 3l-4 4 4 4M5 7h9a5 5 0 015 5v2"/></svg>Lab Kits</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16l-1 13H5zM8 7a4 4 0 018 0"/></svg>Shop</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5a5 3 0 0010 0v-5"/></svg>Education</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>Profile</a>
+    </nav>
+    <div class="sb-divider"></div>
+    <div class="brand fit">
+      <img class="logo logo-fit" src="assets/img/apex-fit-logo.png" alt="APEX FIT">
+    </div>
+    <nav class="nav" style="margin-top:14px">
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3"/></svg>Program</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M6 9v6M18 9v6M3 11h3M18 11h3M6 12h12"/></svg>Workouts</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9-9a5 5 0 019-3 5 5 0 019 3c-2 4.5-9 9-9 9z"/></svg>Nutrition</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1116 0M12 12l4-4"/></svg>Habits</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg>Trainer Messages</a>
+    </nav>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="crumbs"><span>Health</span><span class="sep">›</span><span>Genetics</span><span class="sep">›</span><span class="here">Summary</span></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="search" type="text" placeholder="Search markers, panels, statuses…" autocomplete="off">
+      </div>
+      <div class="top-icons">
+        <button class="icon-btn" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></button>
+        <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 00-1.7-1l-.3-2.6h-4l-.3 2.6a7 7 0 00-1.7 1l-2.3-1-2 3.4 2 1.5a7 7 0 000 2l-2 1.5 2 3.4 2.3-1a7 7 0 001.7 1l.3 2.6h4l.3-2.6a7 7 0 001.7-1l2.3 1 2-3.4-2-1.5a7 7 0 00.1-1z"/></svg></button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="title">Genetics <em>summary</em></h1>
+          <div class="subtitle">
+            <span>Result scores across all panels</span><span class="dot">•</span>
+            <span><b>422</b> markers analyzed</span><span class="dot">•</span>
+            <span>Lifestyle [Demo Library]</span><span class="dot">•</span>
+            <span>Synced from APEX Genetics</span>
+          </div>
+        </div>
+        <button class="export-btn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Export</button>
+      </div>
+
+      <div class="toggle">
+        <button class="on"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>Summary</button>
+        <button><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>By panel</button>
+      </div>
+
+      <div class="banner">
+        <div class="left">
+          <span class="ic">i</span>
+          <span>Results sync from your <img class="brand-logo" src="assets/img/apex-md-logo.png" alt="APEX MD"> genetics kit. New panels appear here automatically.</span>
+        </div>
+        <button class="lib-drop">Lifestyle [Demo Library]<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+
+      <!-- STAT CARDS -->
+      <section class="stats">
+        <div class="stat att">
+          <span class="cap"></span>
+          <div class="lbl">Needs Attention</div>
+          <div class="big">32</div>
+          <div class="sub"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg><span class="pct">8%</span><span>of all markers · 56 instances</span></div>
+        </div>
+        <div class="stat mod">
+          <span class="cap"></span>
+          <div class="lbl">Moderate</div>
+          <div class="big">144</div>
+          <div class="sub"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg><span class="pct">34%</span><span>worth monitoring · 226 instances</span></div>
+        </div>
+        <div class="stat opt">
+          <span class="cap"></span>
+          <div class="lbl">Optimal</div>
+          <div class="big">244</div>
+          <div class="sub"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span class="pct">58%</span><span>in healthy range · 410 instances</span></div>
+        </div>
+      </section>
+
+      <!-- CHARTS -->
+      <section class="charts">
+        <div class="card">
+          <div class="card-head"><h3><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 019 9h-9z"/></svg></span>Status distribution</h3></div>
+          <div class="donut-wrap">
+            <svg class="donut" id="donut" width="190" height="190" viewBox="0 0 42 42"></svg>
+            <div class="legend">
+              <div class="row"><span class="sw" style="background:var(--att)"></span><span class="nm">Needs Attention</span><span class="vl">32 · 8%</span></div>
+              <div class="row"><span class="sw" style="background:var(--amber)"></span><span class="nm">Moderate</span><span class="vl">144 · 34%</span></div>
+              <div class="row"><span class="sw" style="background:var(--green)"></span><span class="nm">Optimal</span><span class="vl">244 · 58%</span></div>
+              <div class="row"><span class="sw" style="background:#aeb3bb"></span><span class="nm">Other</span><span class="vl">2 · 0%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>By report section</h3><span class="pill-tag">Optimal · Moderate · Attention</span></div>
+          <div class="bars" id="bars"></div>
+          <div class="bar-axis"><span></span><div class="ticks"><span>0</span><span>30</span><span>60</span><span>90</span><span>120</span></div></div>
+        </div>
+      </section>
+
+      <!-- ============ FINDINGS SUMMARY ============ -->
+      <section class="card summary">
+        <div class="card-head">
+          <h3><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h11M4 15h14M4 20h7"/></svg></span>Summary of findings</h3>
+          <span class="pill-tag">422 markers · 6 priority themes</span>
+        </div>
+
+        <div class="sum-prose">
+          <p>Overall this is a <b>largely favorable profile</b>. Of the 422 markers analyzed, 244 (58%) landed in the Optimal range and 144 (34%) in Moderate, leaving just <b>32 flagged for attention (8%)</b> &mdash; and those don&rsquo;t scatter at random. They cluster into six clear themes: <b>dietary fats &amp; cardiometabolic handling</b> (the strongest, most repeated signal &mdash; poor saturated-fat response, increased omega-6, high plant-sterol risk), <b>methylation &amp; detoxification</b>, <b>gut &amp; systemic inflammation</b>, <b>micronutrients &amp; antioxidants</b>, <b>skin &amp; hair</b>, and <b>mood &amp; sleep</b>. Each represents a tendency written into your DNA &mdash; not a diagnosis, and not a measure of your health today.</p>
+          <p>In plain terms, a handful of areas are simply worth keeping an eye on: be intentional about the <i>type</i> of fat you eat (your body handles carbohydrates well but saturated fat less efficiently), support the methylation and detox pathways that clear certain medications and metals, mind gut and inflammation triggers, top up key nutrients and antioxidants, protect more sun-sensitive skin, and watch how stress tips over into disrupted sleep. None of this is cause for alarm &mdash; most of these areas respond to everyday diet and lifestyle changes and are good starting points to review with your clinician. Your <b>strengths are broad too</b>: testosterone, general cognition, carbohydrate handling, iron, vitamin E, and several B vitamins all scored Optimal. <b>Tap any marker below to see what it means for you.</b></p>
+        </div>
+
+        <button class="export-btn" id="exportSummary" onclick="exportSummary()">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          Export Full Report (PDF)
+        </button>
+
+        <div class="recs" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--line)">
+          <div class="rec-subhead">Work with Apex MD</div>
+          <div class="concierge">
+            <div class="cml-photo">
+              <img src="assets/img/concierge-physician.jpg" alt="Apex MD physician consulting with a patient">
+            </div>
+            <div class="cml-body">
+              <span class="cml-eyebrow">Concierge Medicine</span>
+              <h4>Work directly with an Apex MD physician &mdash; virtually</h4>
+              <p>Take the next step beyond your report. Get a personalized health optimization plan and work one-on-one with an Apex&nbsp;MD physician &mdash; with regular blood draws and advanced diagnostic testing to ensure optimal health is restored and maintained.</p>
+              <div class="cml-buy">
+                <span class="cml-price">Starting at <b>$399</b><span class="per">/month</span></span>
+                <button class="cml-btn" type="button"><svg viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 6h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>Book a consultation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="recs">
+          <div class="rec-head">
+            <span class="rl">Recommended <i>for you</i></span>
+            <span class="rsub">Curated from your genetic gauges &middot; drawn from your full report</span>
+          </div>
+
+          <div class="rec-subhead">Top 3 supplements</div>
+          <div class="rec-supps">
+            <div class="rec-card">
+              <div class="rec-thumb"><img src="assets/img/products/red-superfood.png" alt="RED Superfood"></div>
+              <div class="rec-body">
+                <span class="pick">Pick 01</span>
+                <h4>RED Superfood</h4>
+                <p class="tag">Kiwi Strawberry &middot; Anti-inflammatory antioxidants + prebiotic fiber</p>
+                <p class="why">Flagged because your IL-10 Inflammation reads <b>Increased</b> with an active general-inflammation profile, alongside a benefit response to Vitamin C.</p>
+                <p class="sup">Immune function &middot; Gut health &middot; Antioxidant defense</p>
+                <div class="rec-buy">
+                  <span class="price">$39.99</span>
+                  <button class="cart-btn" type="button"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h2.5l2.2 12.2a1.5 1.5 0 0 0 1.5 1.3h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Add to cart</button>
+                </div>
+              </div>
+            </div>
+            <div class="rec-card">
+              <div class="rec-thumb"><img src="assets/img/products/probiotic-40b.png" alt="Probiotic 40 Billion CFU"></div>
+              <div class="rec-body">
+                <span class="pick">Pick 02</span>
+                <h4>Probiotic &mdash; 40 Billion CFU</h4>
+                <p class="tag">10 strains &middot; Delayed-release &middot; Professional grade</p>
+                <p class="why">Your Gut Permeability and IL-10 gut-homeostasis markers point to a barrier worth reinforcing &mdash; a 10-strain, delayed-release blend supports the gut-immune axis.</p>
+                <p class="sup">Digestive health &middot; Microbiome balance &middot; Immune health</p>
+                <div class="rec-buy">
+                  <span class="price">$34.99</span>
+                  <button class="cart-btn" type="button"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h2.5l2.2 12.2a1.5 1.5 0 0 0 1.5 1.3h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Add to cart</button>
+                </div>
+              </div>
+            </div>
+            <div class="rec-card">
+              <div class="rec-thumb"><img src="assets/img/products/vitamin-k2-d3.png" alt="Vitamin K2 + D3"></div>
+              <div class="rec-body">
+                <span class="pick">Pick 03</span>
+                <h4>Vitamin K2 + D3</h4>
+                <p class="tag">MK-7 &middot; High absorption &middot; Bone, heart &amp; immune</p>
+                <p class="why">Vitamin D3 is recommended in your Core Vitamins panel, and your cardio-metabolic gauges reward cardiovascular protection; K2 (MK-7) directs calcium to bone, not arteries.</p>
+                <p class="sup">Strong bones &middot; Cardiovascular health &middot; Immune function</p>
+                <div class="rec-buy">
+                  <span class="price">$29.99</span>
+                  <button class="cart-btn" type="button"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h2.5l2.2 12.2a1.5 1.5 0 0 0 1.5 1.3h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Add to cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rec-subhead">Recommended peptide</div>
+          <div class="rec-pep-wrap">
+          <div class="rec-peptide">
+            <div class="rec-thumb"><img src="assets/img/products/wolverine-stack.png" alt="Wolverine Stack peptide"></div>
+            <div class="rec-body">
+              <span class="pick">Elite Stack &middot; BPC-157 + TB-500</span>
+              <h4>Wolverine Stack</h4>
+              <p class="tag">BPC-157 + TB-500 combo for accelerated full-body healing</p>
+              <p class="why">Your Peptides 1.0 panel returns an <b>Increased</b> genetic benefit for both halves &mdash; BPC-157 for inflammation resolution and pain burden, TB-500 for tissue and connective-tissue repair &mdash; mapping closely onto the recovery and anti-inflammatory pathways your report emphasizes. By contrast, CJC-1295 and IGF-1 LR3 returned reduced benefit, so a repair-and-resolution stack is the cleaner genetic fit.</p>
+              <p class="sup">Tissue &amp; joint repair &middot; Inflammation resolution &middot; Recovery</p>
+              <div class="rec-buy">
+                <span class="price">$249</span>
+                <button class="cart-btn" type="button"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h2.5l2.2 12.2a1.5 1.5 0 0 0 1.5 1.3h8.7a1.5 1.5 0 0 0 1.5-1.2L21 7H6"/></svg>Purchase</button>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="rec-also">
+            <span class="al">Also strong in your report</span>
+            <div class="also-grid">
+              <div><b>Thymosin Alpha-1 (TA1)</b><span>Increased benefit &mdash; immune support</span></div>
+              <div><b>Semax</b><span>Increased benefit &mdash; cognitive performance</span></div>
+              <div><b>Epitalon</b><span>Increased benefit &mdash; general longevity</span></div>
+              <div><b>GHK-Cu</b><span>Increased benefit &mdash; skin aging &amp; collagen</span></div>
+            </div>
+          </div>
+          <p class="rec-disc">Peptides are prescription therapies dispensed through Apex MD&rsquo;s physician-led care team. Your provider confirms suitability, dosing, and any lab work before starting. These selections summarize genetic signal only &mdash; not a prescription or diagnosis.</p>
+        </div>
+
+      </section>
+
+      <!-- theme filter bar -->
+      <div class="tf-bar" id="tfBar">
+        <span class="lab">Showing <b id="tfName"></b> &middot; <b id="tfCount"></b> markers from Needs Attention</span>
+        <button class="clear" id="tfClear">Clear filter <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+
+      <!-- RESULT SECTIONS -->
+      <section class="section att" data-sec="att">
+        <div class="sec-head"><span class="h">Needs Attention (32)</span><span class="meta">56 instances across panels</span></div>
+        <div class="grid"></div>
+        <div class="no-results">No markers match your search in this section.</div>
+        <button class="show-toggle"></button>
+      </section>
+
+      <section class="section mod" data-sec="mod">
+        <div class="sec-head"><span class="h">Moderate (144)</span><span class="meta">226 instances across panels</span></div>
+        <div class="grid"></div>
+        <div class="no-results">No markers match your search in this section.</div>
+        <button class="show-toggle"></button>
+      </section>
+
+      <section class="section opt" data-sec="opt">
+        <div class="sec-head"><span class="h">Optimal (244)</span><span class="meta">410 instances across panels</span></div>
+        <div class="grid"></div>
+        <div class="no-results">No markers match your search in this section.</div>
+        <button class="show-toggle"></button>
+      </section>
+
+      <div class="footnote">Showing scored results from the Lifestyle [Demo Library] panel set · APEX Genetics</div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ MARKER DETAIL POPUP ============ -->
+<div class="mk-overlay" id="mkOverlay" role="dialog" aria-modal="true" aria-labelledby="mkName">
+  <div class="mk-modal">
+    <button class="mk-close" id="mkClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="mk-scroll">
+      <div class="mk-cat" id="mkCat"></div>
+      <h2 class="mk-name"><span id="mkNameTxt"></span><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M18 18l-2.5-2.5M6 18l2.5-2.5M18 6l-2.5 2.5"/></svg></h2>
+
+      <div class="mk-gauge">
+        <div class="mk-track"><div class="mk-fill" id="mkFill"></div><div class="mk-knob" id="mkKnob"></div></div>
+        <div class="mk-stat" id="mkStat"></div>
+      </div>
+
+      <div class="mk-sec">
+        <div class="mk-lbl">Understanding what this may mean</div>
+        <div class="mk-box" id="mkExp"></div>
+      </div>
+
+      <div class="mk-sec" id="mkSuppSec">
+        <div class="mk-lbl">Supplement considerations</div>
+        <div class="mk-supps" id="mkSupps"></div>
+      </div>
+
+      <div class="mk-sec" id="mkAppearsSec">
+        <div class="mk-lbl">Also appears in</div>
+        <div class="mk-appears" id="mkAppears"></div>
+      </div>
+
+      <div class="mk-disc">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        <span>Genetic propensity, not a diagnosis or a measure of current health. Supplement notes are informational only &mdash; discuss with your clinician before making changes.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>

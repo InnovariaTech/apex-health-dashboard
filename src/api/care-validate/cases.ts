@@ -121,6 +121,13 @@ export async function getMyCases(
       documentFormat,
       startTime,
       endTime,
+      // Only send `status` when the caller passes one — omitting it tells
+      // the backend to return every status, which is what the My Cases
+      // listing wants. Eligibility-gated callers (Chat, AI Documents)
+      // pass `ELIGIBLE_CASE_STATUSES` to skip closed/rejected cases.
+      ...(typeof params.status === "string" && params.status.trim() !== ""
+        ? { status: params.status }
+        : {}),
     },
   });
 

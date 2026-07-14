@@ -62,6 +62,7 @@ import {
   type WorkoutDef,
   type WorkoutDefExercise,
 } from "@/types/trainerize/plan_types";
+import HeatmapRow from "@/views/patient/components/workouts/HeatmapRow";
 
 /**
  * Trainerize-backed workouts page.
@@ -463,13 +464,13 @@ function WorkoutsInner() {
         )}
       </div>
 
-      <Tabs defaultValue="today" className="space-y-6">
+      <Tabs defaultValue="program" className="space-y-6">
         <TabsList className="grid w-full md:w-auto grid-cols-3 bg-muted p-1">
-          <TabsTrigger value="today" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
-            <Calendar className="w-4 h-4 mr-2" />TODAY
-          </TabsTrigger>
           <TabsTrigger value="program" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
             <Dumbbell className="w-4 h-4 mr-2" />PROGRAM
+          </TabsTrigger>
+          <TabsTrigger value="today" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
+            <Calendar className="w-4 h-4 mr-2" />TODAY
           </TabsTrigger>
           {/* HISTORY tab hidden by request — see TabsContent below for the same.
           <TabsTrigger value="history" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
@@ -1285,37 +1286,10 @@ function WorkoutLoggerDialog({
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-/**
- * 14-day workout heatmap row. Each cell is one day; intensity scales with
- * the count of tracked workouts. Hover tooltip carries the date + count.
- */
-function HeatmapRow({ days }: { days: { date: string; count: number }[] }) {
-  const cellClass = (count: number) => {
-    if (count === 0) return "bg-muted border border-border";
-    if (count === 1) return "bg-primary/30 border border-primary/40";
-    if (count === 2) return "bg-primary/60 border border-primary/60";
-    return "bg-primary border border-primary";
-  };
-  return (
-    <div className="flex items-end gap-1.5 flex-wrap">
-      {days.map((d) => (
-        <div
-          key={d.date}
-          title={`${d.date} — ${d.count} workout${d.count === 1 ? "" : "s"}`}
-          className={`w-7 h-7 rounded-sm ${cellClass(d.count)} transition-colors`}
-        />
-      ))}
-      <div className="ml-auto flex items-center gap-1.5 text-[10px] text-muted-foreground">
-        <span>Less</span>
-        <span className="w-3 h-3 rounded-sm bg-muted border border-border" />
-        <span className="w-3 h-3 rounded-sm bg-primary/30 border border-primary/40" />
-        <span className="w-3 h-3 rounded-sm bg-primary/60 border border-primary/60" />
-        <span className="w-3 h-3 rounded-sm bg-primary border border-primary" />
-        <span>More</span>
-      </div>
-    </div>
-  );
-}
+// `HeatmapRow` lives in its own file so the Dashboard can reuse it without
+// pulling in this whole page. Re-exported under the same name for the
+// existing `<HeatmapRow days={...} />` call site.
+// (See `src/views/patient/components/workouts/HeatmapRow.tsx`.)
 
 /**
  * TODAY tab card — one per scheduled / completed workout instance for today.

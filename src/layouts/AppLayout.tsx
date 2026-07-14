@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Settings, Activity, LogOut, Search, Bell, ChevronRight } from "lucide-react";
+import { Settings, Activity, LogOut, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,7 +20,7 @@ import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useLogout } from "@/hooks/auth/useAuth";
 import AIAssistantBar from "@/components/global/AIAssistantBar";
 import GymSwitcher from "@/components/env/GymSwitcher";
-import { getPatientNavItems } from "@/views/patient/config/patientNavigation";
+import { getPatientNavItems, getPatientNavGroups } from "@/views/patient/config/patientNavigation";
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -39,9 +39,11 @@ export default function Layout({ children }) {
 
   const isGymEnv = environment.id !== "apex-md";
   const navItems = getPatientNavItems(isGymEnv);
-  const emailPrefix = currentUser?.email?.split("@")?.[0] || "User";
-  const displayName = currentUser?.full_name || emailPrefix;
-  const initials = (currentUser?.full_name || emailPrefix)
+  const navGroups = getPatientNavGroups(isGymEnv);
+  // The patient's name is intentionally not shown in the app chrome — the
+  // sidebar identity uses a neutral label so no personal name is surfaced.
+  const displayName = "Patient";
+  const initials = displayName
     .split(/\s+/)
     .map((p) => p?.[0] ?? "")
     .join("")
@@ -57,22 +59,20 @@ export default function Layout({ children }) {
   const pageLabel = activeItem?.title || "Overview";
 
   return (
-    <SidebarProvider>
+    <SidebarProvider style={{ "--sidebar-width": "268px" } as React.CSSProperties}>
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar className="border-r border-border bg-card">
-          <SidebarHeader className="px-4 pt-7 pb-5">
-            <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2.5 px-2">
-              <div className="w-[30px] h-[30px] rounded-[7px] bg-foreground text-background grid place-items-center font-serif font-medium italic text-base">
-                {brandFirst?.[0]?.toUpperCase() || "A"}
-              </div>
-              <div className="font-serif font-medium text-[19px] tracking-[-0.01em] text-foreground">
-                {brandFirst}
-                {brandRemainder && (
-                  <em className="not-italic" style={{ fontStyle: "italic", color: "var(--apex-accent)" }}>
-                    {brandRemainder}
-                  </em>
-                )}
-              </div>
+          <SidebarHeader className="px-4 pt-5 pb-2">
+            <Link
+              to={createPageUrl("Dashboard")}
+              className="flex items-center px-2 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+              aria-label="Apex MD home"
+            >
+              <img
+                src="/images/apex-md-logo.png"
+                alt="Apex MD"
+                className="h-[32px] w-auto block"
+              />
             </Link>
             {isGymEnv && (
               <p className="text-[10px] mt-1 px-2 text-muted-foreground tracking-wide">
@@ -81,30 +81,34 @@ export default function Layout({ children }) {
             )}
           </SidebarHeader>
 
-          <SidebarContent className="px-[18px]">
+          <SidebarContent className="px-4">
             <SidebarGroup className="p-0">
-              <div className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground font-medium px-3 py-2">
-                Menu
-              </div>
+              <div className="apex-eyebrow px-[11px] mt-[18px] mb-[9px]">Menu</div>
               <SidebarGroupContent>
-                <SidebarMenu className="gap-0.5">
-                  {navItems.map((item) => {
+                <SidebarMenu className="gap-[2px]">
+                  {navGroups.md.map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           asChild
-                          className={`h-auto rounded-[8px] transition-colors ${
+                          className={`h-auto rounded-[11px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card ${
                             isActive
-                              ? "bg-foreground text-background hover:bg-foreground hover:text-background"
-                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                              ? "bg-[var(--surface-3)] text-white hover:bg-[var(--surface-3)] hover:text-white"
+                              : "text-[#33372F] hover:bg-secondary hover:text-foreground"
                           }`}
                         >
-                          <Link to={item.url} className="flex items-center gap-[11px] px-3 py-2">
+                          <Link
+                            to={item.url}
+                            className="flex items-center gap-3 px-[11px] py-[9px] leading-none"
+                          >
                             <item.icon
-                              className={`w-4 h-4 ${isActive ? "" : "text-muted-foreground"}`}
+                              className={`w-[19px] h-[19px] shrink-0 transition-colors duration-150 ${
+                                isActive ? "text-white" : "text-[#8A908A] group-hover/menu-item:text-[#5A615A]"
+                              }`}
+                              strokeWidth={1.8}
                             />
-                            <span className="text-[13.5px] font-normal">{item.title}</span>
+                            <span className="text-[14.5px] font-medium">{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -113,6 +117,44 @@ export default function Layout({ children }) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
+
+            {navGroups.fit.length > 0 && (
+              <SidebarGroup className="p-0">
+                <div className="mx-[11px] mt-[22px] mb-[14px] border-t border-border" />
+                <SidebarGroupContent>
+                  <SidebarMenu className="gap-[2px]">
+                    {navGroups.fit.map((item) => {
+                      const isActive = location.pathname === item.url;
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            className={`h-auto rounded-[11px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card ${
+                              isActive
+                                ? "bg-[var(--surface-3)] text-white hover:bg-[var(--surface-3)] hover:text-white"
+                                : "text-[#33372F] hover:bg-secondary hover:text-foreground"
+                            }`}
+                          >
+                            <Link
+                              to={item.url}
+                              className="flex items-center gap-3 px-[11px] py-[9px] leading-none"
+                            >
+                              <item.icon
+                                className={`w-[19px] h-[19px] shrink-0 transition-colors duration-150 ${
+                                  isActive ? "text-white" : "text-[#8A908A] group-hover/menu-item:text-[#5A615A]"
+                                }`}
+                                strokeWidth={1.8}
+                              />
+                              <span className="text-[14.5px] font-medium">{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
             {currentUser?.health_score != null && (
               <div className="mt-5 apex-card p-4">
@@ -136,10 +178,14 @@ export default function Layout({ children }) {
             )}
           </SidebarContent>
 
-          <div className="border-t border-border p-3.5 mx-[18px]">
+          <div className="border-t border-border p-3.5 mx-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground grid place-items-center text-xs font-medium flex-shrink-0">
-                {initials || "U"}
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary text-primary-foreground grid place-items-center text-xs font-medium flex-shrink-0">
+                <img
+                  src="/images/patient-headshot.jpg"
+                  alt={displayName}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-medium leading-tight truncate text-foreground">
@@ -178,21 +224,6 @@ export default function Layout({ children }) {
 
             <div className="flex-1" />
 
-            <div className="relative hidden md:block w-[260px]">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search records, protocols, providers..."
-                className="w-full h-[34px] pl-8 pr-3 rounded-[8px] border border-border bg-card text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:border-ink-2 transition-colors"
-              />
-            </div>
-            <button
-              type="button"
-              className="w-[34px] h-[34px] rounded-[8px] border border-border bg-card grid place-items-center text-muted-foreground hover:bg-secondary transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-            </button>
             <Link
               to={createPageUrl("Profile")}
               className="w-[34px] h-[34px] rounded-[8px] border border-border bg-card grid place-items-center text-muted-foreground hover:bg-secondary transition-colors"

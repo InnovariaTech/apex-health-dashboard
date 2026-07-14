@@ -5,13 +5,15 @@ import { pagesConfig } from "./pages.config";
 import PageNotFound from "./lib/PageNotFound";
 import { useAuth } from "@/lib/AuthContext";
 import Login from "@/views/auth/pages/Login";
-import Signup from "@/views/auth/pages/Signup";
+import ResetPassword from "@/views/auth/pages/ResetPassword";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
 import SyncDevices from "@/views/patient/pages/SyncDevices";
 import Progress from "@/views/patient/pages/Progress";
 import Schedule from "@/views/patient/pages/Schedule";
 import AdvancedBiomarkers from "@/views/patient/pages/AdvancedBiomarkers";
+import LabKits from "@/views/patient/pages/LabKits";
+import Shop from "@/views/patient/pages/Shop";
 import MyTreatments from "@/views/patient/pages/MyTreatments";
 import MyCaseDetails from "@/views/patient/pages/MyCaseDetails";
 import Referral from "@/views/patient/pages/Referral";
@@ -40,7 +42,11 @@ const AuthenticatedApp = () => {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Signup is intentionally hidden until the admin-creates-patient
+            flow is fully wired into the UI. Send any /signup hits to login
+            so the page can't be reached externally. */}
+        <Route path="/signup" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -50,6 +56,10 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
+      {/* Lets logged-in users hitting the reset-password email link reach
+          the flow without forcing them through /login first. Backend
+          revokes their session on success and we redirect to /login. */}
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route
         path="/"
         element={
@@ -114,6 +124,22 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper>
             <AdvancedBiomarkers />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/LabKits"
+        element={
+          <LayoutWrapper>
+            <LabKits />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/Shop"
+        element={
+          <LayoutWrapper>
+            <Shop />
           </LayoutWrapper>
         }
       />

@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import type {
   AuthUser,
+  ForgotPasswordPayload,
   LoginPayload,
   LoginResult,
+  ResetPasswordPayload,
   SignupPayload,
   VerifyOtpPayload,
   VerifyOtpResult,
@@ -45,6 +47,27 @@ export function useVerifyOtp() {
       // Refetch `me` so any consumer relying on the user query stays in sync.
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
     },
+  });
+}
+
+/**
+ * Request a password-reset OTP. Per the auth handoff doc, success is
+ * always returned regardless of whether the email exists — UI should
+ * show a neutral "if this email is registered…" message.
+ */
+export function useForgotPassword() {
+  return useMutation<unknown, unknown, ForgotPasswordPayload>({
+    mutationFn: (payload) => api.auth.forgotPassword(payload),
+  });
+}
+
+/**
+ * Submit the 6-digit OTP + new password. Backend revokes active
+ * sessions on success; the caller should redirect to /login.
+ */
+export function useResetPassword() {
+  return useMutation<unknown, unknown, ResetPasswordPayload>({
+    mutationFn: (payload) => api.auth.resetPassword(payload),
   });
 }
 

@@ -15,6 +15,10 @@ interface BodyModel3DProps {
   className?: string;
   color?: string;
   progress?: number;
+  /** When true and the model is idle/complete, the camera auto-rotates around it. */
+  autoRotate?: boolean;
+  /** OrbitControls' rotation speed in revolutions per minute (default 1.5). */
+  autoRotateSpeed?: number;
 }
 
 function MedicalScanLoader({ color }: { color: string }) {
@@ -263,9 +267,11 @@ interface SceneProps {
   progress: number;
   color: string;
   onModelReady?: (() => void) | undefined;
+  autoRotate: boolean;
+  autoRotateSpeed: number;
 }
 
-function Scene({ scanState, progress, color, onModelReady }: SceneProps) {
+function Scene({ scanState, progress, color, onModelReady, autoRotate, autoRotateSpeed }: SceneProps) {
   const isScanning = scanState === 'scanning-down' || scanState === 'scanning-up';
 
   return (
@@ -290,6 +296,8 @@ function Scene({ scanState, progress, color, onModelReady }: SceneProps) {
         enableZoom={false}
         enableRotate={true}
         target={[0, 0, 0]}
+        autoRotate={autoRotate && (scanState === 'idle' || scanState === 'complete')}
+        autoRotateSpeed={autoRotateSpeed}
       />
     </>
   );
@@ -300,6 +308,8 @@ export function BodyModel3D({
   className,
   progress = 0,
   color = DEFAULT_COLOR,
+  autoRotate = false,
+  autoRotateSpeed = 1.5,
 }: BodyModel3DProps) {
   const [webglSupported, setWebglSupported] = useState(true);
   const [modelError, setModelError] = useState(false);
@@ -369,6 +379,8 @@ export function BodyModel3D({
           progress={progress}
           color={color}
           onModelReady={() => setModelReady(true)}
+          autoRotate={autoRotate}
+          autoRotateSpeed={autoRotateSpeed}
         />
       </Canvas>
 

@@ -1,0 +1,15 @@
+/* Apex MD — vendored web fonts (Inter + JetBrains Mono, latin subset).
+   Self-hosted so screenshots/offline builds are pixel-faithful.
+   Swap for the Google Fonts CDN at runtime if you prefer. */
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(inter-400.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(inter-500.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(inter-600.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url(inter-700.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:800;font-display:swap;src:url(inter-800.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:italic;font-weight:600;font-display:swap;src:url(inter-600i.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:italic;font-weight:700;font-display:swap;src:url(inter-700i.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:italic;font-weight:800;font-display:swap;src:url(inter-800i.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(jetbrains-400.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(jetbrains-500.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:600;font-display:swap;src:url(jetbrains-600.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:swap;src:url(jetbrains-700.woff2) format('woff2')}

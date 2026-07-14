@@ -1,0 +1,15 @@
+{
+  "name": "apexai-chat",
+  "version": "1.0.0",
+  "description": "ApexAI chat renderer — turns Claude's structured output into styled ApexAI message blocks.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "build": "node tools/build.mjs",
+    "render-check": "node tools/render-check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.44.0"
+  }
+}

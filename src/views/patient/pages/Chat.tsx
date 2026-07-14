@@ -10,10 +10,11 @@ import { format } from "date-fns";
 import { useEnvironment } from "@/lib/EnvironmentContext";
 import { useSearchParams } from "react-router-dom";
 import {
-  useCases,
+  useCasesYearRolling,
   useLatestCaseId,
 } from "@/hooks/care-validate/useCases";
-import { getCasesDateRange } from "@/views/patient/utils/casesDateRange";
+import { ELIGIBLE_CASE_STATUSES } from "@/types/care-validate/case_types";
+import { sanitizeCaseTitle } from "@/views/patient/utils/caseTitleUtils";
 import {
   useCaseCommentsByID,
   useCreateCaseComment,
@@ -34,13 +35,22 @@ export default function Chat() {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const previousCommentCountRef = useRef(0);
   const previousScrollHeightRef = useRef(0);
-  const dateRange = React.useMemo(() => getCasesDateRange(), []);
-  const { data: cases = [], isLoading: isCasesLoading } = useCases({
-    startTime: dateRange.startTime,
-    endTime: dateRange.endTime,
+  // Pull 1 year of cases (6 parallel 2-month windows) and pre-filter on
+  // the server to the 4 chat-eligible statuses so closed / rejected /
+  // abandoned cases never enter the picker or the `latestCaseId` fallback.
+  const { data: cases = [], isLoading: isCasesLoading } = useCasesYearRolling({
+    status: ELIGIBLE_CASE_STATUSES,
   });
   const { data: latestCaseId = "" } = useLatestCaseId();
-  const activeCaseIdResolved = activeCaseId || latestCaseId || cases[0]?.id || "";
+  // `latestCaseId` may resolve to a case that's no longer eligible (e.g.
+  // it was just closed). Honor it only when it's still in the eligible
+  // list — otherwise fall through to the first eligible case.
+  const eligibleLatestCaseId =
+    latestCaseId && cases.some((c) => c.id === latestCaseId)
+      ? latestCaseId
+      : "";
+  const activeCaseIdResolved =
+    activeCaseId || eligibleLatestCaseId || cases[0]?.id || "";
   const activeCase = cases.find((caseItem) => caseItem.id === activeCaseIdResolved) ?? null;
   const {
     data: comments = [],
@@ -59,8 +69,11 @@ export default function Chat() {
       return;
     }
 
-    if (!activeCaseId && latestCaseId) {
-      setActiveCaseId(latestCaseId);
+    // Latest-case fallback only fires when it points at an eligible case
+    // (computed above). Closed/rejected latest IDs get dropped here so
+    // the user lands on a chat-able conversation by default.
+    if (!activeCaseId && eligibleLatestCaseId) {
+      setActiveCaseId(eligibleLatestCaseId);
       return;
     }
 
@@ -72,7 +85,7 @@ export default function Chat() {
     if (!caseIdFromQuery && activeCase?.id && !activeCaseId) {
       setActiveCaseId(activeCase.id);
     }
-  }, [caseIdFromQuery, latestCaseId, cases, activeCase?.id, activeCaseId]);
+  }, [caseIdFromQuery, eligibleLatestCaseId, cases, activeCase?.id, activeCaseId]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -187,10 +200,16 @@ export default function Chat() {
     );
   }
 
+  // Strip the patient's name out of the auto-generated case title before it
+  // is shown in the chat header / subtitle (e.g. "Case for Muzammil Lone").
+  const activeCaseTitle = activeCase
+    ? sanitizeCaseTitle(activeCase.title)
+    : "";
+
   const currentThreadConfig = {
     label: "Case Chat",
     sub: activeCase
-      ? `Case #${activeCase.shortId} - ${activeCase.title}`
+      ? `Case #${activeCase.shortId} - ${activeCaseTitle}`
       : "Message your care team for this case",
     icon: Stethoscope,
     placeholder: "Message your provider...",
@@ -226,7 +245,7 @@ export default function Chat() {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {activeCase.title || "Current Case"}
+                    {activeCaseTitle || "Current Case"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     {currentThreadConfig.sub}

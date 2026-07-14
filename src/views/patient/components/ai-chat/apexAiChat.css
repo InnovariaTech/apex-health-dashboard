@@ -1,0 +1,979 @@
+/* ===== ApexAI structured chat — scoped port of the New Ui mockup =====
+   Everything is scoped under `.apex-ai-chat` so it never leaks into the
+   rest of the portal. The mockup's warm palette is kept intact for the
+   chat surface; the RED ACCENT is driven by `--chat-accent` /
+   `--chat-accent-dark` (set inline from the environment primary color)
+   so white-label gym environments retint the chat without new CSS. */
+
+.apex-ai-chat {
+  /* accent (overridable per-environment) */
+  --ca: var(--chat-accent, #e01512);
+  --ca-d: var(--chat-accent-dark, #bd0402);
+  --ca-ink: var(--chat-on-accent, #ffffff);
+  /* mockup neutrals (local to the chat surface) */
+  --c-ink: #14110f;
+  --c-ink-2: #3a3532;
+  --c-muted: #7c7570;
+  --c-faint: #a79f99;
+  --c-line: #ece7e3;
+  --c-line-2: #f4f0ec;
+  --c-wash: #fbf9f7;
+  --c-green: #3e7c57;
+  --c-amber: #b45309;
+  --c-mono: "JetBrains Mono", ui-monospace, monospace;
+  --c-sans: "Inter", -apple-system, sans-serif;
+
+  font-family: var(--c-sans);
+  color: var(--c-ink);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  background: #fff;
+}
+.apex-ai-chat * {
+  box-sizing: border-box;
+}
+
+/* ── Header ── */
+.apex-ai-chat .chat-head {
+  background: linear-gradient(180deg, var(--ca), var(--ca-d));
+  color: var(--ca-ink);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  flex: 0 0 auto;
+}
+.apex-ai-chat .chat-head:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+}
+.apex-ai-chat .chat-head .spark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  flex: 0 0 26px;
+}
+.apex-ai-chat .chat-head .spark svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--ca-ink);
+  fill: none;
+  stroke-width: 1.6;
+}
+.apex-ai-chat .head-title {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+}
+.apex-ai-chat .live {
+  font-family: var(--c-mono);
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.apex-ai-chat .live .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5ff0a8;
+  box-shadow: 0 0 0 0 rgba(95, 240, 168, 0.7);
+  animation: apexai-pulse 1.8s infinite;
+}
+@keyframes apexai-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(95, 240, 168, 0.7); }
+  70% { box-shadow: 0 0 0 7px rgba(95, 240, 168, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(95, 240, 168, 0); }
+}
+.apex-ai-chat .win {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.apex-ai-chat .win button {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: transparent;
+  color: var(--ca-ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.apex-ai-chat .win button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.apex-ai-chat .win button svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* ── Disclaimer ── */
+.apex-ai-chat .disclaimer {
+  background: #fcf6f5;
+  border-bottom: 1px solid var(--c-line);
+  padding: 9px 18px;
+  font-size: 11.5px;
+  color: var(--c-muted);
+  line-height: 1.45;
+  flex: 0 0 auto;
+}
+.apex-ai-chat .disclaimer b {
+  color: var(--ca-d);
+  font-weight: 600;
+}
+
+/* ── Message stream ── */
+.apex-ai-chat .stream {
+  padding: 22px 18px 24px;
+  background: linear-gradient(180deg, var(--c-wash), #fff 120px);
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.apex-ai-chat .user-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 22px;
+}
+.apex-ai-chat .user-bubble {
+  background: linear-gradient(180deg, var(--ca), var(--ca-d));
+  color: var(--ca-ink);
+  padding: 12px 16px;
+  border-radius: 16px 16px 4px 16px;
+  max-width: 78%;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+  white-space: pre-wrap;
+  box-shadow: 0 10px 24px -12px rgba(211, 6, 3, 0.45);
+}
+
+.apex-ai-chat .ai-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+.apex-ai-chat .ai-av {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  margin-top: 2px;
+  background: linear-gradient(145deg, var(--ca), var(--ca-d));
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px -8px rgba(211, 6, 3, 0.45);
+}
+.apex-ai-chat .ai-av svg {
+  width: 18px;
+  height: 18px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 1.6;
+}
+.apex-ai-chat .ai-body {
+  flex: 1;
+  min-width: 0;
+}
+.apex-ai-chat .ai-name {
+  font-family: var(--c-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ca-d);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.apex-ai-chat .ai-name .thin {
+  color: var(--c-faint);
+  letter-spacing: 0.1em;
+}
+
+/* ── intro / markdown ── */
+.apex-ai-chat .intro {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--c-ink-2);
+  margin-bottom: 18px;
+}
+.apex-ai-chat .intro b {
+  color: var(--c-ink);
+  font-weight: 600;
+}
+.apex-ai-chat .md-block p { margin: 0 0 10px; }
+.apex-ai-chat .md-block p:last-child { margin-bottom: 0; }
+.apex-ai-chat .md-block ul,
+.apex-ai-chat .md-block ol { margin: 0 0 10px; padding-left: 20px; }
+.apex-ai-chat .md-block li { margin-bottom: 3px; }
+.apex-ai-chat .md-block h1,
+.apex-ai-chat .md-block h2,
+.apex-ai-chat .md-block h3 { font-size: 14px; font-weight: 700; margin: 8px 0 6px; color: var(--c-ink); }
+.apex-ai-chat .md-block a { color: var(--ca-d); text-decoration: underline; }
+.apex-ai-chat .md-block code {
+  font-family: var(--c-mono);
+  font-size: 12px;
+  background: var(--c-wash);
+  border: 1px solid var(--c-line-2);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+/* ── section eyebrow ── */
+.apex-ai-chat .section-eyebrow {
+  font-family: var(--c-mono);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin: 0 2px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.apex-ai-chat .section-eyebrow:before {
+  content: "";
+  height: 1px;
+  flex: 0 0 18px;
+  background: var(--ca);
+  opacity: 0.5;
+}
+
+/* ── shared card container (lab_snapshot + phase_plan) ── */
+.apex-ai-chat .mod {
+  border: 1px solid var(--c-line);
+  border-radius: 18px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 18px 40px -34px rgba(0, 0, 0, 0.4);
+}
+.apex-ai-chat .mod-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--c-line-2);
+  flex-wrap: wrap;
+}
+.apex-ai-chat .mod-eyebrow {
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.apex-ai-chat .mod-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--c-ink);
+}
+.apex-ai-chat .mod-tag {
+  margin-left: auto;
+  font-family: var(--c-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ca-d);
+  background: #fbeded;
+  border: 1px solid #f4d9d9;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+/* ── lab_snapshot: two columns ── */
+.apex-ai-chat .snap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.apex-ai-chat .snap.single {
+  grid-template-columns: 1fr;
+}
+.apex-ai-chat .snap-col {
+  padding: 14px 18px;
+}
+.apex-ai-chat .snap:not(.single) .snap-col.pos {
+  border-right: 1px solid var(--c-line-2);
+}
+.apex-ai-chat .col-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.apex-ai-chat .col-label .ic {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 18px;
+}
+.apex-ai-chat .snap-col.pos .ic { background: #e9f3ed; }
+.apex-ai-chat .snap-col.pos .ic svg { stroke: var(--c-green); }
+.apex-ai-chat .snap-col.watch .ic { background: #fbf1e4; }
+.apex-ai-chat .snap-col.watch .ic svg { stroke: var(--c-amber); }
+.apex-ai-chat .col-label .ic svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke-width: 2.6;
+}
+.apex-ai-chat .col-label .t {
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.apex-ai-chat .marker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 0;
+}
+.apex-ai-chat .marker .mk-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 6px;
+  background: var(--c-faint);
+}
+.apex-ai-chat .snap-col.pos .mk-dot { background: var(--c-green); }
+.apex-ai-chat .snap-col.watch .mk-dot { background: var(--c-amber); }
+.apex-ai-chat .mk-name {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--c-ink-2);
+  min-width: 0;
+  line-height: 1.35;
+}
+.apex-ai-chat .mk-name em {
+  display: block;
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--c-faint);
+  margin-top: 1px;
+}
+.apex-ai-chat .mk-val {
+  font-family: var(--c-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--c-ink);
+  background: var(--c-wash);
+  border: 1px solid var(--c-line-2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ── phase_plan: timeline spine ── */
+.apex-ai-chat .plan {
+  padding: 16px 20px 18px;
+}
+.apex-ai-chat .spine {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.apex-ai-chat .spine:before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--c-line);
+}
+.apex-ai-chat .phase {
+  position: relative;
+  padding-left: 44px;
+}
+.apex-ai-chat .node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, var(--ca), var(--ca-d));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 5px 12px -5px rgba(211, 6, 3, 0.4);
+}
+.apex-ai-chat .phase.retest .node {
+  background: linear-gradient(145deg, #3e7c57, #2c5a3f);
+}
+.apex-ai-chat .ph-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  flex-wrap: wrap;
+}
+.apex-ai-chat .wk {
+  font-family: var(--c-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  background: var(--c-wash);
+  border: 1px solid var(--c-line-2);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.apex-ai-chat .ph-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--c-ink);
+}
+.apex-ai-chat .ph-goal {
+  font-size: 12.5px;
+  color: var(--c-ink-2);
+  line-height: 1.5;
+  margin: 8px 0 10px;
+}
+.apex-ai-chat .ph-goal b {
+  color: var(--c-ink);
+  font-weight: 600;
+}
+.apex-ai-chat .rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.apex-ai-chat .line {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.apex-ai-chat .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--c-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 6px;
+  flex: 0 0 auto;
+  min-width: 82px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+.apex-ai-chat .pill .pd {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+.apex-ai-chat .pill.p-str { color: #b42318; background: #feeceb; }
+.apex-ai-chat .pill.p-car { color: #175cd3; background: #eaf1fd; }
+.apex-ai-chat .pill.p-nut { color: #2e7d5a; background: #e7f4ee; }
+.apex-ai-chat .pill.p-hyd { color: #0e7090; background: #e4f4f8; }
+.apex-ai-chat .pill.p-rec { color: #6941c6; background: #f1ebfb; }
+.apex-ai-chat .line-txt {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+  padding-top: 2px;
+}
+.apex-ai-chat .line-txt .freq {
+  font-family: var(--c-mono);
+  font-weight: 600;
+  color: var(--c-ink);
+}
+.apex-ai-chat .line-txt .sub {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--c-mono);
+  font-size: 11px;
+  color: var(--c-muted);
+  padding-left: 10px;
+  border-left: 2px solid var(--c-line);
+}
+
+/* ── priority card ── */
+.apex-ai-chat .pcard {
+  border: 1px solid var(--c-line);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 18px 40px -34px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+.apex-ai-chat .pcard:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--ca);
+}
+.apex-ai-chat .p-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--c-line-2);
+  flex-wrap: wrap;
+}
+.apex-ai-chat .pnum {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  flex: 0 0 30px;
+  background: linear-gradient(145deg, var(--ca), var(--ca-d));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 5px 12px -5px rgba(211, 6, 3, 0.4);
+}
+.apex-ai-chat .p-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+  color: var(--c-ink);
+  line-height: 1.2;
+  flex: 1;
+  min-width: 0;
+}
+.apex-ai-chat .driver {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--c-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ca-d);
+  background: #fbeded;
+  border: 1px solid #f4d9d9;
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.apex-ai-chat .driver .dv {
+  color: var(--c-ink);
+  background: #fff;
+  border: 1px solid #f0d6d6;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 10.5px;
+}
+.apex-ai-chat .p-body {
+  padding: 16px 20px 18px;
+}
+.apex-ai-chat .sub-label {
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.apex-ai-chat .sub-label svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--c-faint);
+  fill: none;
+  stroke-width: 2;
+}
+.apex-ai-chat .gym-wrap {
+  margin-bottom: 16px;
+}
+.apex-ai-chat .crow {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 7px 0;
+}
+.apex-ai-chat .ci {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.apex-ai-chat .ci svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.6;
+  fill: none;
+}
+.apex-ai-chat .ci.ok { background: #e9f3ed; }
+.apex-ai-chat .ci.ok svg { stroke: var(--c-green); }
+.apex-ai-chat .ci.warn { background: #fbf1e4; }
+.apex-ai-chat .ci.warn svg { stroke: var(--c-amber); }
+.apex-ai-chat .crow.warn-row {
+  background: #fdf8f0;
+  border: 1px solid #f2e6d2;
+  border-radius: 10px;
+  padding: 8px 11px;
+  margin: 3px 0;
+}
+.apex-ai-chat .ctxt {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+  padding-top: 1px;
+}
+.apex-ai-chat .ctxt b { color: var(--c-ink); font-weight: 600; }
+.apex-ai-chat .wo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.apex-ai-chat .wrow {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: var(--c-wash);
+  border: 1px solid var(--c-line-2);
+}
+.apex-ai-chat .wbadge {
+  font-family: var(--c-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 6px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  white-space: nowrap;
+  min-width: 72px;
+  text-align: center;
+}
+.apex-ai-chat .wbadge.freq { background: #fbeaea; color: var(--ca-d); }
+.apex-ai-chat .wbadge.lbl { background: var(--c-ink); color: #fff; }
+.apex-ai-chat .wtxt {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+  padding-top: 2px;
+}
+.apex-ai-chat .wtxt b { color: var(--c-ink); font-weight: 600; }
+.apex-ai-chat .wtxt .ex {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--c-mono);
+  font-size: 11px;
+  color: var(--c-muted);
+  padding-left: 11px;
+  border-left: 2px solid var(--c-line);
+}
+
+/* ── callout ── */
+.apex-ai-chat .closer {
+  font-size: 13px;
+  color: var(--c-muted);
+  line-height: 1.6;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #fcf6f5, #fff);
+  border: 1px solid #f3e4e3;
+  border-radius: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.apex-ai-chat .closer svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--ca);
+  fill: none;
+  stroke-width: 1.7;
+  flex: 0 0 16px;
+  margin-top: 2px;
+}
+.apex-ai-chat .closer b { color: var(--c-ink-2); font-weight: 600; }
+
+/* ── product_rec: supplement suggestions (§4a) ── */
+.apex-ai-chat .rec {
+  margin-bottom: 16px;
+}
+.apex-ai-chat .rec-cat {
+  font-family: var(--c-mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ca-d);
+  margin: 0 2px 9px;
+}
+.apex-ai-chat .rec-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.apex-ai-chat .rec-card {
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 13px 15px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 18px 40px -34px rgba(0, 0, 0, 0.4);
+}
+.apex-ai-chat .rec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.apex-ai-chat .rec-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--c-ink);
+  flex: 1;
+  min-width: 0;
+}
+.apex-ai-chat .rec-dose {
+  font-family: var(--c-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-ink);
+  background: var(--c-wash);
+  border: 1px solid var(--c-line-2);
+  padding: 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.apex-ai-chat .rec-why {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--c-ink-2);
+}
+.apex-ai-chat .rec-why b { color: var(--c-ink); font-weight: 600; }
+.apex-ai-chat .rec-caution {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 9px;
+  padding: 8px 11px;
+  background: #fdf8f0;
+  border: 1px solid #f2e6d2;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--c-ink-2);
+}
+.apex-ai-chat .rec-caution b { color: var(--c-ink); font-weight: 600; }
+.apex-ai-chat .rec-caution-ic {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  background: #fbf1e4;
+  margin-top: 1px;
+}
+.apex-ai-chat .rec-caution-ic svg {
+  width: 11px;
+  height: 11px;
+  stroke: var(--c-amber);
+  fill: none;
+  stroke-width: 2.6;
+}
+
+/* ── response progress: live tag / completion cue ── */
+.apex-ai-chat .ai-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--c-mono);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ca-d);
+  background: #fbeded;
+  border: 1px solid #f4d9d9;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.apex-ai-chat .ai-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ca);
+  box-shadow: 0 0 0 0 rgba(224, 21, 18, 0.55);
+  animation: apexai-pulse-red 1.6s infinite;
+}
+@keyframes apexai-pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(224, 21, 18, 0.55); }
+  70% { box-shadow: 0 0 0 6px rgba(224, 21, 18, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(224, 21, 18, 0); }
+}
+.apex-ai-chat .ai-status-more {
+  margin-top: 12px;
+}
+.apex-ai-chat .ai-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--c-mono);
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-green);
+}
+.apex-ai-chat .ai-done-ic {
+  width: 13px;
+  height: 13px;
+  stroke: var(--c-green);
+  stroke-width: 2.6;
+}
+
+/* ── typing / status ── */
+.apex-ai-chat .ai-status {
+  font-family: var(--c-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--c-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.apex-ai-chat .typing {
+  display: inline-flex;
+  gap: 4px;
+}
+.apex-ai-chat .typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c-faint);
+  animation: apexai-bounce 1s infinite;
+}
+.apex-ai-chat .typing span:nth-child(2) { animation-delay: 0.15s; }
+.apex-ai-chat .typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes apexai-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+.apex-ai-chat .empty-hint {
+  text-align: center;
+  color: var(--c-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 28px 12px;
+}
+
+/* ── composer ── */
+.apex-ai-chat .composer {
+  padding: 14px 18px 16px;
+  border-top: 1px solid var(--c-line);
+  background: #fff;
+  flex: 0 0 auto;
+}
+.apex-ai-chat .inp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid #efd8d7;
+  border-radius: 16px;
+  padding: 6px 6px 6px 14px;
+  background: #fff;
+  box-shadow: 0 8px 22px -16px rgba(211, 6, 3, 0.4);
+}
+.apex-ai-chat .inp input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--c-sans);
+  font-size: 14px;
+  color: var(--c-ink);
+  background: transparent;
+}
+.apex-ai-chat .inp input::placeholder { color: var(--c-faint); }
+.apex-ai-chat .send {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  flex: 0 0 38px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--ca), var(--ca-d));
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 18px -8px rgba(211, 6, 3, 0.5);
+}
+.apex-ai-chat .send:disabled { opacity: 0.45; cursor: not-allowed; }
+.apex-ai-chat .send svg {
+  width: 16px;
+  height: 16px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 1.8;
+}
+
+@media (max-width: 560px) {
+  .apex-ai-chat .snap { grid-template-columns: 1fr; }
+  .apex-ai-chat .snap:not(.single) .snap-col.pos {
+    border-right: none;
+    border-bottom: 1px solid var(--c-line-2);
+  }
+}

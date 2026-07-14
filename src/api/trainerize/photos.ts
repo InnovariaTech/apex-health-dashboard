@@ -47,11 +47,14 @@ export async function listPhotos(
 export async function getPhotoDetail(
   params: GetPhotoDetailParams,
 ): Promise<PhotoDetail> {
-  // Coerce boolean to string so axios serializes it as `thumbnail=true|false`
-  // rather than relying on its default boolean handling.
+  // Only send `thumbnail` when we actually want the thumbnail. The endpoint
+  // defaults to full size (`thumbnail=false`), so for full-res we omit the
+  // param entirely. This avoids a subtle backend pitfall: the string "false"
+  // is truthy in JS, so a loose `if (req.query.thumbnail)` check would treat
+  // `thumbnail=false` as `true` and wrongly return the low-res thumbnail.
   const query: Record<string, unknown> = { photoId: params.photoId };
-  if (typeof params.thumbnail === "boolean") {
-    query.thumbnail = String(params.thumbnail);
+  if (params.thumbnail === true) {
+    query.thumbnail = "true";
   }
   const res = await axiosService.get<Envelope<PhotoDetail>>(DETAIL, {
     params: query,

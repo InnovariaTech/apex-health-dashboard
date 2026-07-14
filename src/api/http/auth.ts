@@ -79,8 +79,12 @@ export function createAuthApi(): AuthApi {
       const res = await axiosService.post(`${AUTH_BASE}/forgot-password`, { email });
       return res.data;
     },
-    async resetPassword({ token, newPassword }: ResetPasswordPayload) {
-      const res = await axiosService.post(`${AUTH_BASE}/reset-password`, { token, newPassword });
+    async resetPassword({ email, code, newPassword }: ResetPasswordPayload) {
+      const res = await axiosService.post(`${AUTH_BASE}/reset-password`, {
+        email,
+        code,
+        newPassword,
+      });
       return res.data;
     },
     async verifyPortalOtp({ code }: VerifyOtpPayload): Promise<VerifyOtpResult> {

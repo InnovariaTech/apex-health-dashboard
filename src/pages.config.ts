@@ -16,10 +16,12 @@ import Documents from "./views/patient/pages/Documents";
 import MyCases from "./views/patient/pages/MyCases";
 import BrowseTreatments from "./views/patient/pages/BrowseTreatments";
 import HealthAnalysis from "./views/patient/pages/HealthAnalysis";
+import Genetics from "./views/patient/pages/Genetics";
 import Progress from "./views/patient/pages/Progress";
 import TrainerChat from "./views/patient/pages/TrainerChat";
 import Habits from "./views/patient/pages/Habits";
 import Appointments from "./views/patient/pages/Appointments";
+import Wearables from "./views/patient/pages/Wearables";
 import __Layout from "./layouts/AppLayout";
 
 export type PageComponent = ComponentType<any>;
@@ -39,10 +41,12 @@ export const PAGES: Record<string, PageComponent> = {
   MyCases,
   BrowseTreatments,
   HealthAnalysis,
+  Genetics,
   Progress,
   TrainerChat,
   Habits,
   Appointments,
+  Wearables,
 };
 
 export interface PagesConfig {

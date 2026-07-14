@@ -1,0 +1,511 @@
+/**
+ * Biomarker PDF export — scoped styles ported from the `biomarkers (37).html`
+ * demo (`.pdf-modal` / `.rep-*` blocks). Everything is namespaced under
+ * `.bm-pdf-modal` so it can't leak into the rest of the portal, plus the
+ * `@media print` rules that isolate the paper pages for Save-as-PDF / Print.
+ */
+
+.bm-pdf-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(20, 20, 20, 0.62);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  overflow: auto;
+}
+.bm-pdf-modal.open {
+  display: block;
+}
+
+.bm-pdf-modal .pdf-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  background: #1a1a1a;
+  color: #fff;
+}
+.bm-pdf-modal .tb-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.bm-pdf-modal .tb-meta {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.bm-pdf-modal .tb-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.bm-pdf-modal .tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.bm-pdf-modal .tb-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.bm-pdf-modal .tb-btn.primary {
+  background: var(--apex-accent, #e11816);
+  border-color: var(--apex-accent, #e11816);
+}
+.bm-pdf-modal .tb-btn.primary:hover {
+  background: var(--apex-accent-dark, #b70402);
+}
+
+.bm-pdf-modal .pdf-pages-wrap {
+  padding: 28px 16px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Paper-sized page */
+.bm-pdf-modal .pdf-page {
+  width: 8.5in;
+  min-height: 11in;
+  background: #ffffff;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  padding: 0.55in 0.6in 0.7in;
+  color: #1a1a1a;
+  position: relative;
+  font-size: 11px;
+  line-height: 1.5;
+}
+@media (max-width: 960px) {
+  .bm-pdf-modal .pdf-page {
+    transform: scale(0.78);
+    transform-origin: top center;
+    margin-bottom: -22%;
+  }
+}
+@media (max-width: 700px) {
+  .bm-pdf-modal .pdf-page {
+    transform: scale(0.45);
+    margin-bottom: -50%;
+  }
+}
+
+.bm-pdf-modal .rep-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #1a1a1a;
+  margin-bottom: 22px;
+}
+.bm-pdf-modal .rep-logo {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+.bm-pdf-modal .rep-brand-sub {
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  color: #6b6b6b;
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+}
+.bm-pdf-modal .rep-meta-right {
+  text-align: right;
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  color: #525252;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.bm-pdf-modal .rep-meta-right strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.bm-pdf-modal .rep-title-block {
+  margin-bottom: 20px;
+}
+.bm-pdf-modal .rep-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0 0 6px;
+}
+.bm-pdf-modal .rep-title em {
+  color: var(--apex-accent, #e11816);
+  font-style: italic;
+  font-weight: 500;
+}
+.bm-pdf-modal .rep-subtitle {
+  font-family: var(--font-mono, monospace);
+  font-size: 10.5px;
+  color: #525252;
+  letter-spacing: 0.05em;
+}
+
+.bm-pdf-modal .rep-patient {
+  background: #f5f5f3;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 24px;
+}
+.bm-pdf-modal .rep-patient .field {
+  line-height: 1.3;
+}
+.bm-pdf-modal .rep-patient .field label {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #525252;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.bm-pdf-modal .rep-patient .field span {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.bm-pdf-modal .rep-patient .field .mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+}
+
+.bm-pdf-modal .rep-section {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--apex-accent, #e11816);
+  font-weight: 600;
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bm-pdf-modal .rep-section::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e0e0dc;
+}
+
+.bm-pdf-modal .rep-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.bm-pdf-modal .rep-kpi {
+  border: 1px solid #e0e0dc;
+  border-radius: 8px;
+  padding: 12px 14px;
+  position: relative;
+}
+.bm-pdf-modal .rep-kpi .rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 40%;
+  background: #2e7d5a;
+}
+.bm-pdf-modal .rep-kpi .rule.bord {
+  background: #b8761c;
+}
+.bm-pdf-modal .rep-kpi .rule.att {
+  background: #b23a3a;
+}
+.bm-pdf-modal .rep-kpi .lbl {
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #525252;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.bm-pdf-modal .rep-kpi .val {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.bm-pdf-modal .rep-kpi .val .unit {
+  font-size: 10px;
+  color: #525252;
+  margin-left: 3px;
+  font-weight: 400;
+}
+.bm-pdf-modal .rep-kpi .sub {
+  font-size: 9.5px;
+  color: #525252;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.bm-pdf-modal .rep-featured {
+  border: 1px solid #e0e0dc;
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 20px;
+}
+.bm-pdf-modal .rep-featured-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(225, 24, 22, 0.1);
+  color: var(--apex-accent, #e11816);
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.bm-pdf-modal .rep-featured h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.bm-pdf-modal .rep-featured .full-name {
+  font-size: 10px;
+  color: #6b6b6b;
+  margin: 0 0 10px;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.04em;
+}
+.bm-pdf-modal .rep-featured .feat-val {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 8px 0 6px;
+}
+.bm-pdf-modal .rep-featured .feat-num {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.bm-pdf-modal .rep-featured .feat-unit {
+  font-size: 12px;
+  color: #525252;
+}
+.bm-pdf-modal .rep-featured .feat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(46, 125, 90, 0.12);
+  color: #1f5b41;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.bm-pdf-modal .rep-featured .feat-status.bord {
+  background: rgba(184, 118, 28, 0.14);
+  color: #8a5a12;
+}
+.bm-pdf-modal .rep-featured .feat-status.att {
+  background: rgba(178, 58, 58, 0.14);
+  color: #8b2424;
+}
+.bm-pdf-modal .rep-featured .feat-delta {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  color: #1f5b41;
+  margin-bottom: 12px;
+}
+.bm-pdf-modal .rep-featured p {
+  font-size: 10.5px;
+  color: #1a1a1a;
+  line-height: 1.55;
+  margin: 6px 0 0;
+}
+.bm-pdf-modal .rep-trend-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.bm-pdf-modal .rep-trend-cap {
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  color: #525252;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.bm-pdf-modal .rep-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+.bm-pdf-modal .rep-table th {
+  text-align: left;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #525252;
+  font-weight: 600;
+  padding: 8px 8px 9px 0;
+  border-bottom: 1.5px solid #1a1a1a;
+}
+.bm-pdf-modal .rep-table td {
+  padding: 8px 8px 8px 0;
+  border-bottom: 1px solid #ececea;
+  vertical-align: middle;
+}
+.bm-pdf-modal .rep-table td.num {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.bm-pdf-modal .rep-table td.dim {
+  color: #525252;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+}
+.bm-pdf-modal .rep-table td.cat {
+  color: #525252;
+  text-transform: capitalize;
+  font-size: 10px;
+}
+.bm-pdf-modal .rep-table .sdot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.bm-pdf-modal .rep-table .dot-opt {
+  background: #2e7d5a;
+}
+.bm-pdf-modal .rep-table .dot-bord {
+  background: #b8761c;
+}
+.bm-pdf-modal .rep-table .dot-att {
+  background: #b23a3a;
+}
+.bm-pdf-modal .rep-table .slbl {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: capitalize;
+}
+.bm-pdf-modal .rep-table .delta-good {
+  color: #1f5b41;
+}
+.bm-pdf-modal .rep-table .delta-bad {
+  color: #8b2424;
+}
+
+.bm-pdf-modal .rep-disclaimer {
+  margin-top: 18px;
+  padding: 11px 14px;
+  background: #fffcf0;
+  border: 1px solid #f0e4b0;
+  border-radius: 6px;
+  font-size: 9.5px;
+  color: #6b5418;
+  line-height: 1.55;
+}
+
+.bm-pdf-modal .rep-footer {
+  position: absolute;
+  bottom: 0.35in;
+  left: 0.6in;
+  right: 0.6in;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0dc;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono, monospace);
+  font-size: 8.5px;
+  color: #525252;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Print rules ---------- */
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 0;
+  }
+  html,
+  body {
+    background: white !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .bm-pdf-modal,
+  .bm-pdf-modal * {
+    visibility: visible;
+  }
+  .bm-pdf-modal {
+    position: static !important;
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  .bm-pdf-modal .pdf-toolbar {
+    display: none !important;
+  }
+  .bm-pdf-modal .pdf-pages-wrap {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .bm-pdf-modal .pdf-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    padding: 0.5in 0.55in 0.6in !important;
+    transform: none !important;
+    page-break-after: always;
+  }
+  .bm-pdf-modal .pdf-page:last-child {
+    page-break-after: auto;
+  }
+}

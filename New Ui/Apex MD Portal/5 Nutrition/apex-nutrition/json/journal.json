@@ -1,0 +1,94 @@
+{
+  "goal": 2000,
+  "trend": [
+    {
+      "d": "Jun 3",
+      "v": 0
+    },
+    {
+      "d": "Jun 4",
+      "v": 495
+    },
+    {
+      "d": "Jun 5",
+      "v": 505
+    },
+    {
+      "d": "Jun 6",
+      "v": 2475
+    }
+  ],
+  "macros": [
+    {
+      "d": "Jun 3",
+      "c": 0,
+      "p": 0,
+      "f": 0
+    },
+    {
+      "d": "Jun 4",
+      "c": 50,
+      "p": 35,
+      "f": 19
+    },
+    {
+      "d": "Jun 5",
+      "c": 36,
+      "p": 51,
+      "f": 17
+    },
+    {
+      "d": "Jun 6",
+      "c": 248,
+      "p": 174,
+      "f": 97
+    }
+  ],
+  "log": [
+    {
+      "date": "Saturday, Jun 6, 2026",
+      "kcal": 2475,
+      "c": 248,
+      "p": 174,
+      "f": 97,
+      "meals": [
+        "Breakfast",
+        "Breakfast",
+        "Breakfast",
+        "Breakfast",
+        "Breakfast"
+      ]
+    },
+    {
+      "date": "Friday, Jun 5, 2026",
+      "kcal": 505,
+      "c": 36,
+      "p": 51,
+      "f": 17,
+      "meals": [
+        "Breakfast"
+      ]
+    },
+    {
+      "date": "Thursday, Jun 4, 2026",
+      "kcal": 495,
+      "c": 50,
+      "p": 35,
+      "f": 19,
+      "meals": [
+        "Breakfast"
+      ]
+    },
+    {
+      "date": "Wednesday, Jun 3, 2026",
+      "kcal": 0,
+      "c": 0,
+      "p": 0,
+      "f": 0,
+      "meals": [
+        "snacks"
+      ]
+    }
+  ],
+  "source": "APEX FIT app"
+}

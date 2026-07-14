@@ -87,7 +87,11 @@ export default function DashboardHero() {
 
   const now = useMemo(() => new Date(), []);
   const greeting = getGreeting(now);
-  const firstName = deriveFirstName(profileQuery.data, authQuery.data);
+  // Greet without the patient's name. Keep the italic-red emphasis on the
+  // last word of the greeting so the editorial title style is preserved.
+  const greetingParts = greeting.label.split(" ");
+  const greetingEmphasis = greetingParts.pop() ?? greeting.label;
+  const greetingLead = greetingParts.join(" ");
 
   const cases = casesQuery.data ?? [];
   const activeCases = useMemo(
@@ -119,8 +123,6 @@ export default function DashboardHero() {
       })}`
     : "Run your first scan";
 
-  const isNameLoading = profileQuery.isLoading || authQuery.isLoading;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -138,13 +140,9 @@ export default function DashboardHero() {
                 {format(now, "EEEE · MMM d, yyyy").toUpperCase()}
               </span>
             </div>
-            {isNameLoading ? (
-              <Skeleton className="h-11 w-80" />
-            ) : (
-              <h1 className="apex-page-title">
-                {greeting.label}, <em>{firstName}</em>
-              </h1>
-            )}
+            <h1 className="apex-page-title">
+              {greetingLead} <em>{greetingEmphasis}</em>
+            </h1>
           </div>
 
           <div className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-full border border-border bg-card text-[11px] text-ink-2 font-mono">

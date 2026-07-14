@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Health Analysis · Apex Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+
+<h1 class="sr-only">AI-generated health analysis report for Randall Chen</h1>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img class="brand-logo" src="assets/img/apex-md-logo.jpg" alt="Apex MD">
+    </div>
+
+    <div class="nav-label">Menu</div>
+    <div class="nav-section">
+      <a class="nav-item"><i class="ti ti-home"></i> Dashboard</a>
+      <a class="nav-item active"><i class="ti ti-sparkles"></i> Health Analysis</a>
+      <a class="nav-item"><i class="ti ti-capsule"></i> My Treatments</a>
+      <a class="nav-item"><i class="ti ti-message-circle"></i> Chat</a>
+      <a class="nav-item"><i class="ti ti-flask"></i> Biomarkers</a>
+      <a class="nav-item"><img class="nav-img-icon" src="assets/img/nav-genetics-dna.png" alt=""> Genetics</a>
+      <a class="nav-item"><i class="ti ti-trending-up"></i> Progress</a>
+      <a class="nav-item"><i class="ti ti-test-pipe"></i> Lab Kits</a>
+      <a class="nav-item"><i class="ti ti-shopping-bag"></i> Shop</a>
+      <a class="nav-item"><i class="ti ti-school"></i> Education</a>
+      <a class="nav-item"><i class="ti ti-user"></i> Profile</a>
+    </div>
+
+    <div class="brand-divider"></div>
+
+    <div class="brand brand-fit">
+      <img class="brand-logo brand-logo-fit" src="assets/img/apex-fit-logo.jpg" alt="Apex Fit">
+    </div>
+
+    <div class="nav-section nav-fit">
+      <a class="nav-item"><i class="ti ti-clipboard-check"></i> Program</a>
+      <a class="nav-item"><i class="ti ti-barbell"></i> Workouts</a>
+      <a class="nav-item"><i class="ti ti-heart"></i> Nutrition</a>
+      <a class="nav-item"><i class="ti ti-refresh"></i> Habits</a>
+      <a class="nav-item"><i class="ti ti-message-2"></i> Trainer Messages</a>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+  </aside>
+
+  <main>
+
+    <div class="topbar">
+      <div class="breadcrumb">
+        <span>Health</span>
+        <i class="ti ti-chevron-right"></i>
+        <span style="color: var(--ink);">Health analysis</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search records, protocols, providers..." />
+      </div>
+      <button class="icon-btn" aria-label="Notifications"><i class="ti ti-bell"></i></button>
+      <button class="icon-btn" aria-label="Settings"><i class="ti ti-settings"></i></button>
+    </div>
+
+    <div class="page-head">
+      <div>
+        <div class="ai-tag"><i class="ti ti-sparkles"></i> AI health analysis</div>
+        <h2 class="page-title">Health <em>analysis</em></h2>
+        <p class="page-sub">Personalized longitudinal insights from your latest lab work.</p>
+      </div>
+      <div class="page-head-actions">
+        <button class="btn" id="exportPdfBtn"><i class="ti ti-file-download"></i> Export as PDF</button>
+        <button class="btn accent"><i class="ti ti-refresh"></i> Run new analysis</button>
+      </div>
+    </div>
+
+    <!-- Hero: Score donut + History side by side -->
+    <div class="hero-grid">
+
+      <div class="card score-card-large">
+        <div class="score-head">
+          <div class="label">Overall health score</div>
+          <div class="delta">
+            <i class="ti ti-trending-up"></i> +1
+            <span class="since">vs May 6 · 86th %ile age cohort</span>
+          </div>
+        </div>
+
+        <div class="score-body">
+          <div class="donut-large">
+            <svg viewBox="0 0 200 200">
+              <!-- Background track -->
+              <circle cx="100" cy="100" r="84" fill="none" stroke="var(--surface-2)" stroke-width="12"/>
+
+              <!-- Threshold tick marks at 50, 70, 85 (on the outside of the track) -->
+              <g stroke="var(--ink-4)" stroke-width="1">
+                <!-- 50% mark (180° from start, i.e. bottom) -->
+                <line x1="100" y1="190" x2="100" y2="198"/>
+                <!-- 70% mark: angle = 0.7*360 - 90 = 162° from horizontal = (cos(162°), sin(162°)) -->
+                <line x1="20.05" y1="125.95" x2="12.43" y2="128.43"/>
+                <!-- 85% mark: angle = 0.85*360 - 90 = 216° → cos(216°)=-0.809, sin(216°)=-0.588 -->
+                <line x1="32.05" y1="50.61" x2="25.42" y2="46.78"/>
+              </g>
+
+              <!-- Tick labels -->
+              <text x="100" y="206" text-anchor="middle" fill="#a8a8a8" font-family="Inter, sans-serif" font-size="8" letter-spacing="0.5">50</text>
+              <text x="6" y="131" text-anchor="end" fill="#a8a8a8" font-family="Inter, sans-serif" font-size="8" letter-spacing="0.5">70</text>
+              <text x="20" y="44" text-anchor="end" fill="#a8a8a8" font-family="Inter, sans-serif" font-size="8" letter-spacing="0.5">85</text>
+
+              <!-- Score arc: 89% of 2π*84 = 469.93 of 527.79 -->
+              <circle cx="100" cy="100" r="84" fill="none" stroke="var(--opt)" stroke-width="12"
+                      stroke-dasharray="469.93 527.79" stroke-linecap="round"
+                      transform="rotate(-90 100 100)"/>
+            </svg>
+            <div class="center">
+              <div class="num">89</div>
+              <div class="denom">/ 100</div>
+              <div class="status"><span class="dot"></span> Good</div>
+            </div>
+          </div>
+
+          <div class="score-breakdown">
+            <div class="breakdown-h">
+              <span>Subsystem breakdown</span>
+              <span class="h-right">Score / 100</span>
+            </div>
+            <div class="score-row">
+              <span class="name">Metabolic</span>
+              <span class="val">89</span>
+              <div class="bar"><div class="bar-fill" style="width: 89%"></div></div>
+            </div>
+            <div class="score-row">
+              <span class="name">Cardiovascular</span>
+              <span class="val">95</span>
+              <div class="bar"><div class="bar-fill" style="width: 95%"></div></div>
+            </div>
+            <div class="score-row warn">
+              <span class="name">Renal</span>
+              <span class="val">78</span>
+              <div class="bar"><div class="bar-fill" style="width: 78%"></div></div>
+            </div>
+            <div class="score-row">
+              <span class="name">Endocrine</span>
+              <span class="val">83</span>
+              <div class="bar"><div class="bar-fill" style="width: 83%"></div></div>
+            </div>
+            <div class="score-row">
+              <span class="name">Hematology</span>
+              <span class="val">92</span>
+              <div class="bar"><div class="bar-fill" style="width: 92%"></div></div>
+            </div>
+            <div class="score-row">
+              <span class="name">Micronutrients</span>
+              <span class="val">97</span>
+              <div class="bar"><div class="bar-fill" style="width: 97%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="score-foot">
+          <div class="meta-l">
+            <i class="ti ti-database"></i>
+            Based on 27 biomarkers · 4 longitudinal analyses
+          </div>
+          <div class="meta-r">
+            <i class="ti ti-clock"></i>
+            May 11, 2026 · 6:26 AM · Methodology v3.2
+          </div>
+        </div>
+
+        <div class="score-biomarkers">
+          <div class="biomarker-h">
+            <span class="biomarker-title">Biomarker status</span>
+            <span class="biomarker-count"><strong>21 of 27</strong> in optimal range</span>
+          </div>
+          <div class="biomarker-issues">
+            <div class="biomarker-issue att">
+              <span class="bi-dot"></span>
+              <span class="bi-name">Creatinine</span>
+              <span class="bi-value">1.31 mg/dL</span>
+              <span class="bi-status">High — trending up</span>
+            </div>
+            <div class="biomarker-issue bord">
+              <span class="bi-dot"></span>
+              <span class="bi-name">Lp(a)</span>
+              <span class="bi-value">128 nmol/L</span>
+              <span class="bi-status">Elevated — genetic CV risk</span>
+            </div>
+            <div class="biomarker-issue bord">
+              <span class="bi-dot"></span>
+              <span class="bi-name">Free testosterone</span>
+              <span class="bi-value">23.5 pg/mL</span>
+              <span class="bi-status">Declining significantly</span>
+            </div>
+            <div class="biomarker-issue bord">
+              <span class="bi-dot"></span>
+              <span class="bi-name">MCV</span>
+              <span class="bi-value">98 fL</span>
+              <span class="bi-status">At upper edge of normal</span>
+            </div>
+            <div class="biomarker-issue bord">
+              <span class="bi-dot"></span>
+              <span class="bi-name">T3RU</span>
+              <span class="bi-value">52%</span>
+              <span class="bi-status">Slightly elevated</span>
+            </div>
+            <div class="biomarker-issue info">
+              <span class="bi-dot"></span>
+              <span class="bi-name">Insulin</span>
+              <span class="bi-value">2.3 µIU/mL</span>
+              <span class="bi-status">Low — below typical range</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc-summary">
+          <div class="sc-summary-h">
+            <span class="sc-label">Analysis summary</span>
+            <span class="narr-status opt">Strong</span>
+          </div>
+          <p class="sc-summary-text">Your longitudinal labs show <strong>strong overall health</strong>, with most biomarkers consistently within normal ranges from October 2025 through May 2026 — excellent metabolic control, healthy lipids, and stable blood counts. A few markers warrant a closer look, flagged above and detailed in the full report below.</p>
+          <a href="#full-report" class="btn sc-summary-btn">See full report <i class="ti ti-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <div class="card bio-age-card">
+        <div class="bio-head">
+          <div class="label">Biological age</div>
+          <div class="delta">
+            <i class="ti ti-trending-down"></i> −0.1 yrs
+          </div>
+        </div>
+
+        <div class="bio-body">
+          <div class="bio-top-row">
+            <div class="bio-primary">
+              <div class="bio-num">36.4<span class="unit">yrs</span></div>
+              <div class="bio-delta-large">
+                <i class="ti ti-arrow-down"></i> 3.6 yrs younger
+              </div>
+              <div class="bio-vs">vs chronological 40 yrs</div>
+            </div>
+
+            <div class="bio-figure" aria-hidden="true">
+              <img class="bio-figure-img" src="assets/img/bio-figure-body.jpg" alt="">
+            </div>
+          </div>
+
+          <div class="bio-scale">
+            <svg class="bio-scale-svg" viewBox="0 0 380 100" preserveAspectRatio="none">
+              <!-- Background zone shading -->
+              <rect x="156" y="48" width="68" height="14" fill="var(--opt-soft)" rx="2"/>
+
+              <!-- Axis line -->
+              <line x1="24" y1="55" x2="356" y2="55" stroke="#d4d4d0" stroke-width="1.5"/>
+
+              <!-- Tick marks at 25, 30, 35, 40, 45, 50, 55 -->
+              <g stroke="#a8a8a4" stroke-width="1">
+                <line x1="24" y1="50" x2="24" y2="60"/>
+                <line x1="79.3" y1="50" x2="79.3" y2="60"/>
+                <line x1="134.7" y1="50" x2="134.7" y2="60"/>
+                <line x1="190" y1="50" x2="190" y2="60"/>
+                <line x1="245.3" y1="50" x2="245.3" y2="60"/>
+                <line x1="300.7" y1="50" x2="300.7" y2="60"/>
+                <line x1="356" y1="50" x2="356" y2="60"/>
+              </g>
+
+              <!-- Tick labels -->
+              <g font-family="Inter, sans-serif" font-size="9" fill="#888" text-anchor="middle">
+                <text x="24" y="78">25</text>
+                <text x="79.3" y="78">30</text>
+                <text x="134.7" y="78">35</text>
+                <text x="190" y="78">40</text>
+                <text x="245.3" y="78">45</text>
+                <text x="300.7" y="78">50</text>
+                <text x="356" y="78">55</text>
+              </g>
+
+              <!-- "3.6 yrs younger" caption below the band -->
+              <text x="184" y="94" text-anchor="middle" font-family="Inter, sans-serif" font-size="8.5" fill="#2E7D5A" font-weight="600" letter-spacing="0.4">3.6 YRS YOUNGER</text>
+
+              <!-- Biological age marker at age 36.4: x = 24 + (36.4-25) * 11.07 = 150.2 -->
+              <line x1="150" y1="24" x2="150" y2="48" stroke="#2E7D5A" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <circle cx="150" cy="55" r="7" fill="#2E7D5A" stroke="white" stroke-width="2.5"/>
+              <text x="150" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#2E7D5A" font-weight="700">36.4</text>
+
+              <!-- Chronological age marker at age 40: x = 24 + (40-25) * 11.07 = 190 (but use 218 for room) -->
+              <line x1="218" y1="24" x2="218" y2="48" stroke="#888" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <circle cx="218" cy="55" r="7" fill="#fff" stroke="#525252" stroke-width="2"/>
+              <text x="218" y="18" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#525252" font-weight="700">40</text>
+            </svg>
+            <div class="scale-legend">
+              <span class="leg-item"><span class="leg-dot bio"></span> Biological</span>
+              <span class="leg-item"><span class="leg-dot chron"></span> Chronological</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bio-foot">
+          <div class="trend">
+            <span class="trend-vals">36.6 <span class="arrow">→</span> 36.5 <span class="arrow">→</span> 36.4</span>
+          </div>
+          <div class="method">
+            PhenoAge · 9 biomarkers
+          </div>
+        </div>
+
+        <div class="reco-summary">
+          <div class="reco-h">
+            <span class="reco-label">Recommended for you</span>
+            <span class="reco-sub">From your genetic gauges</span>
+          </div>
+
+          <div>
+            <div class="reco-group-label">Top 3 supplements</div>
+            <div class="reco-list">
+              <div class="reco-item">
+                <span class="reco-thumb"><img src="assets/img/product-red-superfood.jpg" alt="Apex MD RED Superfood"></span>
+                <div class="reco-meta">
+                  <div class="reco-name">RED Superfood</div>
+                  <div class="reco-tag">Immune · Gut · Antioxidant defense</div>
+                </div>
+                <span class="reco-price">$39.99</span>
+              </div>
+              <div class="reco-item">
+                <span class="reco-thumb"><img src="assets/img/product-probiotic.jpg" alt="Apex MD Probiotic 40 Billion CFU"></span>
+                <div class="reco-meta">
+                  <div class="reco-name">Probiotic — 40B CFU</div>
+                  <div class="reco-tag">Digestive · Microbiome · Immune</div>
+                </div>
+                <span class="reco-price">$34.99</span>
+              </div>
+              <div class="reco-item">
+                <span class="reco-thumb"><img src="assets/img/product-vitamin-k2-d3.jpg" alt="Apex MD Vitamin K2 + D3"></span>
+                <div class="reco-meta">
+                  <div class="reco-name">Vitamin K2 + D3</div>
+                  <div class="reco-tag">Bones · Cardiovascular · Immune</div>
+                </div>
+                <span class="reco-price">$29.99</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="reco-group-label">Recommended peptide</div>
+            <div class="reco-list">
+              <div class="reco-item reco-peptide">
+                <span class="reco-thumb"><img src="assets/img/product-wolverine.jpg" alt="Apex MD Wolverine Stack BPC-157 TB-500"></span>
+                <div class="reco-meta">
+                  <div class="reco-name">Wolverine Stack</div>
+                  <div class="reco-tag">BPC-157 + TB-500 · Repair · Recovery</div>
+                </div>
+                <span class="reco-price">$249</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="reco-also">
+            <strong>Also strong in your report:</strong> Thymosin α-1 · Semax · Epitalon · GHK-Cu
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Work with Apex MD: concierge medicine -->
+    <div class="section-label">Work with Apex MD</div>
+    <div class="card concierge-card">
+      <div class="concierge-photo">
+        <img src="assets/img/doctor-consultation.jpg" alt="Apex MD physician reviewing results with a patient">
+      </div>
+      <div class="concierge-body">
+        <div class="concierge-eyebrow">Concierge medicine</div>
+        <h3 class="concierge-title">Work directly with an Apex MD physician — virtually</h3>
+        <p class="concierge-text">Take the next step beyond your report. Get a personalized health optimization plan and work one-on-one with an Apex MD physician — with regular blood draws and advanced diagnostic testing to ensure optimal health is restored and maintained.</p>
+        <div class="concierge-foot">
+          <div class="concierge-price">Starting at <strong>$399</strong><span class="per">/month</span></div>
+          <button class="btn accent"><i class="ti ti-calendar"></i> Book a consultation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Narrative summary, full width -->
+    <div class="card" id="full-report">
+      <div class="card-head">
+        <h3 class="card-title"><i class="ti ti-brain"></i> Narrative summary</h3>
+        <span class="card-action">Generated by ApexAI</span>
+      </div>
+
+        <div class="narrative">
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-flask"></i> Metabolic health</h4>
+              <span class="narr-status bord">Watch insulin</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Glucose</span><span class="chip-val">88<span class="chip-unit">mg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">HbA1c</span><span class="chip-val">5.2<span class="chip-unit">%</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Insulin</span><span class="chip-val">2.3<span class="chip-unit">µIU/mL</span></span><span class="chip-dot info"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">HOMA-IR</span><span class="chip-val">1.9</span><span class="chip-dot opt"></span></div>
+            </div>
+            <p class="narr-p">
+              Glucose metabolism remains excellent — fasting glucose steady at <span class="val">89 → 88 mg/dL</span> and HbA1c at <span class="val">5.1 → 5.2%</span> across both dates. Insulin dropped from <span class="val">8.6 to 2.3 µIU/mL</span> (now <span class="flag-low">Low</span>), worth a conversation with Dr. Patel to confirm adequate pancreatic function. HOMA-IR of 1.9 still indicates good insulin sensitivity.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Glucose</strong><span class="range">70–99 mg/dL</span>Your blood sugar after fasting overnight. At 88, your body handles sugar well — no concern about diabetes.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>HbA1c</strong><span class="range">&lt;5.7%</span>Average blood sugar over the past three months. Yours at 5.2% is solidly in the healthy range.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Insulin</strong><span class="range">2.6–25 µIU/mL</span>How much insulin your pancreas releases at rest. Yours dropped to 2.3, just below typical. Often a positive sign of insulin sensitivity, but worth confirming with Dr. Patel that pancreatic function is normal.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>HOMA-IR</strong><span class="range">&lt;2.0 ideal</span>A calculated score for how well your cells respond to insulin. At 1.9, your body uses sugar efficiently — no insulin resistance.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-heart-rate-monitor"></i> Lipid panel & cardiovascular</h4>
+              <span class="narr-status bord">Elevated Lp(a)</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Total chol</span><span class="chip-val">149<span class="chip-unit">mg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">LDL</span><span class="chip-val">91<span class="chip-unit">mg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">HDL</span><span class="chip-val">50<span class="chip-unit">mg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Triglycerides</span><span class="chip-val">51<span class="chip-unit">mg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Lp(a)</span><span class="chip-val">128<span class="chip-unit">nmol/L</span></span><span class="chip-dot bord"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">CRP</span><span class="chip-val">&lt;1<span class="chip-unit">mg/L</span></span><span class="chip-dot opt"></span></div>
+            </div>
+            <p class="narr-p">
+              Lipid profile is favorable overall. Total cholesterol rose modestly from <span class="val">137 to 149 mg/dL</span>, LDL from <span class="val">68 to 91 mg/dL</span> — all still in healthy range. HDL drifted from <span class="val">55 to 50 mg/dL</span> and triglycerides held low. <strong>Lp(a) at 128 nmol/L</strong> is elevated — a genetic marker that adds cardiovascular risk independent of LDL, worth a preventive-strategy conversation. CRP remains low, indicating minimal inflammation.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Total cholesterol</strong><span class="range">&lt;200 mg/dL</span>All forms of cholesterol combined. Yours at 149 is excellent.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>LDL ("bad" cholesterol)</strong><span class="range">&lt;100 mg/dL</span>The cholesterol that can build up inside artery walls and lead to heart disease. Yours at 91 is in the healthy range.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>HDL ("good" cholesterol)</strong><span class="range">&gt;40 mg/dL men</span>Helps remove bad cholesterol from your arteries. Yours at 50 is healthy.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Triglycerides</strong><span class="range">&lt;150 mg/dL</span>A type of fat in your blood from food and made by your liver. Yours at 51 is excellent — very low.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Lp(a)</strong><span class="range">&lt;75 nmol/L</span>A genetic form of cholesterol you mostly cannot change with diet or exercise. Yours at 128 is elevated and independently raises heart disease risk — worth a prevention strategy with your doctor (often more aggressive LDL targets).
+                </div>
+                <div class="narr-explain-item">
+                  <strong>CRP</strong><span class="range">&lt;1 mg/L low risk</span>A marker of inflammation in your body, which contributes to heart disease over time. Yours is &lt;1, meaning very little inflammation — good for cardiovascular health.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-droplet"></i> Kidney function</h4>
+              <span class="narr-status bord">Trending up</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Creatinine</span><span class="chip-val">1.31<span class="chip-unit">mg/dL</span></span><span class="chip-dot att"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">eGFR</span><span class="chip-val">75–83<span class="chip-unit">mL/min</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">BUN/Cr ratio</span><span class="chip-val">11</span><span class="chip-dot opt"></span></div>
+            </div>
+            <p class="narr-p">
+              Creatinine has risen from <span class="val">1.2 to 1.31 mg/dL</span> (now <span class="flag-high">High</span>), though eGFR remains stable around <span class="val">75–83 mL/min/1.73m²</span> and BUN/Cr ratio is normal. The mild elevation may reflect increased muscle mass or hydration status rather than reduced filtration — worth tracking across the next two panels.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Creatinine</strong><span class="range">0.74–1.35 mg/dL</span>A waste product from muscle breakdown that your kidneys filter out of blood. Yours at 1.31 is at the upper edge of normal and trending up. Higher numbers can mean kidneys are working harder, but it can also reflect more muscle mass or being dehydrated at the time of the draw.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>eGFR</strong><span class="range">&gt;60 mL/min</span>An estimate of how well your kidneys filter waste, scaled to body size. Above 60 is considered normal kidney function. Yours at 75–83 is healthy.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>BUN/Cr ratio</strong><span class="range">10–20</span>The ratio of two waste products. A normal ratio (yours is 11) usually means dehydration or other factors aren't skewing your creatinine result.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-test-pipe"></i> Blood count & thyroid</h4>
+              <span class="narr-status opt">Mostly optimal</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Hgb</span><span class="chip-val">14.2–14.6<span class="chip-unit">g/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Hct</span><span class="chip-val">43.6<span class="chip-unit">%</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">MCV</span><span class="chip-val">98<span class="chip-unit">fL</span></span><span class="chip-dot bord"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">TSH</span><span class="chip-val">2.5–2.99<span class="chip-unit">mIU/L</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Free T4</span><span class="chip-val">Normal</span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">T3RU</span><span class="chip-val">52<span class="chip-unit">%</span></span><span class="chip-dot bord"></span></div>
+            </div>
+            <p class="narr-p">
+              CBC markers are stable — hemoglobin, hematocrit, and WBC all within range. <strong>MCV mildly elevated at 98 fL</strong> could suggest macrocytosis (often benign, sometimes related to B12 or folate — both of yours are excellent). Thyroid function is excellent: TSH and Free T4 are well-balanced. T3RU slightly high at 52% but Free T4 stays normal, so likely not clinically significant.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Hemoglobin (Hgb)</strong><span class="range">13.5–17.5 g/dL men</span>The oxygen-carrying protein inside your red blood cells. Yours at 14.2–14.6 means your blood carries oxygen well.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Hematocrit (Hct)</strong><span class="range">38.8–50% men</span>The percentage of your blood that is red blood cells. Yours at 43.6 is normal.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>MCV</strong><span class="range">80–100 fL</span>The average size of your red blood cells. Yours at 98 is at the upper edge — slightly large cells can occasionally point to low B12 or folate, but yours are both excellent, so this is likely benign.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>TSH</strong><span class="range">0.4–4.0 mIU/L</span>The hormone that tells your thyroid how hard to work. Yours at 2.5–3.0 is balanced — thyroid is working normally.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Free T4</strong><span class="range">0.8–1.8 ng/dL</span>The main thyroid hormone available for your body to use. Yours is normal, confirming healthy thyroid function.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-circles-relation"></i> Hormones</h4>
+              <span class="narr-status bord">Discuss with provider</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Testosterone</span><span class="chip-val">628<span class="chip-unit">ng/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Free T</span><span class="chip-val">23.5<span class="chip-unit">pg/mL</span></span><span class="chip-dot bord"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">SHBG</span><span class="chip-val">39.4<span class="chip-unit">nmol/L</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">LH</span><span class="chip-val">3.8<span class="chip-unit">mIU/mL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">IGF-1</span><span class="chip-val">224<span class="chip-unit">ng/mL</span></span><span class="chip-dot opt"></span></div>
+            </div>
+            <p class="narr-p">
+              Total testosterone improved nicely from <span class="val">530 to 628 ng/dL</span>, but <strong>free testosterone dropped from 85.9 to 23.5 pg/mL</strong> — a significant decline. SHBG rose from <span class="val">32 to 39.4 nmol/L</span>, which partly explains the lower free fraction (more T bound, less bioavailable). LH dropped from <span class="val">7.3 to 3.8 mIU/mL</span>. These hormonal-axis shifts merit a focused conversation with your physician. IGF-1 at 224 ng/mL suggests healthy growth hormone activity.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Total testosterone</strong><span class="range">264–916 ng/dL men</span>The total amount of testosterone in your blood, both bound and free. Yours at 628 is solidly in the normal range and improved from prior.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Free testosterone</strong><span class="range">8.7–25.1 pg/mL men</span>The "active" portion of testosterone your body can actually use. Yours dropped to 23.5 — still in range, but the drop from 85.9 is significant. Low free T can affect energy, libido, muscle mass, and mood. Worth a focused conversation with your doctor.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>SHBG</strong><span class="range">16.5–55.9 nmol/L</span>A protein that binds testosterone in the blood and limits its availability. Yours rose to 39.4, which is part of why free testosterone dropped — more is bound up and unavailable.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>LH</strong><span class="range">1.7–8.6 mIU/mL men</span>The signal your brain sends to the testes to make testosterone. Yours at 3.8 is normal. The drop from 7.3 suggests less signaling — relevant context for the testosterone changes.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>IGF-1</strong><span class="range">88–246 ng/mL age-adjusted</span>A marker of growth hormone activity, important for muscle maintenance, recovery, and longevity. Yours at 224 indicates healthy GH activity.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-leaf"></i> Micronutrients & liver</h4>
+              <span class="narr-status opt">All optimal</span>
+            </div>
+            <div class="narr-chips">
+              <div class="narr-chip"><span class="chip-lbl">Vitamin D</span><span class="chip-val">51<span class="chip-unit">ng/mL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">B12</span><span class="chip-val">996<span class="chip-unit">pg/mL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Folate</span><span class="chip-val">14.2<span class="chip-unit">ng/mL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Ferritin</span><span class="chip-val">127<span class="chip-unit">ng/mL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Iron</span><span class="chip-val">90–92<span class="chip-unit">mcg/dL</span></span><span class="chip-dot opt"></span></div>
+              <div class="narr-chip"><span class="chip-lbl">Liver enzymes</span><span class="chip-val">Normal</span><span class="chip-dot opt"></span></div>
+            </div>
+            <p class="narr-p">
+              Vitamin D is optimal at <span class="val">51 ng/mL</span>. B12 and folate are excellent. Iron stores well-maintained — ferritin <span class="val">127 ng/mL</span> and serum iron in healthy range. Liver enzymes (ALT, AST, ALP, bilirubin) all normal, reflecting good hepatic function.
+            </p>
+            <div class="narr-explain">
+              <div class="narr-explain-h"><i class="ti ti-info-circle"></i> What this means in plain terms</div>
+              <div class="narr-explain-list">
+                <div class="narr-explain-item">
+                  <strong>Vitamin D</strong><span class="range">40–80 ng/mL optimal</span>Critical for bone strength, immune function, and mood. Often low in northern climates or with limited sun exposure. Yours at 51 is optimal.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Vitamin B12</strong><span class="range">232–1245 pg/mL</span>Needed for healthy nerves, energy, and red blood cell production. Low B12 can cause fatigue and brain fog. Yours at 996 is excellent.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Folate</strong><span class="range">&gt;5.4 ng/mL</span>Works with B12 to make red blood cells and DNA. Yours at 14.2 is well above the threshold.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Ferritin</strong><span class="range">30–400 ng/mL men</span>Your iron storage protein — tells you how much iron you have in reserve. Yours at 127 is healthy, meaning you have a good iron buffer.
+                </div>
+                <div class="narr-explain-item">
+                  <strong>Liver enzymes (ALT/AST/ALP)</strong><span class="range">&lt;40 U/L typical</span>Enzymes that leak from liver cells when they're stressed (alcohol, medications, fatty liver). Yours are all normal — your liver is healthy.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="narr-section">
+            <div class="narr-section-head">
+              <h4 class="narr-h"><i class="ti ti-trending-up"></i> Recent trends</h4>
+            </div>
+            <div class="trend-grid">
+              <div class="trend-card positive">
+                <div class="trend-head"><i class="ti ti-arrow-up-right"></i> Positive</div>
+                <ul class="trend-list">
+                  <li><i class="ti ti-check"></i> Stable glucose control across all panels</li>
+                  <li><i class="ti ti-check"></i> Improved total testosterone (530 → 628 ng/dL)</li>
+                  <li><i class="ti ti-check"></i> Excellent micronutrient levels across the board</li>
+                  <li><i class="ti ti-check"></i> Low systemic inflammation (CRP &lt;1)</li>
+                </ul>
+              </div>
+              <div class="trend-card monitor">
+                <div class="trend-head"><i class="ti ti-eye"></i> Monitor</div>
+                <ul class="trend-list">
+                  <li><i class="ti ti-point-filled"></i> Elevated Lp(a) — discuss prevention strategy</li>
+                  <li><i class="ti ti-point-filled"></i> Rising creatinine (1.2 → 1.31)</li>
+                  <li><i class="ti ti-point-filled"></i> Decreased free testosterone & insulin</li>
+                  <li><i class="ti ti-point-filled"></i> Mildly elevated MCV (98 fL)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    <!-- Chat dock -->
+    <div class="chat-dock">
+      <div class="ai-pill"><i class="ti ti-sparkles"></i> ApexAI</div>
+      <input type="text" placeholder="Ask ApexAI — analyzes your bloodwork, HRV & more..." />
+      <button class="chat-icon-btn" aria-label="History"><i class="ti ti-history"></i></button>
+      <button class="send-btn" aria-label="Send"><i class="ti ti-arrow-up"></i></button>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="section"><i class="ti ti-shield-check"></i> <strong>End-to-end encrypted</strong></div>
+      <div class="section"><i class="ti ti-sparkles"></i> model <strong>ApexAI-v3</strong></div>
+      <div class="section">analysis <strong id="refreshTime">live</strong></div>
+      <div class="spacer"></div>
+      <div class="section">build <strong>v4.7.2</strong></div>
+      <div class="section">node <strong>us-west-2</strong></div>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ============================================
+     PDF EXPORT — modal preview + print-to-PDF
+     ============================================ -->
+
+<div id="exportPdfModal" class="pdf-modal" aria-hidden="true" role="dialog">
+  <div class="pdf-modal-overlay"></div>
+  <div class="pdf-modal-content">
+    <div class="pdf-modal-head">
+      <div>
+        <div class="pdf-modal-title">Health Analysis Report</div>
+        <div class="pdf-modal-sub">Preview · ready to save as PDF</div>
+      </div>
+      <div class="pdf-modal-actions">
+        <button class="btn" onclick="closePdfModal()">Cancel</button>
+        <button class="btn accent" onclick="window.print()"><i class="ti ti-download"></i> Save as PDF</button>
+      </div>
+    </div>
+    <div class="pdf-modal-body">
+      <div id="pdfReport"></div>
+    </div>
+  </div>
+</div>
+
+  <script src="js/report.js"></script>
+</body>
+</html>

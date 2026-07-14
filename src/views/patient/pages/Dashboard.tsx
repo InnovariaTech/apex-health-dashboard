@@ -1,23 +1,27 @@
 // @ts-nocheck
 import React from "react";
-import { Bolt, ShieldCheck, Clock } from "lucide-react";
 import { usePatientHomeData } from "@/views/patient/hooks/usePatientHomeData";
 
-import QuickActionTiles from "@/views/patient/components/home/QuickActionTiles";
-import RecentBiomarkers from "@/views/patient/components/home/RecentBiomarkers";
-import DashboardHero from "@/views/patient/components/home/DashboardHero";
-import AnalyzeHealthSection from "@/views/patient/components/health-analysis/AnalyzeHealthSection";
-import LatestSummaryPreview from "@/views/patient/components/health-analysis/LatestSummaryPreview";
+import DashboardPageHead from "@/views/patient/components/home/DashboardPageHead";
+import CareHubRow from "@/views/patient/components/home/CareHubRow";
+import HealthScoreCardNew from "@/views/patient/components/home/HealthScoreCardNew";
+import BioAgeCard from "@/views/patient/components/home/BioAgeCard";
+import TrainerizeVitalsRow from "@/views/patient/components/home/TrainerizeVitalsRow";
+import ProgressPhotosCard from "@/views/patient/components/home/ProgressPhotosCard";
 
-function SectionLabel({ icon: Icon, children }) {
-  return (
-    <div className="apex-eyebrow flex items-center gap-1.5 mb-3">
-      {Icon && <Icon className="w-3 h-3" style={{ color: "var(--apex-accent)" }} />}
-      {children}
-    </div>
-  );
-}
-
+/**
+ * Patient dashboard — recomposed to mirror the `New Ui` mockup:
+ *   1. Page head (title + last-sync + patient chip)
+ *   2. Care hub row (Messages · Tasks · Store featured)
+ *   3. Hero (Health score · Biological age)
+ *   4. Vitals & body composition (6 tiles)
+ *   5. Progress photos + before/after slider
+ *
+ * Older "Quick access" tiles, AI section preview, and habits card were
+ * removed from this surface to keep the dashboard a "health snapshot"
+ * rather than a navigation hub. Those features still live on their own
+ * pages — Habits, HealthAnalysis, Workouts, etc.
+ */
 export default function Dashboard() {
   const { isLoading } = usePatientHomeData();
 
@@ -30,45 +34,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground">
-      <DashboardHero />
+    <div className="p-4 md:p-9 max-w-[1280px] mx-auto bg-background text-foreground">
+      <DashboardPageHead />
 
-      {/* AI Health Analysis + Latest Summary */}
-      <div className="mb-6">
-        <SectionLabel>Health intelligence</SectionLabel>
-        <div className="grid lg:grid-cols-2 gap-3.5 items-stretch">
-          <AnalyzeHealthSection />
-          <LatestSummaryPreview />
-        </div>
+      <CareHubRow />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.32fr_1fr] gap-[22px] mb-[22px]">
+        <HealthScoreCardNew />
+        <BioAgeCard />
       </div>
 
-      {/* Quick access tiles */}
-      <div className="mb-6">
-        <SectionLabel icon={Bolt}>Quick access</SectionLabel>
-        <QuickActionTiles />
-      </div>
+      <TrainerizeVitalsRow />
 
-      {/* Recent biomarkers cross-link strip */}
-      <RecentBiomarkers />
-
-      {/* Status bar / footer */}
-      <div className="apex-status-bar">
-        <div className="section">
-          <ShieldCheck className="w-3 h-3" />
-          <strong>End-to-end encrypted</strong>
-        </div>
-        <div className="section">
-          <Clock className="w-3 h-3" />
-          uptime <strong>99.98%</strong>
-        </div>
-        <div className="section">
-          data refresh <strong>live</strong>
-        </div>
-        <div className="flex-1" />
-        <div className="section">
-          build <strong>v4.7.2</strong>
-        </div>
-      </div>
+      <ProgressPhotosCard />
     </div>
   );
 }

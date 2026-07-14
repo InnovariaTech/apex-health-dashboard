@@ -315,7 +315,7 @@ export default function GoalDialog({
               <p className="text-xs">
                 The update endpoint targets the type-level goal slot — saving
                 here may not affect this specific row. Delete duplicates first
-                or edit from your trainer's app.
+                or edit from the Apex Fit app.
               </p>
             </div>
           </div>

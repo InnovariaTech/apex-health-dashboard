@@ -6,6 +6,9 @@ import { useEnvironment } from "@/lib/EnvironmentContext";
 import { api } from "@/api/client";
 import { useStreamAiChatMessage } from "@/hooks/ai-agent/useAi";
 import { useAiChatStore } from "@/stores/aiChatStore";
+import ChatBlocks from "@/views/patient/components/ai-chat/ChatBlocks";
+import { friendlyStatus } from "@/views/patient/components/ai-chat/chatStatus";
+import "@/views/patient/components/ai-chat/apexAiChat.css";
 import {
   Send,
   Bot,
@@ -15,6 +18,7 @@ import {
   Minus,
   Maximize2,
   Minimize2,
+  Check,
 } from "lucide-react";
 
 // const EXAMPLE_PROMPTS = [
@@ -146,6 +150,87 @@ TRAINING PERFORMANCE:
   }
 }
 
+const AI_ERROR_TEXT =
+  "I ran into a temporary issue while generating your response. Please try again.";
+const AI_EMPTY_TEXT =
+  "I could not generate a response right now. Please try again.";
+
+/** One assistant turn — renders block cards, or legacy markdown, or a
+    streaming status/typing indicator until content lands. */
+function AiMessage({ message }) {
+  const blocks = message.blocks || [];
+  const hasBlocks = blocks.length > 0;
+  const legacy = (message.legacyText || "").trim();
+  const hasContent = hasBlocks || Boolean(legacy);
+  // `done` is set once the stream resolves; until then the turn is in flight.
+  const streaming = !message.done && !message.error;
+
+  return (
+    <div className="ai-row">
+      <div className="ai-av">
+        <Sparkles />
+      </div>
+      <div className="ai-body">
+        <div className="ai-name">
+          ApexAI
+          {message.meta ? <span className="thin"> · {message.meta}</span> : null}
+          {streaming ? (
+            <span className="ai-live">
+              <span className="ai-live-dot" />
+              Responding
+            </span>
+          ) : null}
+        </div>
+
+        {hasBlocks && <ChatBlocks blocks={blocks} />}
+
+        {!hasBlocks && legacy && (
+          <div className="intro md-block">
+            <ReactMarkdown>{message.legacyText}</ReactMarkdown>
+          </div>
+        )}
+
+        {!hasContent && message.error && (
+          <div className="intro">{message.errorText || AI_ERROR_TEXT}</div>
+        )}
+
+        {/* In flight, nothing rendered yet — the initial "thinking" state. */}
+        {!hasContent && streaming && (
+          <div className="ai-status">
+            <span className="typing">
+              <span />
+              <span />
+              <span />
+            </span>
+            {message.status || "Thinking…"}
+          </div>
+        )}
+
+        {/* In flight, cards already streaming in — signal more is coming so a
+            partial response doesn't read as finished. */}
+        {hasContent && streaming && (
+          <div className="ai-status ai-status-more">
+            <span className="typing">
+              <span />
+              <span />
+              <span />
+            </span>
+            {message.status || "Writing your response…"}
+          </div>
+        )}
+
+        {/* Turn finished — explicit completion cue. */}
+        {hasContent && message.done && !message.error && (
+          <div className="ai-done">
+            <Check className="ai-done-ic" />
+            Response complete
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AIAssistantBar() {
   const { environment } = useEnvironment();
   const { stream: streamAiChat } = useStreamAiChatMessage();
@@ -159,11 +244,16 @@ export default function AIAssistantBar() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [patientContext, setPatientContext] = useState("");
+  const [disclaimer, setDisclaimer] = useState(environment.aiDisclaimer || "");
   const messagesEndRef = useRef(null);
   const sessionIdRef = useRef(sessionId);
   useEffect(() => {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
+
+  useEffect(() => {
+    setDisclaimer((prev) => prev || environment.aiDisclaimer || "");
+  }, [environment.aiDisclaimer]);
 
   useEffect(() => {
     api.auth.me().then(user => {
@@ -180,6 +270,30 @@ export default function AIAssistantBar() {
   const isDark = environment.themeMode === "dark";
   const primaryText = environment.id === "planet-fitness" || environment.id === "golds-gym" ? "#000" : "#fff";
 
+  // Accent variables for the scoped chat surface. Apex MD keeps the mockup's
+  // red gradient (CSS default); white-label gyms retint via the env primary.
+  const accentStyle =
+    environment.id === "apex-md"
+      ? { "--chat-on-accent": primaryText }
+      : {
+          "--chat-accent": environment.primaryColor,
+          "--chat-accent-dark": environment.primaryColor,
+          "--chat-on-accent": primaryText,
+        };
+
+  // Immutably patch the streaming assistant message at `index`.
+  const patchAssistant = (index, patch) => {
+    setMessages((prev) => {
+      const next = [...prev];
+      const current = next[index];
+      if (current && current.role === "assistant") {
+        next[index] =
+          typeof patch === "function" ? patch(current) : { ...current, ...patch };
+      }
+      return next;
+    });
+  };
+
   const handleSend = async (text, options = {}) => {
     const { isHidden = false } = options;
     const question = typeof text === "string" ? text : input.trim();
@@ -189,27 +303,23 @@ export default function AIAssistantBar() {
     setIsExpanded(true);
     const baseMessages = isHidden
       ? messages
-      : [...messages, { role: "user", content: question }];
+      : [...messages, { role: "user", text: question }];
     if (!isHidden) setMessages(baseMessages);
     setIsLoading(true);
 
-    // const systemPrompt = `You are the ${environment.name} AI Health Assistant — a knowledgeable, clinical-tone wellness advisor. You have access to the patient's real health data below and should use it to give specific, personalized insights.
-    //
-    // ${patientContext ? `=== PATIENT DATA ===\n${patientContext}\n=== END PATIENT DATA ===\n` : ""}
-    //
-    // ${environment.aiPromptContext}
-    //
-    // Instructions:
-    // - Reference the patient's ACTUAL numbers when answering (e.g. "Your testosterone is 380 ng/dL which is below optimal")
-    // - Be specific: recommend peptides, supplements, lifestyle changes, or medical follow-ups based on their data
-    // - When recommending treatments (TRT, peptides, GLP-1, etc.), explain WHY based on their biomarkers
-    // - Flag anything clinically concerning (e.g. low testosterone, high CRP, poor HRV)
-    // - Mention that recommendations should be confirmed with their Apex MD physician
-    // - Be concise but thorough — bullet points for recommendations work well`;
-
-    // Seed an empty assistant message that we'll append streamed tokens into.
+    // Seed an empty assistant message we stream blocks / text into.
     const assistantIndex = baseMessages.length;
-    setMessages([...baseMessages, { role: "assistant", content: "" }]);
+    setMessages([
+      ...baseMessages,
+      {
+        role: "assistant",
+        blocks: [],
+        legacyText: "",
+        status: "",
+        error: false,
+        done: false,
+      },
+    ]);
 
     const currentSessionId = sessionIdRef.current;
     const body = {
@@ -219,50 +329,60 @@ export default function AIAssistantBar() {
     };
 
     try {
-      const result = await streamAiChat(
-        body,
-        {
-          onText: (chunk) => {
-            setMessages((prev) => {
-              const next = [...prev];
-              const current = next[assistantIndex];
-              if (current && current.role === "assistant") {
-                next[assistantIndex] = { ...current, content: current.content + chunk };
-              }
-              return next;
-            });
-          },
-          onDone: (newSessionId) => {
-            if (newSessionId && newSessionId !== sessionIdRef.current) {
-              setSessionId(newSessionId);
-            }
-          },
-        }
-      );
+      const result = await streamAiChat(body, {
+        onStatus: (status) => {
+          patchAssistant(assistantIndex, (m) => ({ ...m, status: friendlyStatus(status) }));
+        },
+        onMeta: ({ disclaimer: d }) => {
+          if (d) setDisclaimer(d);
+        },
+        onBlock: (block) => {
+          patchAssistant(assistantIndex, (m) => ({
+            ...m,
+            blocks: [...m.blocks, block],
+            status: "",
+          }));
+        },
+        onText: (chunk) => {
+          patchAssistant(assistantIndex, (m) => ({
+            ...m,
+            legacyText: m.legacyText + chunk,
+            status: "",
+          }));
+        },
+        onDone: (newSessionId) => {
+          if (newSessionId && newSessionId !== sessionIdRef.current) {
+            setSessionId(newSessionId);
+          }
+        },
+      });
 
-      // If the stream produced no text at all, show a fallback.
-      if (!result.fullText.trim()) {
-        setMessages((prev) => {
-          const next = [...prev];
-          next[assistantIndex] = {
-            role: "assistant",
-            content: "I could not generate a response right now. Please try again.",
-          };
-          return next;
+      // If nothing rendered (no blocks, no legacy text), show a fallback.
+      const producedNothing =
+        (!result.blocks || result.blocks.length === 0) &&
+        !result.fullText.trim();
+      if (producedNothing) {
+        patchAssistant(assistantIndex, {
+          blocks: [],
+          legacyText: "",
+          status: "",
+          error: true,
+          errorText: AI_EMPTY_TEXT,
         });
       }
     } catch (error) {
-      setMessages((prev) => {
-        const next = [...prev];
-        next[assistantIndex] = {
-          role: "assistant",
-          content:
-            "I ran into a temporary issue while generating your response. Please try again.",
-        };
-        return next;
+      patchAssistant(assistantIndex, {
+        blocks: [],
+        legacyText: "",
+        status: "",
+        error: true,
+        errorText: AI_ERROR_TEXT,
       });
     } finally {
       setIsLoading(false);
+      // Mark the turn finished so the UI swaps the live indicator for the
+      // completion cue (runs on success, empty, and error paths alike).
+      patchAssistant(assistantIndex, (m) => ({ ...m, done: true, status: "" }));
     }
   };
 
@@ -292,8 +412,7 @@ export default function AIAssistantBar() {
     setIsMaximized(false);
   };
 
-  const panelHeight = isMaximized ? "85vh" : 440;
-  const messagesMaxHeight = isMaximized ? "calc(85vh - 140px)" : 240;
+  const panelHeight = isMaximized ? "88vh" : 520;
 
   return (
     <div
@@ -308,257 +427,149 @@ export default function AIAssistantBar() {
             animate={{ opacity: 1, y: 0, height: panelHeight }}
             exit={{ opacity: 0, y: 24, height: 0 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-4 mb-2 rounded-xl shadow-2xl border-2 overflow-hidden flex flex-col"
-            style={{
-              backgroundColor: isDark ? environment.surfaceColor : "#fff",
-              borderColor: environment.borderColor,
-            }}
+            className="mx-4 mb-2 rounded-2xl shadow-2xl overflow-hidden border"
+            style={{ borderColor: "var(--c-line, #ece7e3)" }}
           >
-            <div
-              className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
-              style={{ borderColor: environment.borderColor, backgroundColor: environment.primaryColor }}
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" style={{ color: primaryText }} />
-                <span className="text-sm font-bold" style={{ color: primaryText }}>
-                  ApexAI - Personalized Health Advisor
-                </span>
+            <div className="apex-ai-chat" style={accentStyle}>
+              {/* Header */}
+              <div className="chat-head">
+                <div className="spark">
+                  <Sparkles />
+                </div>
+                <div className="head-title">ApexAI — Personalized Health Advisor</div>
                 {patientContext && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-semibold" style={{ color: primaryText }}>
+                  <div className="live">
+                    <span className="dot" />
                     Live Data
-                  </span>
+                  </div>
                 )}
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={collapsePanel}
-                  className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-white/15 transition-colors"
-                  aria-label="Minimize AI assistant"
-                  title="Minimize"
-                >
-                  <Minus className="w-4 h-4" style={{ color: primaryText }} />
-                </button>
-                <button
-                  onClick={() => setIsMaximized((p) => !p)}
-                  className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-white/15 transition-colors"
-                  aria-label={isMaximized ? "Restore AI assistant" : "Maximize AI assistant"}
-                  title={isMaximized ? "Restore" : "Maximize"}
-                >
-                  {isMaximized ? (
-                    <Minimize2 className="w-3.5 h-3.5" style={{ color: primaryText }} />
-                  ) : (
-                    <Maximize2 className="w-3.5 h-3.5" style={{ color: primaryText }} />
-                  )}
-                </button>
-                <button
-                  onClick={collapsePanel}
-                  className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-red-500/80 transition-colors"
-                  aria-label="Close AI assistant"
-                  title="Close"
-                >
-                  <X className="w-4 h-4" style={{ color: primaryText }} />
-                </button>
-              </div>
-            </div>
-
-            <div
-              className="px-4 py-2 text-xs border-b flex-shrink-0"
-              style={{
-                backgroundColor: isDark ? environment.backgroundColor : "#f9fafb",
-                color: environment.mutedTextColor,
-                borderColor: environment.borderColor,
-              }}
-            >
-              {environment.aiDisclaimer} • AI reads your bloodwork, HRV, and health data for personalized insights.
-            </div>
-
-            <div
-              className="overflow-y-auto p-4 space-y-3 flex-1"
-              style={{ maxHeight: messagesMaxHeight }}
-            >
-            {/* {messages.length === 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-semibold" style={{ color: environment.mutedTextColor }}>
-                  Ask about your health data:
-                </p>
-                {EXAMPLE_PROMPTS.slice(0, 3).map((p) => (
+                <div className="win">
                   <button
-                    key={p}
-                    onClick={() => handleSend(p)}
-                    className="block w-full text-left text-xs px-3 py-2 rounded-lg border transition-all hover:opacity-80"
-                    style={{
-                      borderColor: environment.borderColor,
-                      color: environment.textColor,
-                      backgroundColor: isDark ? environment.backgroundColor : environment.surfaceColor,
-                    }}
+                    type="button"
+                    onClick={collapsePanel}
+                    aria-label="Minimize AI assistant"
+                    title="Minimize"
                   >
-                    {p}
+                    <Minus />
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setIsMaximized((p) => !p)}
+                    aria-label={isMaximized ? "Restore AI assistant" : "Maximize AI assistant"}
+                    title={isMaximized ? "Restore" : "Maximize"}
+                  >
+                    {isMaximized ? <Minimize2 /> : <Maximize2 />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={collapsePanel}
+                    aria-label="Close AI assistant"
+                    title="Close"
+                  >
+                    <X />
+                  </button>
+                </div>
               </div>
-            )} */}
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[90%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
-                    msg.role === "user" ? "whitespace-pre-wrap" : ""
-                  }`}
-                  style={
-                    msg.role === "user"
-                      ? { backgroundColor: environment.primaryColor, color: primaryText }
-                      : {
-                          backgroundColor: isDark ? environment.backgroundColor : "#f3f4f6",
-                          color: environment.textColor,
-                          border: `1px solid ${environment.borderColor}`,
-                        }
-                  }
-                >
-                  {msg.role === "user" ? (
-                    msg.content
+
+              {/* Disclaimer */}
+              <div className="disclaimer">
+                {disclaimer}{" "}
+                <b>ApexAI reads your bloodwork, HRV &amp; health data for personalized insights.</b>
+              </div>
+
+              {/* Stream */}
+              <div className="stream">
+                {messages.length === 0 && (
+                  <div className="empty-hint">
+                    Ask ApexAI about your bloodwork, recovery, or a plan for the gym.
+                  </div>
+                )}
+                {messages.map((msg, i) =>
+                  msg.role === "user" ? (
+                    <div className="user-row" key={i}>
+                      <div className="user-bubble">{msg.text}</div>
+                    </div>
                   ) : (
-                    <ReactMarkdown
-                      components={{
-                        h1: ({ node, ...props }) => (
-                          <h1 className="text-base font-bold mt-2 mb-1" {...props} />
-                        ),
-                        h2: ({ node, ...props }) => (
-                          <h2 className="text-sm font-bold mt-2 mb-1" {...props} />
-                        ),
-                        h3: ({ node, ...props }) => (
-                          <h3 className="text-sm font-semibold mt-2 mb-1" {...props} />
-                        ),
-                        h4: ({ node, ...props }) => (
-                          <h4 className="text-sm font-semibold mt-1.5 mb-1" {...props} />
-                        ),
-                        p: ({ node, ...props }) => (
-                          <p className="mb-2 last:mb-0" {...props} />
-                        ),
-                        strong: ({ node, ...props }) => (
-                          <strong className="font-bold" {...props} />
-                        ),
-                        em: ({ node, ...props }) => <em className="italic" {...props} />,
-                        ul: ({ node, ...props }) => (
-                          <ul className="list-disc pl-5 mb-2 space-y-0.5" {...props} />
-                        ),
-                        ol: ({ node, ...props }) => (
-                          <ol className="list-decimal pl-5 mb-2 space-y-0.5" {...props} />
-                        ),
-                        li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-                        hr: () => (
-                          <hr
-                            className="my-3 border-0 border-t"
-                            style={{ borderColor: environment.borderColor }}
-                          />
-                        ),
-                        code: ({ node, inline, ...props }) =>
-                          inline ? (
-                            <code
-                              className="px-1 py-0.5 rounded text-xs font-mono"
-                              style={{
-                                backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#e5e7eb",
-                              }}
-                              {...props}
-                            />
-                          ) : (
-                            <code
-                              className="block p-2 rounded text-xs font-mono whitespace-pre-wrap my-2"
-                              style={{
-                                backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#e5e7eb",
-                              }}
-                              {...props}
-                            />
-                          ),
-                        a: ({ node, ...props }) => (
-                          <a
-                            className="underline"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: environment.primaryColor }}
-                            {...props}
-                          />
-                        ),
-                      }}
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
-                  )}
+                    <AiMessage key={i} message={msg} />
+                  ),
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Composer */}
+              <div className="composer">
+                <div className="inp">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask ApexAI — analyzes your bloodwork, HRV &amp; more…"
+                  />
+                  <button
+                    type="button"
+                    className="send"
+                    onClick={() => handleSend()}
+                    disabled={!input.trim() || isLoading}
+                    aria-label="Send message"
+                  >
+                    <Send />
+                  </button>
                 </div>
               </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div
-                  className="px-3 py-2 rounded-xl text-sm"
-                  style={{
-                    backgroundColor: isDark ? environment.backgroundColor : "#f3f4f6",
-                    color: environment.mutedTextColor,
-                    border: `1px solid ${environment.borderColor}`,
-                  }}
-                >
-                  <span className="inline-flex gap-1">
-                    <span className="animate-bounce" style={{ animationDelay: "0ms" }}>•</span>
-                    <span className="animate-bounce" style={{ animationDelay: "150ms" }}>•</span>
-                    <span className="animate-bounce" style={{ animationDelay: "300ms" }}>•</span>
-                  </span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div
-        className="mx-4 mb-4 rounded-xl shadow-lg border-2 flex items-center gap-3 px-4 py-3 transition-shadow"
-        style={{
-          backgroundColor: isDark ? environment.surfaceColor : "#fff",
-          borderColor: environment.primaryColor,
-        }}
-      >
+      {/* Collapsed launcher bar — hidden while the panel is open */}
+      {!isExpanded && (
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: environment.primaryColor }}
-        >
-          <Bot className="w-4 h-4" style={{ color: primaryText }} />
-        </div>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsExpanded(true)}
-          placeholder={`Ask ApexAI — analyzes your bloodwork, HRV & more…`}
-          className="flex-1 bg-transparent outline-none text-sm font-medium placeholder:font-normal"
-          style={{ color: environment.textColor }}
-        />
-        <button
-          onClick={() => setIsExpanded((p) => !p)}
-          className="w-8 h-8 rounded-lg flex items-center justify-center border-2 transition-all hover:scale-105 active:scale-95"
+          className="mx-4 mb-4 rounded-xl shadow-lg border-2 flex items-center gap-3 px-4 py-3 transition-shadow"
           style={{
-            backgroundColor: `${environment.primaryColor}1a`,
-            borderColor: `${environment.primaryColor}55`,
-            color: environment.primaryColor,
+            backgroundColor: isDark ? environment.surfaceColor : "#fff",
+            borderColor: environment.primaryColor,
           }}
-          aria-label={isExpanded ? "Collapse AI assistant panel" : "Expand AI assistant panel"}
-          title={isExpanded ? "Collapse" : "Expand chat"}
         >
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: environment.primaryColor }}
+          >
+            <Bot className="w-4 h-4" style={{ color: primaryText }} />
+          </div>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsExpanded(true)}
+            placeholder={`Ask ApexAI — analyzes your bloodwork, HRV & more…`}
+            className="flex-1 bg-transparent outline-none text-sm font-medium placeholder:font-normal"
+            style={{ color: environment.textColor }}
+          />
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center border-2 transition-all hover:scale-105 active:scale-95"
+            style={{
+              backgroundColor: `${environment.primaryColor}1a`,
+              borderColor: `${environment.primaryColor}55`,
+              color: environment.primaryColor,
+            }}
+            aria-label="Expand AI assistant panel"
+            title="Expand chat"
           >
             <ChevronUp className="w-4 h-4" strokeWidth={2.5} />
-          </motion.div>
-        </button>
-        <button
-          onClick={() => handleSend()}
-          disabled={!input.trim() || isLoading}
-          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
-          style={{ backgroundColor: environment.primaryColor }}
-        >
-          <Send className="w-4 h-4" style={{ color: primaryText }} />
-        </button>
-      </div>
+          </button>
+          <button
+            onClick={() => handleSend()}
+            disabled={!input.trim() || isLoading}
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-40"
+            style={{ backgroundColor: environment.primaryColor }}
+          >
+            <Send className="w-4 h-4" style={{ color: primaryText }} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -51,12 +51,11 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
       <Card className="apex-card w-full max-w-md">
         <CardHeader className="space-y-3 items-center text-center">
-          <div className="w-11 h-11 rounded-[12px] bg-foreground grid place-items-center">
-            <span className="font-serif text-xl font-semibold text-background leading-none">
-              A
-            </span>
-          </div>
-          <div className="apex-eyebrow">Apex MD Health</div>
+          <img
+            src="/images/apex-md-logo.png"
+            alt="Apex MD Health"
+            className="h-9 w-auto"
+          />
           <h1 className="apex-page-title">
             Create <em>account</em>
           </h1>

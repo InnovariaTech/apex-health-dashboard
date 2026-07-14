@@ -5,7 +5,7 @@ export const portalEnvironments = [
     name: "Apex MD",
     slug: "apex-md",
     logoUrl: "https://media.api.com/images/public/68dc2f71f36b75ec180e03bd/61e8b3af9_ApexMdlrgsymsideblack.png",
-    primaryColor: "#9B1C2E",
+    primaryColor: "#E11816",
     secondaryColor: "#1A1A1A",
     accentColor: "#F5E4E7",
     backgroundColor: "#FFFFFF",

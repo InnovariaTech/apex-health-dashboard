@@ -17,6 +17,10 @@ import CaseAppointmentsPanel from "@/views/patient/components/case/CaseAppointme
 import CaseChatPanel from "@/views/patient/components/case/CaseChatPanel";
 import FollowupFormDialog from "@/views/patient/components/case/FollowupFormDialog";
 import { normalizeCaseForms } from "@/views/patient/utils/caseFormUtils";
+import {
+  derivePersonName,
+  sanitizeCaseTitle,
+} from "@/views/patient/utils/caseTitleUtils";
 
 function formatCaseLabel(value: string) {
   return value
@@ -170,7 +174,12 @@ export default function MyCaseDetails() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <CardTitle className="text-xl">
-                      {caseDetails.title || caseDetails.raw?.title || "Untitled Case"}
+                      {sanitizeCaseTitle(
+                        caseDetails.title || caseDetails.raw?.title,
+                        derivePersonName(
+                          caseDetails.raw?.submitter as Record<string, unknown>,
+                        ),
+                      )}
                     </CardTitle>
                     <Badge
                       variant={getStatusBadgeVariant(

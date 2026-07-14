@@ -160,7 +160,22 @@ export interface GetCasesParams {
   includeOrders?: boolean;
   includeCalendarEvents?: boolean;
   documentFormat?: CaseDocumentFormat;
+  /**
+   * Comma-separated status filter. CareValidate accepts:
+   *   OPEN, ASSIGNED, IN_PROGRESS, APPROVED,
+   *   REJECTED, NO_DECISION, ABANDONED
+   * Omit to fetch every status; pass `ELIGIBLE_CASE_STATUSES` to limit
+   * to the four "active" states the user can chat against or upload to.
+   */
+  status?: string;
 }
+
+/**
+ * Cases that the user can actively chat against and attach documents to.
+ * Anything else (`REJECTED`, `NO_DECISION`, `ABANDONED`) still shows on
+ * the My Cases listing but is read-only.
+ */
+export const ELIGIBLE_CASE_STATUSES = "OPEN,ASSIGNED,IN_PROGRESS,APPROVED";
 
 // ─── Create case (doc #2) ───────────────────────────────────────────────────
 

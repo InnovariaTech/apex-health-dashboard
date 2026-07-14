@@ -1,0 +1,17 @@
+/* Apex MD — vendored web fonts (Inter + JetBrains Mono)
+   Paths are relative to this file (css/). Served locally so the page and the
+   PDF export render identically offline, without Google Fonts / CDN calls. */
+
+/* Inter */
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('../assets/fonts/inter-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:italic;font-weight:400;font-display:swap;src:url('../assets/fonts/inter-latin-400-italic.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('../assets/fonts/inter-latin-500-normal.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:italic;font-weight:500;font-display:swap;src:url('../assets/fonts/inter-latin-500-italic.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('../assets/fonts/inter-latin-600-normal.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:italic;font-weight:600;font-display:swap;src:url('../assets/fonts/inter-latin-600-italic.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url('../assets/fonts/inter-latin-700-normal.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:italic;font-weight:700;font-display:swap;src:url('../assets/fonts/inter-latin-700-italic.woff2') format('woff2');}
+
+/* JetBrains Mono (used by the clinical-report / PDF styling) */
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url('../assets/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url('../assets/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');}

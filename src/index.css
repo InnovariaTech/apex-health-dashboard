@@ -5,24 +5,31 @@
 @layer base {
   :root {
     /* ── shadcn tokens (Apex MD light theme) ──────────────────────────────── */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
+    /* Page bg: #F4F5F2 — the mockup spec (#FAFAF9) is only 2% off pure white
+       and renders as visually white on most monitors, so we push two shades
+       darker so the white cards visibly pop against the gray. */
+    --background: 80 7% 95%;
+    --foreground: 100 6% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 100 6% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 100 6% 9%;
     --primary: 350 69% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 60 4% 91%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 60 4% 91%;
-    --muted-foreground: 0 0% 54%;
+    /* Secondary surface (pressed/hover for buttons, sidebar hover, etc.).
+       Matches the mockup's `--surface-2: #EAEAE7`. */
+    --secondary: 60 5% 91%;
+    --secondary-foreground: 100 6% 9%;
+    --muted: 60 5% 91%;
+    /* AA-compliant mute: 4.9:1 on #FFF, 4.8:1 on #FAFAF9. Was 0 0% 54% = 3.5:1. */
+    --muted-foreground: 105 4% 43%;
     --accent: 348 45% 93%;
     --accent-foreground: 350 69% 36%;
     --destructive: 0 49% 46%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 91%;
-    --input: 0 0% 91%;
+    /* Border: #E7E9E6 from mockup. */
+    --border: 100 5% 91%;
+    --input: 100 5% 91%;
     --ring: 350 69% 36%;
     --chart-1: 350 69% 36%;
     --chart-2: 152 47% 33%;
@@ -31,41 +38,68 @@
     --chart-5: 0 49% 46%;
     --radius: 0.875rem;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 32%;
-    --sidebar-primary: 0 0% 10%;
+    --sidebar-foreground: 90 5% 22%;
+    --sidebar-primary: 220 8% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 91%;
+    --sidebar-accent: 80 5% 95%;
+    --sidebar-accent-foreground: 100 6% 9%;
+    --sidebar-border: 100 5% 91%;
     --sidebar-ring: 350 69% 36%;
 
-    /* ── Apex design-system raw tokens ────────────────────────────────────── */
+    /* ── Apex design-system raw tokens ──────────────────────────────────────
+       Sourced verbatim from the `New Ui/2 Health Analysis` mockup. Mockup
+       spec values are kept even where they fall below WCAG AA for normal
+       text (e.g. --ink-3 #8A8A8A at 3.3:1) so the surfaces render visually
+       identical. Pair small mute text with larger sizes where possible. */
     --ink: #1a1a1a;
     --ink-2: #525252;
     --ink-3: #8a8a8a;
     --ink-4: #b5b5b5;
     --ink-inv: #e8e8e6;
+    --mute: #8a8a8a;       /* alias for --ink-3 used by apex-eyebrow / labels */
     --surface: #ffffff;
     --surface-2: #eaeae7;
-    --surface-3: #1a1a1a;
+    --surface-3: #1a1a1a;  /* mockup sidebar-active / status-bar bg */
     --line: rgba(26, 26, 26, 0.09);
     --line-2: rgba(26, 26, 26, 0.16);
-    --apex-accent: #9b1c2e;
-    --apex-accent-soft: #f5e4e7;
-    --apex-accent-dark: #7a1424;
+
+    /* Brand accent (red). Unified to the vivid Habits "Mark complete" red —
+       no more dark maroon. */
+    --apex-accent: #e11816;        /* vivid brand red (was maroon #9b1c2e) */
+    --apex-accent-bright: #e11816; /* vivid brand red */
+    --apex-accent-soft: #fbe5e4;   /* mockup --accent-soft */
+    --apex-accent-dark: #b70402;   /* gradient lower stop */
+
+    /* Status palette — green / amber / attention / info — mockup spec. */
     --opt: #2e7d5a;
+    --opt-d: #246347;
     --opt-soft: rgba(46, 125, 90, 0.12);
     --opt-band: rgba(46, 125, 90, 0.16);
     --bord: #b8761c;
+    --bord-d: #8f5a1c;
     --bord-soft: rgba(184, 118, 28, 0.12);
     --bord-band: rgba(184, 118, 28, 0.18);
     --att: #b23a3a;
     --att-soft: rgba(178, 58, 58, 0.12);
     --att-band: rgba(178, 58, 58, 0.18);
     --info: #1e5a8c;
+
+    /* Vivid zone palette for biomarker reference bars + status dots
+       (biomarkers mockup `--z-*`). Brighter than the muted status palette. */
+    --z-red: #cf0413;
+    --z-amber: #eba307;
+    --z-green: #166331;
+    --z-blue: #0a6df4;
     --info-soft: rgba(30, 90, 140, 0.1);
+    --purple: #7355c9;
+    --purple-soft: #efeafb;
+    --brown: #9a6534;
+    --brown-soft: #f2e8d6;
+    --track: #eceeeb;      /* progress bar background */
+
     --radius-lg: 14px;
-    --shadow-card: 0 1px 0 rgba(26, 26, 26, 0.04);
+    --shadow-card: 0 1px 2px rgba(20, 28, 20, 0.05);
+    --shadow-card-hover: 0 1px 2px rgba(20, 28, 20, 0.04), 0 10px 30px -16px rgba(20, 40, 28, 0.16);
     --shadow-panel: 0 24px 60px rgba(26, 25, 22, 0.18);
   }
 
@@ -117,7 +151,10 @@
   }
 }
 
-/* ── Apex design-system component classes ─────────────────────────────────── */
+/* ── Apex design-system component classes ──────────────────────────────────
+   Type scale tracks the New Ui mockup (Inter 400-800 + JetBrains Mono).
+   Hierarchy — page H1 40px/800 → card title 21px/700 → section h2 19px/700
+   → body 14-14.5px/500 → eyebrow 10-11px mono uppercase. */
 @layer components {
   /* Card surface — subtle border + hairline shadow */
   .apex-card {
@@ -125,31 +162,111 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* Editorial page title — Saira with italic accent span */
+  /* Editorial page title — Inter 700 with italic-red emphasis span.
+     Mockup spec: 46px / weight 700 / -0.035em / line-height 1. */
   .apex-page-title {
-    @apply font-serif font-medium leading-none m-0;
-    font-size: clamp(30px, 4vw, 44px);
+    @apply font-sans leading-none m-0;
+    font-size: clamp(34px, 4.2vw, 46px);
+    font-weight: 700;
     letter-spacing: -0.035em;
+    color: var(--ink);
   }
   .apex-page-title em {
     @apply not-italic;
     font-style: italic;
-    color: var(--apex-accent);
-    font-weight: 400;
+    font-weight: 700;
+    color: var(--apex-accent-bright);
+    letter-spacing: -0.035em;
   }
 
-  /* Uppercase mono section / card label */
-  .apex-eyebrow {
-    @apply font-mono text-[10px] font-medium uppercase;
+  /* Page subtitle below the title. Mockup: 15px / ink-2 / max-width 540px. */
+  .apex-page-sub {
+    font-size: 15px;
+    color: var(--ink-2);
+    max-width: 540px;
+    margin: 10px 0 0;
+  }
+
+  /* "AI health analysis" eyebrow tag — accent-soft pill at the top of the
+     page head. Mockup: bg accent-soft / text accent / mono 10px / .12em /
+     weight 600 / padding 5px 11px. Distinct from `.apex-eyebrow` (gray). */
+  .apex-ai-tag {
+    @apply font-mono inline-flex items-center gap-1.5 uppercase;
+    background: var(--apex-accent-soft);
+    color: var(--apex-accent-bright);
+    padding: 5px 11px;
+    border-radius: 100px;
+    font-size: 10px;
     letter-spacing: 0.12em;
+    font-weight: 600;
+  }
+
+  /* Uppercase mono eyebrow — section labels and tile captions.
+     Mockup spec: 10-11px / weight 600 / .12-.14em / ink-3. */
+  .apex-eyebrow {
+    @apply font-mono uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     color: var(--ink-3);
   }
 
-  /* Card title (serif) */
+  /* Form field label — Inter (the portal's UI font), NOT the mono used by
+     decorative eyebrows. Mono labels on an Inter page read as a foreign
+     typeface; this keeps the structured uppercase label look but in-family
+     with the rest of the dashboard, darker so it reads as a real label. */
+  .apex-field-label {
+    @apply font-sans uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+  }
+
+  /* Card title — Inter 700, tight tracking. Mockup: 24px / 700 / -0.015em
+     and tinted accent-dark for the score / bio age headers. */
   .apex-card-title {
-    @apply font-serif font-medium m-0;
-    font-size: 20px;
+    @apply font-sans m-0;
+    font-size: 24px;
+    font-weight: 700;
     letter-spacing: -0.015em;
+    color: var(--apex-accent-dark);
+  }
+
+  /* Neutral card title (24px / 700 / ink) — used by cards that aren't the
+     hero score/bio cards (e.g. concierge, narrative report inner header). */
+  .apex-card-title-ink {
+    @apply font-sans m-0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  /* Section heading (mid-size, between page title and card title). */
+  .apex-section-title {
+    @apply font-sans m-0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  /* Big numeric — vitals tile value, gauge centre, etc.
+     Mockup tile-val: 30px / 800 / -0.02em. */
+  .apex-tile-val {
+    @apply font-sans leading-none;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .apex-tile-val .u {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-left: 3px;
+    letter-spacing: 0;
   }
 
   /* Pulsing live dot */

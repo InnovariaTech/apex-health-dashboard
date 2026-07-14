@@ -11,7 +11,8 @@ export const queryKeys = {
       includeAttachments = true,
       includeOrders = true,
       includeCalendarEvents = false,
-      documentFormat = "url"
+      documentFormat = "url",
+      status?: string,
     ) =>
       [
         "care-validate",
@@ -25,6 +26,9 @@ export const queryKeys = {
           includeOrders,
           includeCalendarEvents,
           documentFormat,
+          // `status` becomes part of the cache key so eligibility-filtered
+          // and unfiltered callers don't collide (My Cases vs Chat / Docs).
+          status: status ?? "all",
         },
       ] as const,
     treatmentBundles: (isVisible?: boolean) =>
@@ -131,6 +135,24 @@ export const queryKeys = {
     home: (email?: string | null) => ["patients", "home", email ?? "anonymous"] as const,
     biomarkersSummary: () => ["patients", "biomarkers-summary"] as const,
   },
+  tasso: {
+    /** Cheap probe used by the link-status detector. */
+    linkStatus: () => ["tasso", "link-status"] as const,
+    orderEvents: (
+      filters: {
+        limit?: number;
+        cursor?: string;
+        orderIds?: string;
+        status?: string;
+        createdSince?: string;
+      } = {},
+    ) => ["tasso", "order-events", filters] as const,
+    testResults: (
+      filters: { limit?: number; cursor?: string; orderIds?: string } = {},
+    ) => ["tasso", "test-results", filters] as const,
+    testResult: (testResultId: string) =>
+      ["tasso", "test-result", testResultId] as const,
+  },
   patientDocuments: {
     list: (cvUpload?: boolean) =>
       [
@@ -175,6 +197,12 @@ export const queryKeys = {
         { achieved: typeof achieved === "boolean" ? achieved : "all", start, count },
       ] as const,
     goal: (goalId: number) => ["trainerize", "goal", goalId] as const,
+    accomplishmentStats: (category?: string, start = 0, count = 25) =>
+      [
+        "trainerize",
+        "accomplishment-stats",
+        { category: category ?? "all", start, count },
+      ] as const,
     photos: (startDate: string, endDate: string) =>
       ["trainerize", "photos", { startDate, endDate }] as const,
     photoDetail: (photoId: number, thumbnail: boolean) =>
@@ -221,5 +249,24 @@ export const queryKeys = {
       ] as const,
     mealPlan: (mealPlanId?: number) =>
       ["trainerize", "meal-plan", { mealPlanId: mealPlanId ?? null }] as const,
+    healthData: (type: string, startDate?: string, endDate?: string) =>
+      [
+        "trainerize",
+        "health-data",
+        {
+          type,
+          startDate: startDate ?? "all",
+          endDate: endDate ?? "all",
+        },
+      ] as const,
+    healthDataSleep: (startTime?: string, endTime?: string) =>
+      [
+        "trainerize",
+        "health-data-sleep",
+        {
+          startTime: startTime ?? "all",
+          endTime: endTime ?? "all",
+        },
+      ] as const,
   },
 };

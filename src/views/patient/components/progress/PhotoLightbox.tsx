@@ -43,7 +43,7 @@ export default function PhotoLightbox({ photo, onClose }: PhotoLightboxProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <span>Progress photo</span>
@@ -68,7 +68,7 @@ export default function PhotoLightbox({ photo, onClose }: PhotoLightboxProps) {
             <img
               src={src}
               alt={photo ? `${poseLabel} on ${photo.date}` : "Photo"}
-              className="max-w-full max-h-[70vh] object-contain"
+              className="max-w-full max-h-[82vh] object-contain"
             />
           ) : detail.isError ? (
             <div className="text-center text-muted-foreground p-6">

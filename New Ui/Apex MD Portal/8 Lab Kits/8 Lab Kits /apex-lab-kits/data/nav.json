@@ -1,0 +1,84 @@
+{
+  "menuLabel": "Menu",
+  "groups": [
+    {
+      "brand": "apex-md-logo.png",
+      "brandAlt": "Apex MD",
+      "brandClass": "",
+      "items": [
+        {
+          "label": "Dashboard",
+          "icon": "layout-dashboard"
+        },
+        {
+          "label": "Health Analysis",
+          "icon": "sparkles"
+        },
+        {
+          "label": "My Treatments",
+          "icon": "pill"
+        },
+        {
+          "label": "Chat",
+          "icon": "message-circle"
+        },
+        {
+          "label": "Biomarkers",
+          "icon": "flask-2"
+        },
+        {
+          "label": "Genetics",
+          "icon": "dna-2"
+        },
+        {
+          "label": "Progress",
+          "icon": "trending-up"
+        },
+        {
+          "label": "Lab Kits",
+          "icon": "test-pipe",
+          "active": true
+        },
+        {
+          "label": "Shop",
+          "icon": "shopping-bag"
+        },
+        {
+          "label": "Education",
+          "icon": "school"
+        },
+        {
+          "label": "Profile",
+          "icon": "user-circle"
+        }
+      ]
+    },
+    {
+      "brand": "apex-fit-logo.png",
+      "brandAlt": "Apex Fit",
+      "brandClass": "brand-fit",
+      "items": [
+        {
+          "label": "Program",
+          "icon": "clipboard-check"
+        },
+        {
+          "label": "Workouts",
+          "icon": "barbell"
+        },
+        {
+          "label": "Nutrition",
+          "icon": "apple"
+        },
+        {
+          "label": "Habits",
+          "icon": "refresh"
+        },
+        {
+          "label": "Trainer Messages",
+          "icon": "message-2"
+        }
+      ]
+    }
+  ]
+}

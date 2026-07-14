@@ -2,6 +2,7 @@ import { axiosService } from "@/api/http/axiosInstance";
 import type {
   AiChatStreamHandlers,
   AiChatStreamResult,
+  ResponseBlock,
   SendAiChatMessageBody,
 } from "@/types/ai-agent/ai_chat";
 
@@ -11,6 +12,8 @@ const DEBUG_AI_STREAM = true;
 type SseEvent =
   | { type: "text"; content?: string }
   | { type: "status"; content?: string }
+  | { type: "meta"; schemaVersion?: string; disclaimer?: string }
+  | { type: "block"; block?: ResponseBlock }
   | { type: "done"; sessionId?: string }
   | { type: "error"; message?: string };
 
@@ -30,6 +33,9 @@ export async function streamAiChatMessage(
   signal?: AbortSignal
 ): Promise<AiChatStreamResult> {
   let fullText = "";
+  const blocks: ResponseBlock[] = [];
+  let disclaimer: string | null = null;
+  let schemaVersion: string | null = null;
   let sessionId: string | null = null;
   let streamError: string | null = null;
   let processedIndex = 0;
@@ -46,6 +52,21 @@ export async function streamAiChatMessage(
       case "status":
         if (typeof evt.content === "string") {
           handlers.onStatus?.(evt.content);
+        }
+        break;
+      case "meta":
+        disclaimer = typeof evt.disclaimer === "string" ? evt.disclaimer : disclaimer;
+        schemaVersion =
+          typeof evt.schemaVersion === "string" ? evt.schemaVersion : schemaVersion;
+        handlers.onMeta?.({
+          schemaVersion: schemaVersion ?? "",
+          disclaimer: disclaimer ?? "",
+        });
+        break;
+      case "block":
+        if (evt.block && typeof evt.block.type === "string") {
+          blocks.push(evt.block);
+          handlers.onBlock?.(evt.block);
         }
         break;
       case "done":
@@ -118,7 +139,11 @@ export async function streamAiChatMessage(
 
   if (streamError) throw new Error(streamError);
   if (DEBUG_AI_STREAM) {
-    console.debug("[ai-chat] done", { fullTextLength: fullText.length, sessionId });
+    console.debug("[ai-chat] done", {
+      fullTextLength: fullText.length,
+      blockCount: blocks.length,
+      sessionId,
+    });
   }
-  return { fullText, sessionId };
+  return { fullText, blocks, disclaimer, schemaVersion, sessionId };
 }

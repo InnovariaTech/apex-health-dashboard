@@ -1,0 +1,502 @@
+{
+  "glp1-gip": {
+    "id": "glp1-gip",
+    "category": "weight",
+    "categoryLabel": "Weight Loss",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Weight Loss",
+    "name": "GLP-1 / GIP",
+    "blurb": "Compounded dual GLP-1/GIP for metabolic & weight support.",
+    "spec": "Vial \u00b7 6 mg ODT",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=glp1-gip"
+    },
+    "signals": [
+      "weight",
+      "metabolic"
+    ]
+  },
+  "glp1-microdose": {
+    "id": "glp1-microdose",
+    "category": "weight",
+    "categoryLabel": "Weight Loss",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Weight Loss",
+    "name": "GLP-1 Microdose",
+    "blurb": "Gentle microdose GLP-1 for gradual metabolic support.",
+    "spec": "Low-dose titration",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=glp1-microdose"
+    },
+    "signals": [
+      "weight",
+      "metabolic"
+    ]
+  },
+  "wolverine": {
+    "id": "wolverine",
+    "category": "peptide_blend",
+    "categoryLabel": "Peptide Blend",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide Blend",
+    "name": "Wolverine (BPC-157 / TB-500)",
+    "blurb": "Tissue repair, inflammation & recovery blend.",
+    "spec": "Recovery blend",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=wolverine"
+    },
+    "signals": [
+      "recovery",
+      "inflammation",
+      "muscle"
+    ]
+  },
+  "cjc-ipamorelin": {
+    "id": "cjc-ipamorelin",
+    "category": "peptide_blend",
+    "categoryLabel": "Peptide Blend",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide Blend",
+    "name": "CJC-1295 / Ipamorelin",
+    "blurb": "GH support for recovery, sleep & lean mass.",
+    "spec": "GH secretagogue",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=cjc-ipamorelin"
+    },
+    "signals": [
+      "muscle",
+      "recovery",
+      "sleep",
+      "longevity"
+    ]
+  },
+  "semax-selank": {
+    "id": "semax-selank",
+    "category": "peptide_blend",
+    "categoryLabel": "Peptide Blend",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide Blend",
+    "name": "Semax / Selank",
+    "blurb": "Focus, mood & stress-resilience blend.",
+    "spec": "Nootropic blend",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=semax-selank"
+    },
+    "signals": [
+      "cognitive"
+    ]
+  },
+  "tesa-ipamorelin": {
+    "id": "tesa-ipamorelin",
+    "category": "peptide_blend",
+    "categoryLabel": "Peptide Blend",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide Blend",
+    "name": "Tesamorelin / Ipamorelin",
+    "blurb": "Targets visceral fat with GH support.",
+    "spec": "Body-comp blend",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=tesa-ipamorelin"
+    },
+    "signals": [
+      "metabolic",
+      "muscle"
+    ]
+  },
+  "glow": {
+    "id": "glow",
+    "category": "peptide_blend",
+    "categoryLabel": "Peptide Blend",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide Blend",
+    "name": "Glow+ (GHK-Cu Blend)",
+    "blurb": "Skin, hair & recovery blend.",
+    "spec": "Skin & recovery",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=glow"
+    },
+    "signals": [
+      "hair_skin",
+      "recovery"
+    ]
+  },
+  "trt": {
+    "id": "trt",
+    "category": "trt",
+    "categoryLabel": "TRT",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 TRT",
+    "name": "Testosterone Therapy (TRT)",
+    "blurb": "Managed testosterone optimization for low-T.",
+    "spec": "Physician-managed",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=trt"
+    },
+    "signals": [
+      "testosterone"
+    ]
+  },
+  "estradiol": {
+    "id": "estradiol",
+    "category": "hrt",
+    "categoryLabel": "HRT",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 HRT",
+    "name": "Estradiol",
+    "blurb": "Compounded estrogen therapy.",
+    "spec": "$199 / month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=estradiol"
+    },
+    "signals": [
+      "hormones_female"
+    ]
+  },
+  "enclomiphene": {
+    "id": "enclomiphene",
+    "category": "hrt",
+    "categoryLabel": "HRT",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 HRT",
+    "name": "Enclomiphene Citrate",
+    "blurb": "Raises natural testosterone, preserves fertility.",
+    "spec": "$199 / month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=enclomiphene"
+    },
+    "signals": [
+      "testosterone"
+    ]
+  },
+  "progesterone": {
+    "id": "progesterone",
+    "category": "hrt",
+    "categoryLabel": "HRT",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 HRT",
+    "name": "Progesterone",
+    "blurb": "Compounded progesterone therapy.",
+    "spec": "$199 / month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=progesterone"
+    },
+    "signals": [
+      "hormones_female"
+    ]
+  },
+  "bpc-157": {
+    "id": "bpc-157",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "Most Popular",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "BPC-157",
+    "blurb": "Gut & tissue repair, faster recovery.",
+    "spec": "Recovery peptide",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=bpc-157"
+    },
+    "signals": [
+      "recovery",
+      "gut"
+    ]
+  },
+  "nad": {
+    "id": "nad",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "NAD+",
+    "blurb": "Cellular energy & longevity support.",
+    "spec": "Longevity peptide",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=nad"
+    },
+    "signals": [
+      "longevity",
+      "energy"
+    ]
+  },
+  "nad-nasal": {
+    "id": "nad-nasal",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "NAD+ Nasal Spray",
+    "blurb": "Rapid NAD+ delivery for energy.",
+    "spec": "Fast-absorbing",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=nad-nasal"
+    },
+    "signals": [
+      "longevity",
+      "energy"
+    ]
+  },
+  "sermorelin": {
+    "id": "sermorelin",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "Sermorelin",
+    "blurb": "Recovery, sleep & body composition.",
+    "spec": "GH support",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=sermorelin"
+    },
+    "signals": [
+      "muscle",
+      "sleep",
+      "longevity"
+    ]
+  },
+  "sermorelin-odt": {
+    "id": "sermorelin-odt",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "Sermorelin ODT",
+    "blurb": "Dissolvable GH support.",
+    "spec": "Dissolvable",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=sermorelin-odt"
+    },
+    "signals": [
+      "muscle",
+      "sleep",
+      "longevity"
+    ]
+  },
+  "tesamorelin": {
+    "id": "tesamorelin",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "Tesamorelin",
+    "blurb": "Reduces visceral fat.",
+    "spec": "Visceral fat",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=tesamorelin"
+    },
+    "signals": [
+      "metabolic"
+    ]
+  },
+  "mots-c": {
+    "id": "mots-c",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "MOTS-c",
+    "blurb": "Metabolism & energy at the cellular level.",
+    "spec": "Mitochondrial",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=mots-c"
+    },
+    "signals": [
+      "metabolic",
+      "energy"
+    ]
+  },
+  "epitalon": {
+    "id": "epitalon",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "Epitalon",
+    "blurb": "Longevity & sleep-cycle support.",
+    "spec": "Longevity",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=epitalon"
+    },
+    "signals": [
+      "longevity",
+      "sleep"
+    ]
+  },
+  "ghk-cu": {
+    "id": "ghk-cu",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "GHK-Cu",
+    "blurb": "Collagen, skin & hair support.",
+    "spec": "Skin & hair",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=ghk-cu"
+    },
+    "signals": [
+      "hair_skin"
+    ]
+  },
+  "pt-141": {
+    "id": "pt-141",
+    "category": "peptide",
+    "categoryLabel": "Peptide",
+    "tag": "RX",
+    "eyebrow": "Apex MD \u00b7 Peptide",
+    "name": "PT-141",
+    "blurb": "Libido & sexual wellness.",
+    "spec": "Libido",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=pt-141"
+    },
+    "signals": [
+      "libido"
+    ]
+  },
+  "lab-longevity": {
+    "id": "lab-longevity",
+    "category": "lab",
+    "categoryLabel": "Lab Diagnostics",
+    "tag": "Most Popular",
+    "eyebrow": "Apex MD \u00b7 Lab Diagnostics",
+    "name": "Longevity Lab Panel",
+    "blurb": "Comprehensive longevity biomarker panel.",
+    "spec": "from $249",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=lab-longevity"
+    },
+    "signals": [
+      "diagnostics"
+    ]
+  },
+  "lab-hormone": {
+    "id": "lab-hormone",
+    "category": "lab",
+    "categoryLabel": "Lab Diagnostics",
+    "tag": "Lab Diagnostics",
+    "eyebrow": "Apex MD \u00b7 Lab Diagnostics",
+    "name": "Hormone Panel",
+    "blurb": "Full hormone & endocrine panel.",
+    "spec": "/ month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=lab-hormone"
+    },
+    "signals": [
+      "diagnostics",
+      "testosterone",
+      "hormones_female"
+    ]
+  },
+  "lab-metabolic": {
+    "id": "lab-metabolic",
+    "category": "lab",
+    "categoryLabel": "Lab Diagnostics",
+    "tag": "Lab Diagnostics",
+    "eyebrow": "Apex MD \u00b7 Lab Diagnostics",
+    "name": "Metabolic Panel",
+    "blurb": "Metabolic & cardiovascular markers.",
+    "spec": "/ month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=lab-metabolic"
+    },
+    "signals": [
+      "diagnostics",
+      "metabolic",
+      "cardiovascular"
+    ]
+  },
+  "advanced-health-check": {
+    "id": "advanced-health-check",
+    "category": "concierge",
+    "categoryLabel": "Concierge",
+    "tag": "One-time",
+    "eyebrow": "Apex MD \u00b7 Concierge",
+    "name": "Advanced Health Check",
+    "blurb": "Deep-dive assessment with a concierge physician.",
+    "spec": "$399 one-time",
+    "cta": {
+      "label": "Purchase",
+      "href": "shop.html?sku=advanced-health-check"
+    },
+    "signals": [
+      "concierge",
+      "diagnostics"
+    ]
+  },
+  "foundational": {
+    "id": "foundational",
+    "category": "concierge",
+    "categoryLabel": "Concierge",
+    "tag": "Concierge",
+    "eyebrow": "Apex MD \u00b7 Concierge",
+    "name": "Foundational Annual Program",
+    "blurb": "Year-round concierge care & optimization.",
+    "spec": "$399 / month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=foundational"
+    },
+    "signals": [
+      "concierge"
+    ]
+  },
+  "apex-elite": {
+    "id": "apex-elite",
+    "category": "concierge",
+    "categoryLabel": "Concierge",
+    "tag": "Concierge",
+    "eyebrow": "Apex MD \u00b7 Concierge",
+    "name": "Apex Elite",
+    "blurb": "Premium concierge membership, full-service.",
+    "spec": "$1,250 / month",
+    "cta": {
+      "label": "Shop",
+      "href": "shop.html?sku=apex-elite"
+    },
+    "signals": [
+      "concierge"
+    ]
+  },
+  "creatine": {
+    "id": "creatine",
+    "category": "supplement",
+    "categoryLabel": "Supplement",
+    "tag": "Supplement",
+    "eyebrow": "Apex MD \u00b7 Muscle & Strength",
+    "name": "Creatine Powder",
+    "blurb": "Pure micronized 100% creatine monohydrate \u2014 supports muscle strength, performance & absorption.",
+    "spec": "300 G \u00b7 Unflavored",
+    "cta": {
+      "label": "Purchase",
+      "href": "shop.html?sku=creatine"
+    },
+    "signals": [
+      "muscle",
+      "recovery"
+    ]
+  }
+}

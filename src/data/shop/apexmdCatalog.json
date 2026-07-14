@@ -1,0 +1,867 @@
+{
+  "environment": "apexmd",
+  "medicalCategories": [
+    {
+      "id": "weight-loss",
+      "label": "Weight Loss",
+      "icon": "Zap",
+      "sections": [
+        {
+          "id": "weight-loss",
+          "label": "Weight Loss",
+          "tagline": "GLP-1 Medications",
+          "badgeColor": "bg-blue-600",
+          "quizUrl": "https://form.apexmd.com?categoryId=weight-loss",
+          "description": "Clinically-supervised GLP-1 weight loss programs. Start with a quick quiz to find your best fit.",
+          "products": [
+            {
+              "name": "Compounded Semaglutide",
+              "price": "$299/mo",
+              "url": "https://form.apexmd.com?productid=compounded-semaglutide",
+              "badge": "Most Popular",
+              "desc": "Injectable compounded semaglutide for effective, sustained weight loss.",
+              "image": "/shop/images/compounded-semaglutide.png"
+            },
+            {
+              "name": "Compounded Tirzepatide",
+              "price": "$399/mo",
+              "url": "https://form.apexmd.com?productid=compounded-tirzepatide",
+              "badge": "Strongest",
+              "desc": "Dual GIP/GLP-1 agonist for maximum metabolic impact.",
+              "image": "/shop/images/compounded-tirzepatide.png"
+            },
+            {
+              "name": "Semaglutide ODT",
+              "price": "$349/mo",
+              "url": "https://form.apexmd.com?productid=semaglutide-odt",
+              "badge": null,
+              "desc": "Oral dissolving tablet — no injections required.",
+              "image": "/shop/images/semaglutide-odt.png"
+            },
+            {
+              "name": "Tirzepatide ODT",
+              "price": "$419/mo",
+              "url": "https://form.apexmd.com?productid=tirzepatide-odt",
+              "badge": null,
+              "desc": "Oral tirzepatide for dual-action weight management.",
+              "image": "/shop/images/tirzepatide-odt.png"
+            },
+            {
+              "name": "Semaglutide Micro Dose",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=compounded-semaglutide-micro",
+              "badge": "Best Value",
+              "desc": "Micro-dosing protocol ideal for beginners or maintenance.",
+              "image": "/shop/images/compounded-semaglutide.png"
+            },
+            {
+              "name": "Tirzepatide Micro Dose",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=compounded-tirzepatide-micro",
+              "badge": null,
+              "desc": "Low-dose tirzepatide for gradual, sustainable results.",
+              "image": "/shop/images/compounded-tirzepatide.png"
+            },
+            {
+              "name": "Semaglutide ODT Micro",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=semaglutide-odt-micro",
+              "badge": null,
+              "desc": "Oral micro-dose semaglutide — easy and convenient.",
+              "image": "/shop/images/semaglutide-odt.png"
+            },
+            {
+              "name": "Tirzepatide ODT Micro",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=tirzepatide-odt-micro",
+              "badge": null,
+              "desc": "Oral micro-dose tirzepatide for gentle weight management.",
+              "image": "/shop/images/tirzepatide-odt.png"
+            }
+          ]
+        },
+        {
+          "id": "longevity",
+          "label": "Longevity",
+          "tagline": "Anti-Aging & Cellular Health",
+          "badgeColor": "bg-violet-600",
+          "quizUrl": "https://form.apexmd.com",
+          "description": "Science-backed therapies targeting cellular health, energy production, and longevity.",
+          "products": [
+            {
+              "name": "NAD+ Injection",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=nad-injection",
+              "badge": "Top Pick",
+              "desc": "IV-quality NAD+ in injectable form for peak cellular energy.",
+              "image": "/shop/images/nad-plus-injection.png"
+            },
+            {
+              "name": "NAD+ Nasal Spray",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=nad-nasal-spray",
+              "badge": null,
+              "desc": "Fast-absorbing nasal NAD+ — no needles.",
+              "image": "/shop/images/nad-plus-nasal-spray.png"
+            },
+            {
+              "name": "Sermorelin Injection",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=sermorelin-injection",
+              "badge": null,
+              "desc": "Stimulates natural GH release for anti-aging and body composition.",
+              "image": "/shop/images/sermorelin-injection.png"
+            },
+            {
+              "name": "Sermorelin ODT",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=sermorelin-odt",
+              "badge": null,
+              "desc": "Oral dissolving sermorelin — easy and effective.",
+              "image": "/shop/images/sermorelin-odt.png"
+            },
+            {
+              "name": "B12 + MIC Injection",
+              "price": "$149/mo",
+              "url": "https://form.apexmd.com?productid=b12-mic",
+              "badge": "Best Value",
+              "desc": "B12 with lipotropic MIC blend for energy and metabolism.",
+              "image": "/shop/images/b12-plus-mic-injection.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trt",
+      "label": "TRT",
+      "icon": "Shield",
+      "sections": [
+        {
+          "id": "trt",
+          "label": "TRT",
+          "tagline": "Testosterone Replacement Therapy",
+          "badgeColor": "bg-slate-700",
+          "quizUrl": "https://form.apexmd.com?categoryId=trt",
+          "description": "Restore optimal testosterone levels with physician-supervised TRT. Labs included.",
+          "products": [
+            {
+              "name": "TRT – Labs First",
+              "price": "Free Consult",
+              "url": "https://form.apexmd.com?categoryId=trt",
+              "eosUrl": "https://formeos.apexmd.com?categoryId=trt",
+              "goldsUrl": "https://formgolds.apexmd.com?categoryId=trt",
+              "badge": "Start Here",
+              "desc": "Not sure which product is right for you? Get your labs done first and speak with a provider about the best option for you.",
+              "image": "/shop/images/trt-labs-first.png"
+            },
+            {
+              "name": "Testosterone Cream",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=testosterone-cream",
+              "badge": null,
+              "desc": "Topical cream for easy daily application.",
+              "image": "/shop/images/testosterone-cream.png"
+            },
+            {
+              "name": "Testosterone Injection",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=testosterone-replacement-injection",
+              "badge": "Most Common",
+              "desc": "Intramuscular injection — the gold standard for TRT.",
+              "image": "/shop/images/testosterone-injection.png"
+            },
+            {
+              "name": "Testosterone Troche",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=testosterone-troche",
+              "badge": null,
+              "desc": "Dissolving lozenge absorbed through oral mucosa.",
+              "image": "/shop/images/testosterone-cream.png"
+            },
+            {
+              "name": "Kyzatrex",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=kyzatrex",
+              "badge": null,
+              "desc": "FDA-approved oral testosterone capsule.",
+              "image": "/shop/images/testosterone-cream.png"
+            },
+            {
+              "name": "Gonadorelin ODT",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=gonadorelin-odt",
+              "badge": null,
+              "desc": "Maintains natural testosterone production and fertility.",
+              "image": "/shop/images/testosterone-cream.png"
+            },
+            {
+              "name": "Testosterone Gel",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=testosterone-gel",
+              "badge": null,
+              "desc": "Topical gel for steady, consistent absorption.",
+              "image": "/shop/images/testosterone-gel.png"
+            },
+            {
+              "name": "Enclomiphene",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=enclomiphene",
+              "badge": null,
+              "desc": "Oral SERM that stimulates natural testosterone production.",
+              "image": "/shop/images/enclomiphene.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hrt",
+      "label": "HRT",
+      "icon": "Star",
+      "sections": [
+        {
+          "id": "hrt",
+          "label": "HRT",
+          "tagline": "Hormone Replacement Therapy",
+          "badgeColor": "bg-pink-600",
+          "quizUrl": "https://form.apexmd.com?categoryId=hrt",
+          "description": "Personalized HRT to balance hormones and restore vitality. Labs included.",
+          "products": [
+            {
+              "name": "HRT – Labs First",
+              "price": "Free Consult",
+              "url": "https://form.apexmd.com?categoryId=hrt",
+              "eosUrl": "https://formeos.apexmd.com?categoryId=hrt",
+              "goldsUrl": "https://formgolds.apexmd.com?categoryId=hrt",
+              "badge": "Start Here",
+              "desc": "Not sure which product is right for you? Get your labs done first and speak with a provider about the best option for you.",
+              "image": "/shop/images/hrt-labs-first.png"
+            },
+            {
+              "name": "Estradiol Capsule",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=estradiol-olive-oil-pill-capsule",
+              "badge": "Popular",
+              "desc": "Oral estradiol in olive oil capsule for smooth absorption.",
+              "image": "/shop/images/estradiol-capsule.png"
+            },
+            {
+              "name": "Estradiol Cream",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=estradiol-cream",
+              "badge": null,
+              "desc": "Topical estradiol for flexible dosing.",
+              "image": "/shop/images/estradiol-cream.png"
+            },
+            {
+              "name": "Estradiol Patch",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=estradiol-patch",
+              "badge": null,
+              "desc": "Transdermal patch for consistent hormone delivery.",
+              "image": "/shop/images/estradiol-cream.png"
+            },
+            {
+              "name": "Bioidentical Progesterone",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=bioidentical-progesterone",
+              "badge": null,
+              "desc": "Bioidentical progesterone capsules (60 count) — physician-prescribed for hormonal balance, sleep, and mood stability.",
+              "image": "/shop/images/bioidentical-progesterone.png"
+            },
+            {
+              "name": "Bioidentical Estrogen Cream",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=estradiol-cream-smartpump",
+              "badge": null,
+              "desc": "Bioidentical estrogen 4mg/gm topical cream via SmartPump — precise dosing for smooth, consistent hormone delivery.",
+              "image": "/shop/images/bioidentical-estrogen-cream.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "peptides",
+      "label": "Peptides",
+      "icon": "FlaskConical",
+      "sections": [
+        {
+          "id": "peptides",
+          "label": "Peptides",
+          "tagline": "Performance & Recovery",
+          "badgeColor": "bg-emerald-600",
+          "quizUrl": "https://form.apexmd.com",
+          "description": "Targeted peptide therapies for recovery, performance, skin, and sexual health.",
+          "products": [
+            {
+              "name": "CJC-1295 / Ipamorelin",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=cjc-ipamorelin",
+              "badge": "Best Seller",
+              "desc": "Synergistic GH-releasing stack for muscle growth and fat loss.",
+              "image": "/shop/images/cjc-1295-ipamorelin.png"
+            },
+            {
+              "name": "Wolverine Stack",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=wolverine-stack",
+              "badge": "Elite",
+              "desc": "BPC-157 + TB-500 combo for accelerated full-body healing.",
+              "image": "/shop/images/wolverine-stack.jpg"
+            },
+            {
+              "name": "Glow Stack",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=glow-stack",
+              "badge": null,
+              "desc": "GHK-Cu + skin peptides for anti-aging and radiant skin.",
+              "image": "/shop/images/glow-stack.png"
+            },
+            {
+              "name": "BPC-157 Injection",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=bpc-157-injection",
+              "badge": null,
+              "desc": "Gut, joint, and tissue repair peptide. Rapid recovery support.",
+              "image": "/shop/images/bpc-157-injection.png"
+            },
+            {
+              "name": "TB-500 Injection",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=tb-500-injection",
+              "badge": null,
+              "desc": "Systemic healing peptide with anti-inflammatory properties.",
+              "image": "/shop/images/bpc-157-injection.png"
+            },
+            {
+              "name": "PT-141 Injection",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=pt-141-injection",
+              "badge": null,
+              "desc": "Bremelanotide for enhanced libido and sexual health.",
+              "image": "/shop/images/pt-141-injection.png"
+            },
+            {
+              "name": "GHK-Cu Cream",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=ghk-cu-cream",
+              "badge": null,
+              "desc": "Copper peptide cream for skin regeneration and collagen.",
+              "image": "/shop/images/glow-stack.png"
+            },
+            {
+              "name": "Epitalon",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=epitalon",
+              "badge": null,
+              "desc": "Telomere-protecting peptide for cellular longevity and anti-aging.",
+              "image": "/shop/images/epitalon.png"
+            },
+            {
+              "name": "MOTS-C",
+              "price": "$299/mo",
+              "url": "https://form.apexmd.com?productid=mots-c",
+              "badge": null,
+              "desc": "Mitochondrial-derived peptide for metabolic health and energy.",
+              "image": "/shop/images/mots-c.png"
+            },
+            {
+              "name": "Selank",
+              "price": "$199/mo",
+              "url": "https://form.apexmd.com?productid=selank",
+              "badge": null,
+              "desc": "Anxiolytic peptide for stress reduction and cognitive support.",
+              "image": "/shop/images/selank.png"
+            },
+            {
+              "name": "Drive",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=drive",
+              "badge": "Blend",
+              "desc": "Tesamorelin / Ipamorelin / AOD-9604 / MOTS-C. Metabolic drive stack targeting fat loss, GH release, and mitochondrial energy.",
+              "image": "/shop/images/drive.png"
+            },
+            {
+              "name": "Lucid",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=lucid",
+              "badge": "Blend",
+              "desc": "SEMAX / SELANK / MOTS-C / Tesamorelin. Cognitive clarity, focus, and metabolic optimization in one pharmacy-grade blend.",
+              "image": "/shop/images/lucid.jpg"
+            },
+            {
+              "name": "BeastMode",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=beastmode",
+              "badge": "Blend",
+              "desc": "AOD-9604 / CJC-1295 / Ipamorelin / MOTS-C. Elite performance stack for muscle growth, fat shredding, and metabolic power.",
+              "image": "/shop/images/beastmode.jpg"
+            },
+            {
+              "name": "Regenisis",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=regenisis",
+              "badge": "Blend",
+              "desc": "GHK-Cu / CJC-1295 / Ipamorelin / TB-500. Full-body regeneration blend targeting skin, tissue repair, and GH optimization.",
+              "image": "/shop/images/regenisis.jpg"
+            },
+            {
+              "name": "Glow",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=glow",
+              "badge": null,
+              "desc": "GHK-Cu / Tesamorelin. Skin rejuvenation and collagen-boosting peptide blend for anti-aging and radiant skin.",
+              "image": "/shop/images/glow.jpg"
+            },
+            {
+              "name": "Limitless",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=limitless",
+              "badge": "Blend",
+              "desc": "SEMAX / SELANK / AOD-9604 / MOTS-C. Cognitive performance meets fat loss — the ultimate brain-body optimization stack.",
+              "image": "/shop/images/limitless.jpg"
+            },
+            {
+              "name": "Serenity",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=serenity",
+              "badge": "Blend",
+              "desc": "SEMAX / SELANK / BPC-157 / KPV. Stress relief, gut healing, and anxiolytic peptide blend for calm and recovery.",
+              "image": "/shop/images/serenity.jpg"
+            },
+            {
+              "name": "Shred",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=shred",
+              "badge": "Blend",
+              "desc": "Tesamorelin / CJC-1295 / Ipamorelin / BPC-157. Aggressive fat-loss and lean muscle stack with built-in recovery support.",
+              "image": "/shop/images/shred.jpg"
+            },
+            {
+              "name": "Youth",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=youth",
+              "badge": "Blend",
+              "desc": "GHK-Cu / BPC-157 / TB-500 / Epitalon. Comprehensive longevity and anti-aging stack targeting cellular renewal and tissue repair.",
+              "image": "/shop/images/youth.jpg"
+            },
+            {
+              "name": "Hypnos",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=hypnos",
+              "badge": "Blend",
+              "desc": "DSIP / SELANK / CJC-1295 / Ipamorelin. Deep sleep optimization blend combining delta sleep-inducing peptide with GH secretagogues.",
+              "image": "/shop/images/hypnos.jpg"
+            },
+            {
+              "name": "Grow",
+              "price": "$249/mo",
+              "url": "https://form.apexmd.com?productid=grow",
+              "badge": null,
+              "desc": "CJC-1295 / Ipamorelin. The classic GH-releasing stack for muscle growth, fat loss, and recovery in a single pharmacy-grade vial.",
+              "image": "/shop/images/grow.jpg"
+            },
+            {
+              "name": "Passion",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=passion",
+              "badge": "Blend",
+              "desc": "Oxytocin / PT-141. Intimacy and libido-enhancing peptide blend for enhanced connection, arousal, and sexual health.",
+              "image": "/shop/images/passion.jpg"
+            },
+            {
+              "name": "InnerShield",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=innershield",
+              "badge": "Blend",
+              "desc": "Thymosin Alpha-1 / BPC-157 / KPV / LL-37. Comprehensive immune-fortifying and gut-healing peptide blend for full-body resilience.",
+              "image": "/shop/images/innershield.jpg"
+            },
+            {
+              "name": "Empress",
+              "price": "$350/mo",
+              "url": "https://form.apexmd.com?productid=empress",
+              "badge": "Blend",
+              "desc": "MOTS-C / BPC-157 / GHK-Cu / Kisspeptin-10. Women's optimization blend targeting hormonal balance, metabolic health, skin, and vitality.",
+              "image": "/shop/images/empress.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lab-diagnostics",
+      "label": "Lab Diagnostics",
+      "icon": "FlaskConical",
+      "sections": [
+        {
+          "id": "labs",
+          "label": "Lab Services",
+          "tagline": "Diagnostics & Bloodwork",
+          "badgeColor": "bg-red-600",
+          "quizUrl": "https://form.apexmd.com?productid=labs-only",
+          "description": "Comprehensive lab panels reviewed by our physicians. Know your numbers.",
+          "products": [
+            {
+              "name": "Basic Labs",
+              "price": "$129",
+              "url": "https://form.apexmd.com?productid=labs-only",
+              "badge": null,
+              "desc": "Full blood panel with physician review — no treatment required.",
+              "image": "/shop/images/basic-labs.png"
+            },
+            {
+              "name": "Comprehensive Labs",
+              "price": "$199",
+              "url": "https://form.apexmd.com?productid=comprehensive-labs-only",
+              "badge": null,
+              "desc": "Comprehensive metabolic panel with extended biomarkers and physician review.",
+              "image": "/shop/images/basic-labs.png"
+            },
+            {
+              "name": "At-Home Lab Kit - Upgrade",
+              "price": "$89",
+              "url": "https://form.apexmd.com?productid=athome-lab-kit",
+              "badge": null,
+              "desc": "Convenient at-home lab collection with comprehensive analysis and physician review.",
+              "image": "/shop/images/at-home-lab-kit-upgrade.png"
+            },
+            {
+              "name": "TruAge",
+              "price": "$399/mo",
+              "url": "https://form.apexmd.com?productid=truage",
+              "badge": "Popular",
+              "desc": "Advanced aging assessment measuring biological vs chronological age for longevity insights.",
+              "image": "/shop/images/truage.png"
+            },
+            {
+              "name": "TruHealth",
+              "price": "$399/mo",
+              "url": "https://form.apexmd.com?productid=truhealth",
+              "badge": null,
+              "desc": "Comprehensive health assessment with advanced biometric analysis and personalized recommendations.",
+              "image": "/shop/images/truhealth.png"
+            },
+            {
+              "name": "Jona Microbiome",
+              "price": "$399/mo",
+              "url": "https://form.apexmd.com?productid=jona-microbiome",
+              "badge": "New",
+              "desc": "Complete microbiome analysis revealing gut health status, bacterial composition, and metabolic function.",
+              "image": "/shop/images/jona-microbiome.png"
+            },
+            {
+              "name": "Genomic Sequencing",
+              "price": "$399/mo",
+              "url": "https://form.apexmd.com?productid=genomic-sequencing",
+              "badge": "Advanced",
+              "desc": "Full genome sequencing for personalized medicine insights, ancestry, and health predisposition analysis.",
+              "image": "/shop/images/genomic-sequencing.png"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "supplements": [
+    {
+      "id": 1,
+      "name": "Whey Protein",
+      "tagline": "Premium Protein Powder",
+      "price": 59.99,
+      "unit": "/bag",
+      "flavors": [
+        "Chocolate",
+        "Vanilla",
+        "Cinnamon"
+      ],
+      "image": "/shop/Apex%20MD%20Supplements/Vanilla%20Whey%20Protein.png"
+    },
+    {
+      "id": 2,
+      "name": "Vegan Protein",
+      "tagline": "Plant-Based Protein",
+      "price": 59.99,
+      "unit": "/bag",
+      "flavors": [
+        "Chocolate",
+        "Vanilla"
+      ],
+      "image": "/shop/Apex%20MD%20Supplements/Vegan%20Vanilla%20Protein.png"
+    },
+    {
+      "id": 3,
+      "name": "Preworkout",
+      "tagline": "Energy & Focus",
+      "price": 39.99,
+      "unit": "/tub",
+      "flavors": [
+        "Fruit Punch",
+        "Georgia Peach",
+        "Tropical Sunrise",
+        "Watermelon"
+      ],
+      "image": "/shop/Apex%20MD%20Supplements/Preworkout%20Fruit%20Punch.png"
+    },
+    {
+      "id": 4,
+      "name": "BCAA Powder",
+      "tagline": "Recovery & Endurance",
+      "price": 34.99,
+      "unit": "/tub",
+      "flavors": [
+        "Green Apple",
+        "Watermelon"
+      ],
+      "image": "/shop/Apex%20MD%20Supplements/BCAA%20Watermelon.png"
+    },
+    {
+      "id": 5,
+      "name": "Omega 3",
+      "tagline": "Heart & Brain Health",
+      "price": 29.99,
+      "unit": "/bottle",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Omega%203.png"
+    },
+    {
+      "id": 6,
+      "name": "Probiotic",
+      "tagline": "Gut Health Support",
+      "price": 34.99,
+      "unit": "/bottle",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Probiotic%202.png"
+    },
+    {
+      "id": 7,
+      "name": "Mens Multivitamin",
+      "tagline": "Daily Essentials for Men",
+      "price": 29.99,
+      "unit": "/bottle",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Mens%20Multivitmain%202.png"
+    },
+    {
+      "id": 8,
+      "name": "Womens Multivitamin",
+      "tagline": "Daily Essentials for Women",
+      "price": 29.99,
+      "unit": "/bottle",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Womens%20Multivitamin%202.png"
+    },
+    {
+      "id": 9,
+      "name": "Creatine Powder",
+      "tagline": "Strength & Power",
+      "price": 39.99,
+      "unit": "/tub",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Creatine%20Powder.png"
+    },
+    {
+      "id": 10,
+      "name": "Greens",
+      "tagline": "Daily Greens Blend",
+      "price": 39.99,
+      "unit": "/tub",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Greens.png"
+    },
+    {
+      "id": 11,
+      "name": "Glutamine Powder",
+      "tagline": "Recovery Support",
+      "price": 34.99,
+      "unit": "/tub",
+      "flavors": [],
+      "image": "/shop/Apex%20MD%20Supplements/Glutamine%20Powder.png"
+    }
+  ],
+  "memberships": [
+    {
+      "id": 1,
+      "name": "Classic",
+      "price": 24.99,
+      "period": "/month",
+      "color": "border-gray-300",
+      "headerBg": "bg-gray-100",
+      "current": true,
+      "features": [
+        "Gym access all locations",
+        "Cardio equipment",
+        "Free weights area",
+        "Locker rooms",
+        "2 guest passes/month"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Black Card",
+      "price": 44.99,
+      "period": "/month",
+      "color": "border-black",
+      "headerBg": "bg-black",
+      "headerText": "text-white",
+      "badge": "Most Popular",
+      "current": false,
+      "features": [
+        "Everything in Classic",
+        "Unlimited guest privileges",
+        "Massage chairs & tanning",
+        "Bring a guest any time",
+        "Premium amenities",
+        "Priority class booking"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Black Card + PT",
+      "price": 99.99,
+      "period": "/month",
+      "color": "border-yellow-500",
+      "headerBg": "bg-gradient-to-r from-yellow-500 to-yellow-600",
+      "badge": "Best Value",
+      "current": false,
+      "features": [
+        "Everything in Black Card",
+        "2 PT sessions/month included",
+        "Monthly body scan",
+        "Nutrition coaching",
+        "Exclusive member events",
+        "Recovery suite access"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Concierge Care",
+      "price": 399,
+      "period": "/month",
+      "color": "border-red-500",
+      "headerBg": "bg-gradient-to-r from-red-600 to-red-700",
+      "badge": "Apex MD",
+      "current": false,
+      "image": "/shop/dashboard-store/concierge-care.jpg",
+      "features": [
+        "Apex MD Concierge Medicine",
+        "Direct physician access",
+        "Personalized health optimization plan",
+        "Regular blood draws",
+        "Advanced diagnostic testing",
+        "Same-day virtual consults"
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "id": 1,
+      "name": "8-Week Shred",
+      "tagline": "Fat Loss & Definition",
+      "price": 129,
+      "duration": "8 Weeks",
+      "sessions": "5x/week",
+      "level": "Intermediate",
+      "badge": "Most Popular",
+      "badgeColor": "bg-orange-500",
+      "description": "High-intensity program combining strength and cardio to maximize fat loss while preserving muscle.",
+      "includes": [
+        "40 workout sessions",
+        "Nutrition guide",
+        "Weekly check-ins",
+        "Progress tracking"
+      ],
+      "image": "/shop/images/8-week-shred.jpg",
+      "coach": "Coach Marcus"
+    },
+    {
+      "id": 2,
+      "name": "Powerlifting Foundation",
+      "tagline": "Build Serious Strength",
+      "price": 149,
+      "duration": "12 Weeks",
+      "sessions": "4x/week",
+      "level": "Beginner–Advanced",
+      "badge": "Coach Pick",
+      "badgeColor": "bg-purple-500",
+      "description": "Progressive overload program focused on squat, bench, and deadlift mastery from foundation to elite.",
+      "includes": [
+        "48 workout sessions",
+        "Form video library",
+        "1-RM tracking",
+        "Peaking protocol"
+      ],
+      "image": "/shop/images/powerlifting-foundation.jpg",
+      "coach": "Coach Reyes"
+    },
+    {
+      "id": 3,
+      "name": "Lean Muscle Builder",
+      "tagline": "Hypertrophy Focused",
+      "price": 119,
+      "duration": "10 Weeks",
+      "sessions": "4x/week",
+      "level": "Intermediate",
+      "badge": "Best Value",
+      "badgeColor": "bg-emerald-500",
+      "description": "Science-backed hypertrophy program using volume and progressive overload to maximize muscle growth.",
+      "includes": [
+        "40 workout sessions",
+        "Macro targets",
+        "Supplement guide",
+        "Rest day protocols"
+      ],
+      "image": "/shop/images/lean-muscle-builder.jpg",
+      "coach": "Coach Alexis"
+    }
+  ],
+  "personalTrainingPackages": [
+    {
+      "id": 1,
+      "name": "Starter Pack",
+      "sessions": 5,
+      "price": 299,
+      "pricePerSession": 59.8,
+      "popular": false,
+      "features": [
+        "5 one-on-one sessions",
+        "Initial fitness assessment",
+        "Personalized workout plan",
+        "Email support"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Transform",
+      "sessions": 12,
+      "price": 599,
+      "pricePerSession": 49.92,
+      "popular": true,
+      "features": [
+        "12 one-on-one sessions",
+        "Full body composition analysis",
+        "Custom meal plan",
+        "Unlimited text support",
+        "Progress photos"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Elite",
+      "sessions": 24,
+      "price": 999,
+      "pricePerSession": 41.63,
+      "popular": false,
+      "features": [
+        "24 one-on-one sessions",
+        "Weekly check-ins",
+        "Nutrition coaching",
+        "Recovery protocols",
+        "Priority booking",
+        "Supplement consult"
+      ]
+    }
+  ]
+}

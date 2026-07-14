@@ -7,12 +7,19 @@ import {
   useUpdateProfileUserEmail,
 } from "@/hooks/care-validate/useProfile";
 import { buildUpdateEmailPayload } from "@/api/care-validate/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { User, Save, CheckCircle, ShieldCheck, Mail } from "lucide-react";
+import {
+  User,
+  Save,
+  CheckCircle,
+  ShieldCheck,
+  Mail,
+  MapPin,
+  HeartPulse,
+  Loader2,
+} from "lucide-react";
 
 const EMPTY_FORM = {
   firstName: "",
@@ -44,6 +51,55 @@ function normalizeDate(value: string) {
   if (!raw) return "";
   if (raw.includes("T")) return raw.slice(0, 10);
   return raw.slice(0, 10);
+}
+
+function Field({
+  label,
+  required = false,
+  children,
+  span = 1,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+  span?: 1 | 2;
+}) {
+  return (
+    <div className={span === 2 ? "md:col-span-2" : ""}>
+      <span className="apex-field-label flex items-center gap-1 mb-2">
+        {label}
+        {required && <em className="not-italic" style={{ color: "var(--apex-accent-bright)" }}>*</em>}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function SectionHeader({
+  eyebrow,
+  title,
+  icon: Icon,
+}: {
+  eyebrow: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <div
+        className="w-9 h-9 rounded-[10px] grid place-items-center flex-shrink-0"
+        style={{ background: "var(--apex-accent-soft)" }}
+      >
+        <Icon className="w-4 h-4" style={{ color: "var(--apex-accent-bright)" }} />
+      </div>
+      <div>
+        <span className="apex-eyebrow block">{eyebrow}</span>
+        <h3 className="apex-card-title-ink" style={{ fontSize: 20 }}>
+          {title}
+        </h3>
+      </div>
+    </div>
+  );
 }
 
 export default function Profile() {
@@ -101,48 +157,55 @@ export default function Profile() {
   const isProfileSaving = updateProfileUser.isPending;
   const isEmailSaving = updateProfileEmail.isPending;
 
+  // The update endpoint (patient-api doc #24) is a PATCH — every field is
+  // optional. We only require a name so the identity can't be blanked out;
+  // any other field the user leaves empty is simply omitted from the payload
+  // (never sent as ""), so a name-only edit saves fine and existing data on
+  // the record is left untouched.
   const canSaveProfile =
-    Boolean(form.firstName.trim()) &&
-    Boolean(form.lastName.trim()) &&
-    Boolean(form.dob.trim()) &&
-    Boolean(form.phoneNumber.trim()) &&
-    Boolean(form.address.trim()) &&
-    Boolean(form.city.trim()) &&
-    Boolean(form.state.trim()) &&
-    Boolean(form.country.trim()) &&
-    Boolean(form.postalCode.trim());
+    Boolean(form.firstName.trim()) && Boolean(form.lastName.trim());
 
   const handleSave = async () => {
     if (!canSaveProfile) {
       toast({
-        title: "Missing required fields",
-        description: "Please complete all required profile fields before saving.",
+        title: "Name is required",
+        description: "Please enter your first and last name before saving.",
         variant: "destructive",
       });
       return;
     }
 
+    // Send name always; include every other field only when it has a value so
+    // an incomplete profile can still be updated without tripping the backend's
+    // per-field validation (e.g. phone min 3 chars, country 2-letter ISO).
+    const payload = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+    };
+    const addIfSet = (key, value) => {
+      const v = String(value ?? "").trim();
+      if (v) payload[key] = v;
+    };
+    addIfSet("dob", form.dob);
+    addIfSet("gender", form.gender);
+    addIfSet("phoneNumber", form.phoneNumber);
+    addIfSet("address", form.address);
+    addIfSet("address2", form.address2);
+    addIfSet("city", form.city);
+    addIfSet("state", form.state);
+    addIfSet("country", form.country);
+    addIfSet("postalCode", form.postalCode);
+    addIfSet("allergies", form.allergies);
+    addIfSet("currentMedications", form.currentMedications);
+    addIfSet("healthConditions", form.healthConditions);
+    const languages = form.languagePreferences
+      .split(",")
+      .map((lang) => lang.trim())
+      .filter(Boolean);
+    if (languages.length) payload.languagePreferences = languages;
+
     try {
-      await updateProfileUser.mutateAsync({
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        dob: form.dob,
-        gender: form.gender || "MALE",
-        phoneNumber: form.phoneNumber.trim(),
-        address: form.address.trim(),
-        address2: form.address2.trim(),
-        city: form.city.trim(),
-        state: form.state.trim(),
-        country: form.country.trim(),
-        postalCode: form.postalCode.trim(),
-        allergies: form.allergies.trim(),
-        currentMedications: form.currentMedications.trim(),
-        healthConditions: form.healthConditions.trim(),
-        languagePreferences: form.languagePreferences
-          .split(",")
-          .map((lang) => lang.trim())
-          .filter(Boolean),
-      });
+      await updateProfileUser.mutateAsync(payload);
       toast({
         title: "Profile updated",
         description: "Your profile information has been saved successfully.",
@@ -198,36 +261,47 @@ export default function Profile() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--apex-accent-bright)" }} />
       </div>
     );
   }
 
+  const displayName = currentUser?.full_name || [form.firstName, form.lastName].filter(Boolean).join(" ").trim() || "—";
+  const initial = (displayName && displayName !== "—" ? displayName[0] : "U").toUpperCase();
+
   return (
     <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground">
       {/* Page head */}
-      <div className="mb-6 pb-5 border-b border-border flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <div className="apex-eyebrow flex items-center gap-1.5 mb-2">
-            <User className="w-3 h-3" style={{ color: "var(--apex-accent)" }} />
+          <div className="apex-ai-tag mb-3">
+            <User className="w-3 h-3" strokeWidth={2.2} />
             Account settings
           </div>
           <h1 className="apex-page-title">
             Your <em>profile</em>
           </h1>
-          <p className="text-[13px] text-ink-2 mt-2">
-            Manage your personal information and contact details.
+          <p className="apex-page-sub">
+            Manage your personal information, contact details and medical background.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
-          <ShieldCheck className="w-3.5 h-3.5" style={{ color: "var(--apex-accent)" }} />
+        <span
+          className="inline-flex items-center gap-1.5 font-mono uppercase"
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            fontWeight: 600,
+            color: "var(--ink-3)",
+          }}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" style={{ color: "var(--apex-accent-bright)" }} />
           HIPAA protected
         </span>
       </div>
 
       {isError && (
         <div
-          className="mb-6 apex-card p-4 text-sm"
+          className="apex-card mb-[18px] p-4 text-sm"
           style={{ borderColor: "var(--att)", background: "var(--att-soft)" }}
         >
           <span style={{ color: "var(--att)" }}>
@@ -236,166 +310,302 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.9fr] gap-[18px]">
         {/* Identity summary */}
-        <Card className="lg:col-span-1 h-fit">
-          <CardContent className="p-6 flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-serif font-medium border border-border bg-secondary text-primary">
-              {currentUser?.full_name?.[0]?.toUpperCase() || "U"}
+        <div className="apex-card p-6 h-fit">
+          <div className="flex flex-col items-center text-center">
+            <div
+              className="w-24 h-24 rounded-full grid place-items-center flex-shrink-0"
+              style={{
+                background: "var(--apex-accent-soft)",
+                border: "1px solid var(--line)",
+              }}
+            >
+              <span
+                className="font-sans"
+                style={{
+                  fontSize: 34,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  color: "var(--apex-accent-bright)",
+                }}
+              >
+                {initial}
+              </span>
             </div>
-            <p className="font-serif text-lg font-medium text-foreground mt-4">
-              {currentUser?.full_name || "—"}
-            </p>
-            <p className="text-[13px] text-ink-2 font-mono mt-0.5">
+
+            <h2
+              className="font-sans mt-4"
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: "-0.015em",
+                color: "var(--ink)",
+              }}
+            >
+              {displayName}
+            </h2>
+            <p
+              className="font-mono mt-1"
+              style={{ fontSize: 12.5, color: "var(--ink-2)" }}
+            >
               {currentUser?.email || "—"}
             </p>
-            <div className="w-full mt-5 pt-5 border-t border-border space-y-2.5 text-left">
-              <div className="flex items-center justify-between">
-                <span className="apex-eyebrow">Phone</span>
-                <span className="font-mono text-[12px] text-foreground">
-                  {form.phoneNumber || "—"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="apex-eyebrow">Date of birth</span>
-                <span className="font-mono text-[12px] text-foreground">
-                  {form.dob || "—"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="apex-eyebrow">Location</span>
-                <span className="font-mono text-[12px] text-foreground">
-                  {[form.city, form.state].filter(Boolean).join(", ") || "—"}
-                </span>
-              </div>
+          </div>
+
+          <div className="w-full mt-6 pt-5 space-y-3.5 text-left" style={{ borderTop: "1px solid var(--line)" }}>
+            <div className="flex items-center justify-between gap-3">
+              <span className="apex-field-label">Phone</span>
+              <span className="font-mono text-[12.5px]" style={{ color: "var(--ink)" }}>
+                {form.phoneNumber || "—"}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center justify-between gap-3">
+              <span className="apex-field-label">Date of birth</span>
+              <span className="font-mono text-[12.5px]" style={{ color: "var(--ink)" }}>
+                {form.dob || "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="apex-field-label">Gender</span>
+              <span className="font-mono text-[12.5px]" style={{ color: "var(--ink)" }}>
+                {form.gender || "—"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="apex-field-label">Location</span>
+              <span className="font-mono text-[12.5px] text-right" style={{ color: "var(--ink)" }}>
+                {[form.city, form.state].filter(Boolean).join(", ") || "—"}
+              </span>
+            </div>
+          </div>
+        </div>
 
-        {/* Form */}
-        <div className="lg:col-span-2 space-y-3.5">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                Personal Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>First Name *</Label>
-                <Input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Last Name *</Label>
-                <Input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Phone Number *</Label>
-                <Input value={form.phoneNumber} onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))} placeholder="+1 (555) 000-0000" />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Date of Birth *</Label>
-                <Input type="date" value={form.dob} onChange={e => setForm(f => ({ ...f, dob: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Gender</Label>
-                <Input value={form.gender} onChange={e => setForm(f => ({ ...f, gender: e.target.value }))} placeholder="MALE / FEMALE / OTHER" />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Address *</Label>
-                <Input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Address 2</Label>
-                <Input value={form.address2} onChange={e => setForm(f => ({ ...f, address2: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>City *</Label>
-                <Input value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>State *</Label>
-                <Input value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Country *</Label>
-                <Input value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Postal Code *</Label>
-                <Input value={form.postalCode} onChange={e => setForm(f => ({ ...f, postalCode: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Allergies</Label>
-                <Input value={form.allergies} onChange={e => setForm(f => ({ ...f, allergies: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Current Medications</Label>
-                <Input value={form.currentMedications} onChange={e => setForm(f => ({ ...f, currentMedications: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Health Conditions</Label>
-                <Input value={form.healthConditions} onChange={e => setForm(f => ({ ...f, healthConditions: e.target.value }))} />
-              </div>
-
-              <div className="space-y-1.5 md:col-span-2">
-                <Label>Language Preferences (comma separated)</Label>
+        {/* Right column */}
+        <div className="space-y-[18px]">
+          {/* Personal information */}
+          <div className="apex-card p-6 md:p-7">
+            <SectionHeader
+              eyebrow="Section 01"
+              title="Personal information"
+              icon={User}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="First name" required>
+                <Input
+                  value={form.firstName}
+                  onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+                />
+              </Field>
+              <Field label="Last name" required>
+                <Input
+                  value={form.lastName}
+                  onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                />
+              </Field>
+              <Field label="Phone number">
+                <Input
+                  value={form.phoneNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, phoneNumber: e.target.value }))}
+                  placeholder="+1 (555) 000-0000"
+                />
+              </Field>
+              <Field label="Date of birth">
+                <Input
+                  type="date"
+                  value={form.dob}
+                  onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
+                />
+              </Field>
+              <Field label="Gender">
+                <Input
+                  value={form.gender}
+                  onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
+                  placeholder="MALE / FEMALE / OTHER"
+                />
+              </Field>
+              <Field label="Language preferences">
                 <Input
                   value={form.languagePreferences}
-                  onChange={e => setForm(f => ({ ...f, languagePreferences: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, languagePreferences: e.target.value }))
+                  }
                   placeholder="en, es"
                 />
-              </div>
+              </Field>
+            </div>
+          </div>
 
-              <div className="md:col-span-2 pt-2 border-t border-border">
-                <Button
-                  onClick={handleSave}
-                  disabled={isProfileSaving || !canSaveProfile}
-                  className="w-full"
-                >
-                  {saved ? (
-                    <><CheckCircle className="w-4 h-4 mr-2" /> Saved!</>
-                  ) : (
-                    <><Save className="w-4 h-4 mr-2" /> {isProfileSaving ? "Saving..." : "Save Changes"}</>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Address */}
+          <div className="apex-card p-6 md:p-7">
+            <SectionHeader
+              eyebrow="Section 02"
+              title="Address"
+              icon={MapPin}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Street address" span={2}>
+                <Input
+                  value={form.address}
+                  onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                />
+              </Field>
+              <Field label="Address line 2" span={2}>
+                <Input
+                  value={form.address2}
+                  onChange={(e) => setForm((f) => ({ ...f, address2: e.target.value }))}
+                  placeholder="Apartment, suite, unit"
+                />
+              </Field>
+              <Field label="City">
+                <Input
+                  value={form.city}
+                  onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                />
+              </Field>
+              <Field label="State">
+                <Input
+                  value={form.state}
+                  onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                />
+              </Field>
+              <Field label="Country">
+                <Input
+                  value={form.country}
+                  onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
+                />
+              </Field>
+              <Field label="Postal code">
+                <Input
+                  value={form.postalCode}
+                  onChange={(e) => setForm((f) => ({ ...f, postalCode: e.target.value }))}
+                />
+              </Field>
+            </div>
+          </div>
 
-          {/* Update Email */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                Update Email
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label>Current Email</Label>
+          {/* Medical background */}
+          <div className="apex-card p-6 md:p-7">
+            <SectionHeader
+              eyebrow="Section 03"
+              title="Medical background"
+              icon={HeartPulse}
+            />
+            <div className="grid grid-cols-1 gap-4">
+              <Field label="Allergies">
+                <Input
+                  value={form.allergies}
+                  onChange={(e) => setForm((f) => ({ ...f, allergies: e.target.value }))}
+                  placeholder="e.g. Penicillin, latex"
+                />
+              </Field>
+              <Field label="Current medications">
+                <Input
+                  value={form.currentMedications}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, currentMedications: e.target.value }))
+                  }
+                  placeholder="e.g. Metformin 500mg, Atorvastatin"
+                />
+              </Field>
+              <Field label="Health conditions">
+                <Input
+                  value={form.healthConditions}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, healthConditions: e.target.value }))
+                  }
+                  placeholder="e.g. Hypertension, Type 2 diabetes"
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* Save changes bar */}
+          <div
+            className="apex-card p-4 md:p-5 flex flex-wrap items-center justify-between gap-3"
+            style={{ background: "var(--apex-accent-soft)" }}
+          >
+            <div className="min-w-0 flex-1">
+              <p
+                className="font-sans"
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  color: "var(--ink)",
+                }}
+              >
+                Ready to save your changes?
+              </p>
+              <p className="text-[12.5px] mt-0.5" style={{ color: "var(--ink-2)" }}>
+                Update any field and save — only your first and last name are required.
+              </p>
+            </div>
+            <Button
+              onClick={handleSave}
+              disabled={isProfileSaving || !canSaveProfile}
+              className="gap-2 min-w-[168px]"
+              style={{
+                background: saved
+                  ? "var(--apex-accent-bright)"
+                  : "var(--apex-accent-bright)",
+                color: "#fff",
+              }}
+            >
+              {saved ? (
+                <>
+                  <CheckCircle className="w-4 h-4" /> Saved
+                </>
+              ) : isProfileSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" /> Save changes
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Update email */}
+          <div className="apex-card p-6 md:p-7">
+            <SectionHeader
+              eyebrow="Sign-in"
+              title="Update email"
+              icon={Mail}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Current email">
                 <Input value={String(currentUser?.email || "")} disabled />
-              </div>
-              <div className="space-y-1.5">
-                <Label>New Email</Label>
-                <Input value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="name@example.com" />
-              </div>
-              <Button onClick={handleUpdateEmail} disabled={isEmailSaving} variant="outline" className="w-full">
-                {isEmailSaving ? "Updating Email..." : "Update Email"}
+              </Field>
+              <Field label="New email">
+                <Input
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="name@example.com"
+                />
+              </Field>
+            </div>
+            <div className="mt-5 flex justify-end">
+              <Button
+                onClick={handleUpdateEmail}
+                disabled={isEmailSaving}
+                variant="outline"
+                className="gap-2"
+              >
+                {isEmailSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Updating…
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4" /> Update email
+                  </>
+                )}
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
