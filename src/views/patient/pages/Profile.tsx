@@ -315,23 +315,17 @@ export default function Profile() {
         <div className="apex-card p-6 h-fit">
           <div className="flex flex-col items-center text-center">
             <div
-              className="w-24 h-24 rounded-full grid place-items-center flex-shrink-0"
+              className="w-24 h-24 rounded-full overflow-hidden grid place-items-center flex-shrink-0"
               style={{
                 background: "var(--apex-accent-soft)",
                 border: "1px solid var(--line)",
               }}
             >
-              <span
-                className="font-sans"
-                style={{
-                  fontSize: 34,
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
-                  color: "var(--apex-accent-bright)",
-                }}
-              >
-                {initial}
-              </span>
+              <img
+                src="/images/patient-headshot.jpg"
+                alt={displayName}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <h2

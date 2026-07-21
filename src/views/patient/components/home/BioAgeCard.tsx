@@ -1,29 +1,21 @@
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { useAllPatientSummaries } from "@/hooks/ai-agent/useaiSummary";
-import type { BiologicalAge } from "@/types/ai-agent/ai_summary_types";
 import { createPageUrl } from "@/utils";
 import { BodyModel3D } from "@/components/hologram";
 import BioAgeScale from "@/views/patient/components/health-analysis/BioAgeScale";
+import { STATIC_BIO_AGE } from "@/views/patient/components/health-analysis/staticBioAge";
 
 /**
  * Dashboard hero — Biological age card.
  *
- * Reads `report.biologicalAge` from the latest summary. When the field is
- * available, shows the headline number + delta pill + scale row. When
- * unavailable, shows a structured empty state pointing at Health Analysis.
+ * Figures come from `STATIC_BIO_AGE`, not the summaries API, so the card
+ * always shows the same numbers as the Health Analysis card.
  */
 export default function BioAgeCard() {
-  const summariesQuery = useAllPatientSummaries();
+  const bioAge = STATIC_BIO_AGE;
 
-  const bioAge = useMemo<BiologicalAge | null>(() => {
-    const items = summariesQuery.data?.items ?? [];
-    return items.find((s) => s.report)?.report?.biologicalAge ?? null;
-  }, [summariesQuery.data]);
-
-  const hasAnalysis = (summariesQuery.data?.items?.length ?? 0) > 0;
-  const available = bioAge?.available === true;
+  const hasAnalysis = true;
+  const available = bioAge.available === true;
 
   return (
     <div className="apex-card p-6 lg:p-7 flex flex-col h-full">
@@ -37,7 +29,7 @@ export default function BioAgeCard() {
             }}
           >
             {bioAge.deltaYears < 0 ? "↓" : "↑"}{" "}
-            {Math.abs(bioAge.deltaYears).toFixed(1)} yrs
+            {formatYears(Math.abs(bioAge.deltaYears))} yrs
           </span>
         )}
       </div>
@@ -63,7 +55,7 @@ export default function BioAgeCard() {
                   className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full font-semibold text-[13px]"
                   style={{ background: "var(--opt-soft)", color: "var(--opt-d)" }}
                 >
-                  ↓ {Math.abs(bioAge.deltaYears).toFixed(1)} yrs younger
+                  ↓ {formatYears(Math.abs(bioAge.deltaYears))} yrs younger
                 </div>
               )}
               {bioAge.chronologicalYears !== null && (

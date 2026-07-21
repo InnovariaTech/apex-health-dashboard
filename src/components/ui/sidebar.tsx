@@ -195,7 +195,12 @@ const Sidebar = React.forwardRef((
         )} />
       <div
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex",
+          // Height comes from `inset-y-0` (top:0/bottom:0), NOT `h-svh`:
+          // viewport units don't divide by CSS `zoom`, so `h-svh` renders the
+          // fixed sidebar taller than the screen under viewport-scaling and
+          // clips its footer. `inset-y-0` computes height correctly at any zoom
+          // and is identical to `h-svh` at zoom = 1.
+          "fixed inset-y-0 z-10 hidden w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",

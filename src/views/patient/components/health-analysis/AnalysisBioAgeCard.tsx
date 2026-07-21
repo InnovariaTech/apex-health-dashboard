@@ -1,11 +1,10 @@
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, ArrowRight, ArrowUp, Sparkles } from "lucide-react";
-import { useAllPatientSummaries } from "@/hooks/ai-agent/useaiSummary";
 import type { BiologicalAge } from "@/types/ai-agent/ai_summary_types";
 import { createPageUrl } from "@/utils";
 import { BodyModel3D } from "@/components/hologram";
 import BioAgeScale from "./BioAgeScale";
+import { STATIC_BIO_AGE } from "./staticBioAge";
 
 /**
  * Biological age card matching the mockup's `.bio-age-card`.
@@ -17,17 +16,14 @@ import BioAgeScale from "./BioAgeScale";
  *   - .bio-num .unit: 16px / ink-3 / weight 500
  *   - .bio-delta-large: opt-soft bg, opt color, mono 11.5/700, padding 5/11
  *   - .bio-foot: mono 10.5px / ink-3, top border, trend-vals colored ink
+ *
+ * Figures come from `STATIC_BIO_AGE`, not the summaries API — see that module.
  */
 export default function AnalysisBioAgeCard() {
-  const summariesQuery = useAllPatientSummaries();
+  const bioAge = STATIC_BIO_AGE;
 
-  const bioAge = useMemo<BiologicalAge | null>(() => {
-    const items = summariesQuery.data?.items ?? [];
-    return items.find((s) => s.report)?.report?.biologicalAge ?? null;
-  }, [summariesQuery.data]);
-
-  const hasAnalysis = (summariesQuery.data?.items?.length ?? 0) > 0;
-  const available = bioAge?.available === true;
+  const hasAnalysis = true;
+  const available = bioAge.available === true;
 
   return (
     <div
@@ -88,7 +84,7 @@ function BioAgeBody({ bioAge }: { bioAge: BiologicalAge }) {
               }}
             >
               <ArrowDown className="w-3 h-3" strokeWidth={2.4} />
-              {Math.abs(delta).toFixed(1)} yrs younger
+              {formatYears(Math.abs(delta))} yrs younger
             </span>
           )}
           {delta !== null && delta > 0 && (
@@ -104,7 +100,7 @@ function BioAgeBody({ bioAge }: { bioAge: BiologicalAge }) {
               }}
             >
               <ArrowUp className="w-3 h-3" strokeWidth={2.4} />
-              {delta.toFixed(1)} yrs older
+              {formatYears(delta)} yrs older
             </span>
           )}
           {chrono !== null && (
@@ -389,7 +385,7 @@ function HeadDelta({ deltaYears }: { deltaYears: number }) {
       ) : (
         <ArrowDown className="w-3 h-3" strokeWidth={2.4} />
       )}
-      {Math.abs(deltaYears).toFixed(1)} yrs
+      {formatYears(Math.abs(deltaYears))} yrs
     </div>
   );
 }
