@@ -11,9 +11,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
- New Ui/
- /New Ui/*
- /New Ui/*
+# Design mockups and internal API docs — kept locally, not published.
+# NOTE: these patterns must start at column 0. Leading whitespace is
+# significant in .gitignore, so " New Ui/" (the previous value) only ever
+# matched a directory literally named " New Ui" and never took effect.
+/New Ui/
+/docs/
 
 node_modules
 dist
