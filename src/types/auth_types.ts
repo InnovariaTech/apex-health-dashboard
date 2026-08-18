@@ -12,10 +12,18 @@ export interface LoginPayload {
   password: string;
 }
 
+/**
+ * Body accepted by `POST /api/auth/signup`.
+ *
+ * Deliberately narrow: the endpoint takes only these three keys. It has no
+ * name or phone field, so those are not collected at signup.
+ *
+ * `role` is accepted by the request schema but ignored by the service —
+ * signup always creates a `patient`.
+ */
 export interface SignupPayload {
-  full_name?: string;
   email: string;
-  phone?: string;
+  /** Minimum 8 characters (backend rule). */
   password: string;
   role?: string;
 }

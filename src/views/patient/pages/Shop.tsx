@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  ACC,
-  TABS,
-  type AccentKey,
-  type ShopProduct,
-  type ShopSection,
-  type ShopTab,
-  type TabIconKey,
-} from "@/data/shop/apexShopCatalog";
+import { ACC } from "@/data/shop/apexShopCatalog";
+import { useShopCatalog } from "@/hooks/shop/useShopCatalog";
+import type {
+  AccentKey,
+  ShopProduct,
+  ShopSection,
+  ShopTab,
+  TabIconKey,
+} from "@/types/shop/liveCatalog_types";
 import "./apexShop.css";
 
 /**
@@ -21,7 +21,12 @@ import "./apexShop.css";
  */
 
 export default function Shop() {
-  const [activeTab, setActiveTab] = useState<string>(TABS[0]!.id);
+  const { data: tabs = [], isLoading, isError, refetch, isFetching } = useShopCatalog();
+  const [activeTab, setActiveTab] = useState<string>("");
+
+  // The catalog is fetched, so the active tab can't reference a hard-coded
+  // first tab — fall back to the first one the server returned.
+  const activeId = activeTab || tabs[0]?.id || "";
 
   return (
     <div className="apex-shop p-4 md:p-9 max-w-[1640px] mx-auto bg-background min-h-screen">
@@ -37,35 +42,86 @@ export default function Shop() {
 
       <div className="shop-head-rule" />
 
-      {/* Tabs */}
-      <div className="tabs" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === t.id}
-            className={`tab${activeTab === t.id ? " active" : ""}`}
-            onClick={() => {
-              setActiveTab(t.id);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          >
-            <TabIcon name={t.icon} />
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {isLoading ? (
+        <ShopState kind="loading" />
+      ) : isError ? (
+        <ShopState kind="error" onRetry={() => refetch()} busy={isFetching} />
+      ) : tabs.length === 0 ? (
+        <ShopState kind="empty" />
+      ) : (
+        <>
+          {/* Tabs */}
+          <div className="tabs" role="tablist">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={activeId === t.id}
+                className={`tab${activeId === t.id ? " active" : ""}`}
+                onClick={() => {
+                  setActiveTab(t.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                <TabIcon name={t.icon} />
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-      {/* Panels */}
-      {TABS.map((t) => (
-        <div
-          key={t.id}
-          className={`panel${activeTab === t.id ? " active" : ""}`}
-        >
-          {activeTab === t.id ? <TabPanel tab={t} /> : null}
-        </div>
-      ))}
+          {/* Panels */}
+          {tabs.map((t) => (
+            <div key={t.id} className={`panel${activeId === t.id ? " active" : ""}`}>
+              {activeId === t.id ? <TabPanel tab={t} /> : null}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Loading / empty / error states ────────────────────────────────────────
+
+function ShopState({
+  kind,
+  onRetry,
+  busy,
+}: {
+  kind: "loading" | "empty" | "error";
+  onRetry?: () => void;
+  busy?: boolean;
+}) {
+  if (kind === "loading") {
+    return (
+      <div className="shop-state" role="status" aria-live="polite">
+        <span className="shop-spinner" aria-hidden="true" />
+        <p className="shop-state-title">Loading the shop…</p>
+      </div>
+    );
+  }
+  if (kind === "empty") {
+    return (
+      <div className="shop-state">
+        <p className="shop-state-title">The shop is being updated</p>
+        <p className="shop-state-sub">
+          New products are on their way — check back soon.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="shop-state">
+      <p className="shop-state-title">We couldn’t load the shop</p>
+      <p className="shop-state-sub">
+        Something went wrong reaching the store. Please try again.
+      </p>
+      {onRetry ? (
+        <button type="button" className="shop-retry" onClick={onRetry} disabled={busy}>
+          {busy ? "Retrying…" : "Try again"}
+        </button>
+      ) : null}
     </div>
   );
 }
