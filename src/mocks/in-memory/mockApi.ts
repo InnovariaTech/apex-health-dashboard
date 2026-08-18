@@ -148,18 +148,16 @@ export const mockAuth = {
     return Promise.resolve({ user: { ...user }, requiredOtp: false });
   },
   verifyPortalOtp: () => Promise.resolve({ otpVerified: true }),
-  // Mirrors the http contract: the real endpoint takes only email/password
-  // (+ an ignored role) and has no name or phone field.
-  signup: ({ email, password }) => {
+  signup: ({ full_name, email, phone, password }) => {
     const normalizedEmail = String(email || "").trim().toLowerCase();
-    if (!normalizedEmail || !password) return Promise.reject(new Error("invalid_payload"));
+    if (!normalizedEmail || !full_name) return Promise.reject(new Error("invalid_payload"));
     const exists = initialUsers.some((u) => u.email.toLowerCase() === normalizedEmail);
     if (exists) return Promise.reject(new Error("email_exists"));
 
     const newUser = {
       email: normalizedEmail,
-      full_name: "",
-      phone: "",
+      full_name: String(full_name).trim(),
+      phone: phone || "",
       password: password || "",
       role: "user",
       current_program_id: "wp1",

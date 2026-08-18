@@ -22,14 +22,14 @@ import { useAllPatientSummaries } from "@/hooks/ai-agent/useaiSummary";
 import { format, parseISO } from "date-fns";
 
 /**
- * When `true`, hides biomarkers that don't have BOTH a low-normal and a
- * high-normal bound — which also hides one-directional markers
- * (higher-/lower-is-better, e.g. CRP, HbA1c, triglycerides, eGFR, HDL).
- *
- * Set to `false`: every tracked marker is shown regardless of range, so
- * one-directional and range-less markers appear alongside two-sided ones.
+ * Hide biomarkers that don't have BOTH a low-normal and a high-normal bound.
+ * Requires the resolved registry range to carry a two-sided normal range
+ * (`normalMin` AND `normalMax`). This intentionally also hides one-directional
+ * markers (higher-/lower-is-better, e.g. CRP, HbA1c, triglycerides, eGFR, HDL)
+ * since they only define one side. Flip to `false` to show every tracked
+ * marker regardless of range.
  */
-const HIDE_MARKERS_WITHOUT_NORMAL_RANGE = false;
+const HIDE_MARKERS_WITHOUT_NORMAL_RANGE = true;
 
 function hasTwoSidedNormalRange(item: BiomarkerSummaryItem): boolean {
   const range = resolveRegistryRange(item);

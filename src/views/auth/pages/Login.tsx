@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
 import { useLoginMutation, useVerifyOtp } from "@/hooks/auth/useAuth";
@@ -29,13 +29,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  // One-shot confirmation handed over by /signup on success. Cleared as soon
-  // as the user submits, so it can't linger over a later error.
-  const location = useLocation();
-  const routeNotice =
-    (location.state as { notice?: string } | null)?.notice ?? "";
-  const [notice, setNotice] = useState(routeNotice);
-
   // OTP step state — populated only when the login response carries
   // `requiredOtp: true`. We hold the authenticated user locally so that on
   // verify-success we can hydrate the auth query without a round-trip.
@@ -46,7 +39,6 @@ export default function Login() {
   const handleCredentialsSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setNotice("");
 
     try {
       const result = await loginMutation.mutateAsync(form);
@@ -134,19 +126,6 @@ export default function Login() {
                       </Alert>
                     ) : null}
 
-                    {notice && !error ? (
-                      <Alert
-                        style={{
-                          background: "var(--opt-soft)",
-                          borderColor: "var(--opt)",
-                        }}
-                      >
-                        <AlertDescription style={{ color: "var(--opt-d)" }}>
-                          {notice}
-                        </AlertDescription>
-                      </Alert>
-                    ) : null}
-
                     <form className="space-y-4" onSubmit={handleCredentialsSubmit}>
                       <div className="space-y-1.5">
                         <Label htmlFor="email">Email</Label>
@@ -211,16 +190,6 @@ export default function Login() {
                         {loginMutation.isPending ? "Signing in..." : "Sign in"}
                       </Button>
                     </form>
-
-                    <p className="text-[13px] text-center text-ink-2 pt-2">
-                      Don't have an account?{" "}
-                      <Link
-                        to="/signup"
-                        className="font-medium text-primary hover:underline"
-                      >
-                        Create one
-                      </Link>
-                    </p>
                   </CardContent>
                 </>
               ) : (

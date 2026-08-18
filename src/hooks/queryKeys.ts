@@ -2,9 +2,6 @@ export const queryKeys = {
   auth: {
     user: () => ["auth", "user"] as const,
   },
-  shop: {
-    catalog: () => ["shop", "catalog"] as const,
-  },
   careValidate: {
     cases: (
       includePayments = false,

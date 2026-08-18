@@ -1,6 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Check, X } from "lucide-react";
 import { useSignupMutation } from "@/hooks/auth/useAuth";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,59 +7,34 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import {
-  PASSWORD_RULES,
-  isPasswordValid,
-} from "@/views/auth/utils/passwordRules";
-import {
-  extractApiErrorDetails,
-  extractDisplayErrorMessage,
-} from "@/utils/errorHandler";
+import { extractApiErrorDetails, extractDisplayErrorMessage } from "@/utils/errorHandler";
 
 export default function Signup() {
   const navigate = useNavigate();
   const signupMutation = useSignupMutation();
   const [form, setForm] = useState({
+    full_name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
 
-  // Rule feedback appears once the user starts typing, so an untouched form
-  // isn't a wall of red crosses.
-  const passwordTouched = form.password.length > 0;
-  const passwordOk = isPasswordValid(form.password);
-  const confirmTouched = form.confirmPassword.length > 0;
-  const passwordsMatch =
-    form.password === form.confirmPassword && form.password.length > 0;
-  const canSubmit =
-    form.email.trim().length > 0 && passwordOk && passwordsMatch;
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
-    if (!passwordOk) {
-      setError("Your password doesn't meet all the requirements yet.");
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
-    if (!passwordsMatch) {
+    if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
     try {
-      await signupMutation.mutateAsync({
-        email: form.email.trim(),
-        password: form.password,
-      });
-      // Signup issues no CareValidate portal session — the user has to sign in
-      // to get one, so hand off to /login rather than the dashboard.
-      navigate("/login", {
-        replace: true,
-        state: { notice: "Account created. Please sign in to continue." },
-      });
+      await signupMutation.mutateAsync(form);
+      navigate("/");
     } catch (err: unknown) {
       const details = extractApiErrorDetails(err);
       console.error("Signup failed", details);
@@ -98,6 +72,18 @@ export default function Signup() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
+              <Label htmlFor="full_name">Full name</Label>
+              <Input
+                id="full_name"
+                placeholder="Jane Smith"
+                value={form.full_name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setForm((p) => ({ ...p, full_name: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -111,39 +97,31 @@ export default function Signup() {
                 required
               />
             </div>
-
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone (optional)</Label>
+              <Input
+                id="phone"
+                placeholder="+1 (555) 123-4567"
+                value={form.phone}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setForm((p) => ({ ...p, phone: e.target.value }))
+                }
+              />
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="new-password"
-                placeholder="Choose a strong password"
+                placeholder="At least 6 characters"
                 value={form.password}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setForm((p) => ({ ...p, password: e.target.value }))
                 }
-                aria-describedby="password-rules"
                 required
               />
-
-              {/* Live requirement checklist — re-evaluates on every keystroke. */}
-              <ul
-                id="password-rules"
-                aria-live="polite"
-                className="space-y-1.5 pt-2 m-0 list-none"
-              >
-                {PASSWORD_RULES.map((rule) => (
-                  <RuleRow
-                    key={rule.id}
-                    label={rule.label}
-                    met={rule.test(form.password)}
-                    touched={passwordTouched}
-                  />
-                ))}
-              </ul>
             </div>
-
             <div className="space-y-1.5">
               <Label htmlFor="confirm-password">Confirm password</Label>
               <Input
@@ -155,30 +133,15 @@ export default function Signup() {
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setForm((p) => ({ ...p, confirmPassword: e.target.value }))
                 }
-                aria-describedby="confirm-rule"
                 required
               />
-              <ul
-                id="confirm-rule"
-                aria-live="polite"
-                className="space-y-1.5 pt-2 m-0 list-none"
-              >
-                <RuleRow
-                  label="Passwords match"
-                  met={passwordsMatch}
-                  touched={confirmTouched}
-                />
-              </ul>
             </div>
-
             <Button
               className="w-full"
               type="submit"
-              disabled={signupMutation.isPending || !canSubmit}
+              disabled={signupMutation.isPending}
             >
-              {signupMutation.isPending
-                ? "Creating account..."
-                : "Create account"}
+              {signupMutation.isPending ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
@@ -193,53 +156,5 @@ export default function Signup() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-/**
- * One requirement line. Before the field is touched it stays neutral; after
- * that it reads green (met) or muted-red (not yet met).
- */
-function RuleRow({
-  label,
-  met,
-  touched,
-}: {
-  label: string;
-  met: boolean;
-  touched: boolean;
-}) {
-  const color = !touched
-    ? "var(--ink-3)"
-    : met
-      ? "var(--opt-d)"
-      : "var(--ink-2)";
-
-  return (
-    <li
-      className="flex items-center gap-2 font-sans"
-      style={{ fontSize: 12, color, letterSpacing: "-0.005em" }}
-    >
-      <span
-        className="grid place-items-center rounded-full shrink-0"
-        style={{
-          width: 15,
-          height: 15,
-          background: !touched
-            ? "var(--surface-2)"
-            : met
-              ? "var(--opt-soft)"
-              : "transparent",
-          border: touched && !met ? "1px solid var(--line)" : "none",
-        }}
-      >
-        {touched && met ? (
-          <Check className="w-2.5 h-2.5" strokeWidth={3} />
-        ) : touched ? (
-          <X className="w-2.5 h-2.5" strokeWidth={2.5} />
-        ) : null}
-      </span>
-      {label}
-    </li>
   );
 }
