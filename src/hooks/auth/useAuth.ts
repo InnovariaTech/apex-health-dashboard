@@ -12,11 +12,19 @@ import type {
 } from "@/types/auth_types";
 import { queryKeys } from "@/hooks/queryKeys";
 import { useNavigate } from "react-router-dom";
+import { getImpersonation } from "@/lib/impersonation";
 
 export function useAuthUser() {
   return useQuery<AuthUser | null>({
     queryKey: queryKeys.auth.user(),
-    queryFn: () => api.auth.me(),
+    // While impersonating, identity comes from the impersonation session
+    // (persisted client-side) — `/auth/me` doesn't report the viewed patient,
+    // so calling it would log the app out from under the read-only view.
+    queryFn: () => {
+      const imp = getImpersonation();
+      if (imp) return imp.user;
+      return api.auth.me();
+    },
     staleTime: 5 * 60 * 1000,
     retry: false,
   });
@@ -71,13 +79,19 @@ export function useResetPassword() {
   });
 }
 
+/**
+ * Create an account.
+ *
+ * Note what this deliberately does *not* do: it never writes the new user
+ * into the auth query. Signup sets Apex auth cookies but issues no
+ * CareValidate portal session, so marking the app "authenticated" here would
+ * land the user on a dashboard whose profile/cases/documents calls all fail.
+ * Only `login` establishes the portal session (see the `requiredOtp` flow),
+ * so the Signup screen redirects to /login on success.
+ */
 export function useSignupMutation() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: SignupPayload) => api.auth.signup(payload),
-    onSuccess: (user) => {
-      queryClient.setQueryData(queryKeys.auth.user(), user);
-    },
   });
 }
 

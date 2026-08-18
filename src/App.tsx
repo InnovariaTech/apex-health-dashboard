@@ -5,7 +5,10 @@ import { pagesConfig } from "./pages.config";
 import PageNotFound from "./lib/PageNotFound";
 import { useAuth } from "@/lib/AuthContext";
 import Login from "@/views/auth/pages/Login";
+import Signup from "@/views/auth/pages/Signup";
 import ResetPassword from "@/views/auth/pages/ResetPassword";
+import ImpersonateExchange from "@/views/auth/pages/ImpersonateExchange";
+import ImpersonationBanner from "@/components/ImpersonationBanner";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
 import SyncDevices from "@/views/patient/pages/SyncDevices";
@@ -30,6 +33,13 @@ const LayoutWrapper = ({ children }: { children: ReactNode }) =>
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated } = useAuth();
 
+  // Admin "view as user" entry — must run BEFORE the auth gate, since we arrive
+  // with only a one-time code and no session yet. It exchanges the code, then
+  // navigates to "/" (this component re-renders and falls through normally).
+  if (typeof window !== "undefined" && window.location.pathname === "/impersonate") {
+    return <ImpersonateExchange />;
+  }
+
   if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -43,17 +53,19 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        {/* Signup is intentionally hidden until the admin-creates-patient
-            flow is fully wired into the UI. Send any /signup hits to login
-            so the page can't be reached externally. */}
-        <Route path="/signup" element={<Navigate to="/login" replace />} />
+        {/* Self-serve signup. `POST /api/auth/signup` always creates a
+            patient; the page redirects to /login on success because signup
+            issues no CareValidate portal session. */}
+        <Route path="/signup" element={<Signup />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
 
   return (
-    <Routes>
+    <>
+      <ImpersonationBanner />
+      <Routes>
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
       {/* Lets logged-in users hitting the reset-password email link reach
@@ -184,7 +196,8 @@ const AuthenticatedApp = () => {
         }
       />
       <Route path="*" element={<PageNotFound />} />
-    </Routes>
+      </Routes>
+    </>
   );
 };
 

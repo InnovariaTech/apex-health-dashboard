@@ -44,11 +44,12 @@ function getRequiredOtpFromResponse(data: unknown): boolean {
 
 export function createAuthApi(): AuthApi {
   return {
-    async signup({ full_name, email, phone, password, role = "patient" }: SignupPayload) {
+    async signup({ email, password, role = "patient" }: SignupPayload) {
+      // Only these three keys — the endpoint's schema defines no name/phone
+      // field, and `role` is ignored server-side (signup always makes a
+      // patient). Sending extra keys risks a 400 on a strict schema.
       const res = await axiosService.post<AuthResponseBody>(`${AUTH_BASE}/signup`, {
-        full_name,
         email,
-        phone,
         password,
         role,
       });

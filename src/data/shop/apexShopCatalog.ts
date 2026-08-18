@@ -89,89 +89,26 @@ export const PHOTO: Record<string, { src: string; bg: string }> = {
 };
 
 // ─── Types ─────────────────────────────────────────────────────────────────
+// The wire contract lives in `@/types/shop/liveCatalog_types` and is shared
+// with the live `GET /api/shop/catalog` read. Re-exported here so existing
+// imports from this data file keep working.
 
-export interface ShopBadge {
-  text: string;
-  color: "blue" | "red" | "green" | "purple" | "soon";
-}
+export type {
+  AccentKey,
+  TabIconKey,
+  ShopBadge,
+  ShopFeature,
+  ShopProduct,
+  ShopSection,
+  ShopPill,
+  ShopTab,
+} from "@/types/shop/liveCatalog_types";
 
-export interface ShopFeature {
-  name: string;
-  desc: string;
-  /** `false` = not included (renders a dash instead of a check). */
-  inc?: boolean;
-}
-
-export interface ShopProduct {
-  name?: string;
-  desc: string;
-  img?: string;
-  tile?: string;
-  fit?: "cover" | "contain" | "poster" | "fill";
-  price?: string;
-  per?: string;
-  topPrice?: string;
-  topNote?: string;
-  badge?: ShopBadge;
-  cta?: string;
-  clickable?: boolean;
-  soon?: string;
-  features?: ShopFeature[];
-  /** HRT "Don't know what you want?" intro card. */
-  type?: "intro" | "plan";
-  lead?: string;
-  lead2?: string;
-  /**
-   * External store / checkout URL for the "Shop" / CTA button.
-   * Empty string = not yet connected (button renders inert).
-   */
-  externalUrl: string;
-}
-
-export interface ShopSection {
-  id: string;
-  accent: AccentKey;
-  badge: string;
-  title: string;
-  sub: string;
-  /** Optional right-aligned action button (e.g. "Take the quiz"). */
-  action?: string;
-  /** External URL for the section action button. Empty = inert. */
-  actionUrl?: string;
-  products: ShopProduct[];
-}
-
-export interface ShopPill {
-  label: string;
-  sec: string;
-}
-
-export type TabIconKey =
-  | "medical"
-  | "supplements"
-  | "memberships"
-  | "programs"
-  | "training";
-
-export interface ShopTab {
-  id: string;
-  label: string;
-  icon: TabIconKey;
-  planIcon?: "memberships" | "programs" | "training";
-  pills?: ShopPill[];
-  sections: ShopSection[];
-}
-
-export type AccentKey =
-  | "blue"
-  | "purple"
-  | "teal"
-  | "pink"
-  | "orange"
-  | "green"
-  | "red"
-  | "grey"
-  | "black";
+import type {
+  AccentKey,
+  ShopProduct,
+  ShopTab,
+} from "@/types/shop/liveCatalog_types";
 
 // Accent key → CSS color (mirrors `ACC` in the demo's app.js).
 export const ACC: Record<AccentKey, string> = {
