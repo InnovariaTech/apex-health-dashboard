@@ -1,7 +1,9 @@
 // @ts-nocheck
-import React from "react";
+import React, { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { InlineText } from "./chatInline";
+import { useShopCatalog } from "@/hooks/shop/useShopCatalog";
+import { flattenProducts, matchShopProduct } from "./shopMatch";
 import type {
   ChatCalloutBlock,
   ChatIntroBlock,
@@ -258,6 +260,13 @@ function CalloutBlock({ block }: { block: ChatCalloutBlock }) {
 
 function ProductRecBlock({ block }: { block: ChatProductRecBlock }) {
   const items = block.items || [];
+
+  // The AI sends only a generic supplement name (no url/image/price). Pull the
+  // storefront catalog and map each item to a real product so we can show an
+  // image + price + Buy link. Unmatched items render as a plain card.
+  const { data: tabs = [] } = useShopCatalog();
+  const products = useMemo(() => flattenProducts(tabs), [tabs]);
+
   // No items → skip the whole group rather than render an empty card.
   if (items.length === 0) return null;
 
@@ -266,31 +275,92 @@ function ProductRecBlock({ block }: { block: ChatProductRecBlock }) {
       {block.label ? <div className="rec-cat">{block.label}</div> : null}
       <div className="rec-items">
         {items.map((it, i) => (
-          <div className="rec-card" key={`r${i}`}>
-            <div className="rec-head">
-              <span className="rec-name">
-                <InlineText text={it.name} />
-              </span>
-              {it.dose ? <span className="rec-dose">{it.dose}</span> : null}
-            </div>
-            {it.rationale ? (
-              <div className="rec-why">
-                <InlineText text={it.rationale} />
-              </div>
-            ) : null}
-            {it.caution ? (
-              <div className="rec-caution">
-                <span className="rec-caution-ic">
-                  <Icon name="warn" />
-                </span>
-                <span>
-                  <InlineText text={it.caution} />
-                </span>
-              </div>
-            ) : null}
-          </div>
+          <RecCard
+            key={`r${i}`}
+            item={it}
+            product={matchShopProduct(it.name, products)}
+          />
         ))}
       </div>
+    </div>
+  );
+}
+
+function RecCard({ item: it, product }) {
+  // Prefer the card the backend embeds on the item (exact); fall back to a
+  // name-matched storefront product for older responses that omit it.
+  const card = it.card || product || null;
+  const img = card?.img || "";
+  const tile = card?.tile || "";
+  const price = card?.price || "";
+  const per = card?.per || "";
+  // "buyable" only when there's a real checkout URL ("" = not connected yet).
+  const buyUrl = card?.externalUrl ? card.externalUrl : "";
+  const cta = card?.cta || "Shop";
+  const fit = card?.fit === "contain" ? "contain" : "cover";
+  const hasImg = Boolean(img);
+
+  return (
+    <div className={`rec-card${card ? " rec-card-shop" : ""}`}>
+      <div className="rec-body">
+        {hasImg || tile ? (
+          <div className="rec-thumb" style={tile ? { background: tile } : undefined}>
+            {hasImg ? (
+              <img src={img} alt="" loading="lazy" className={fit} />
+            ) : null}
+          </div>
+        ) : null}
+        <div className="rec-main">
+          <div className="rec-head">
+            <span className="rec-name">
+              <InlineText text={it.name} />
+            </span>
+            {it.dose ? <span className="rec-dose">{it.dose}</span> : null}
+          </div>
+          {it.rationale ? (
+            <div className="rec-why">
+              <InlineText text={it.rationale} />
+            </div>
+          ) : null}
+          {it.caution ? (
+            <div className="rec-caution">
+              <span className="rec-caution-ic">
+                <Icon name="warn" />
+              </span>
+              <span>
+                <InlineText text={it.caution} />
+              </span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {card ? (
+        <div className="rec-foot">
+          {price ? (
+            <span className="rec-price">
+              {price}
+              {per ? <span className="rec-per">{per}</span> : null}
+            </span>
+          ) : (
+            <span />
+          )}
+          {buyUrl ? (
+            <a
+              className="rec-buy"
+              href={buyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {cta}
+            </a>
+          ) : (
+            <span className="rec-buy is-inert" aria-disabled="true">
+              Coming soon
+            </span>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

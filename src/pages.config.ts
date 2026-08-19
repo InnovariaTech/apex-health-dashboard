@@ -22,6 +22,7 @@ import TrainerChat from "./views/patient/pages/TrainerChat";
 import Habits from "./views/patient/pages/Habits";
 import Appointments from "./views/patient/pages/Appointments";
 import Wearables from "./views/patient/pages/Wearables";
+import Visits from "./views/patient/pages/Visits";
 import __Layout from "./layouts/AppLayout";
 
 export type PageComponent = ComponentType<any>;
@@ -47,6 +48,7 @@ export const PAGES: Record<string, PageComponent> = {
   Habits,
   Appointments,
   Wearables,
+  Visits,
 };
 
 export interface PagesConfig {

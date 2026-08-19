@@ -19,6 +19,8 @@ import LabKits from "@/views/patient/pages/LabKits";
 import Shop from "@/views/patient/pages/Shop";
 import MyTreatments from "@/views/patient/pages/MyTreatments";
 import MyCaseDetails from "@/views/patient/pages/MyCaseDetails";
+import VisitDetails from "@/views/patient/pages/VisitDetails";
+import BelugaIntake from "@/views/patient/pages/BelugaIntake";
 import Referral from "@/views/patient/pages/Referral";
 import Rewards from "@/views/patient/pages/Rewards";
 import Sleep from "@/views/patient/pages/Sleep";
@@ -168,6 +170,22 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper>
             <MyCaseDetails />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/Visits/new"
+        element={
+          <LayoutWrapper>
+            <BelugaIntake />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/Visits/:masterId"
+        element={
+          <LayoutWrapper>
+            <VisitDetails />
           </LayoutWrapper>
         }
       />

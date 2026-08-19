@@ -86,14 +86,32 @@ export interface ChatCalloutBlock {
   text: string;
 }
 
+/** Storefront card the backend embeds on a `product_rec` item when the
+    suggestion maps to a real shop product. `externalUrl` is the checkout link
+    (`""` = not connected yet → render inert). All commerce fields optional. */
+export interface ChatProductCard {
+  slug?: string;
+  img?: string;
+  /** Background colour behind the image tile. */
+  tile?: string;
+  price?: string;
+  /** Price suffix, e.g. "/mo". */
+  per?: string;
+  sectionTitle?: string;
+  externalUrl?: string;
+}
+
 /** One supplement suggestion inside a `product_rec` block (§4a).
     `dose`/`rationale`/`caution` are optional — guard for absence.
-    Names are generic (no brands); the backend is the sole source. */
+    When the suggestion maps to a shop product the backend attaches `slug` +
+    `card` (image/price/buy link); older responses may omit them. */
 export interface ChatProductRecItem {
   name: string;
   dose?: string;
   rationale?: string;
   caution?: string;
+  slug?: string;
+  card?: ChatProductCard;
 }
 
 /** Supplement suggestions for ONE category (§4a). `label` is the

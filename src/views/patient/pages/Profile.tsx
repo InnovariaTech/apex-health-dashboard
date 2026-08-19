@@ -7,6 +7,8 @@ import {
   useUpdateProfileUserEmail,
 } from "@/hooks/care-validate/useProfile";
 import { buildUpdateEmailPayload } from "@/api/care-validate/profile";
+import { COUNTRIES, normalizeCountryCode } from "@/data/countries";
+import { US_STATES, normalizeStateCode } from "@/data/usStates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
@@ -26,6 +28,7 @@ const EMPTY_FORM = {
   lastName: "",
   dob: "",
   gender: "MALE",
+  assignedSex: "",
   phoneNumber: "",
   address: "",
   address2: "",
@@ -139,11 +142,14 @@ export default function Profile() {
       phoneNumber: String(user.phone || user.phoneNumber || ""),
       dob: normalizeDate(String(user.date_of_birth || user.dateOfBirth || user.dob || "")),
       gender: String(user.gender || "MALE"),
+      assignedSex: String(user.assignedSex || user.assigned_sex || "").toLowerCase(),
       address: String(user.address || ""),
       address2: String(user.address2 || ""),
       city: String(user.city || ""),
-      state: String(user.state || ""),
-      country: String(user.country || "US"),
+      // Backend requires a 2-letter state code; coerce a legacy full name.
+      state: normalizeStateCode(String(user.state || "")),
+      // Backend requires a 2-letter ISO code; coerce a legacy full name.
+      country: normalizeCountryCode(String(user.country || "US")) || "US",
       postalCode: String(user.postalCode || user.postal_code || ""),
       allergies: String(user.allergies || ""),
       currentMedications: String(user.currentMedications || ""),
@@ -188,6 +194,7 @@ export default function Profile() {
     };
     addIfSet("dob", form.dob);
     addIfSet("gender", form.gender);
+    addIfSet("assignedSex", form.assignedSex);
     addIfSet("phoneNumber", form.phoneNumber);
     addIfSet("address", form.address);
     addIfSet("address2", form.address2);
@@ -418,6 +425,21 @@ export default function Profile() {
                   placeholder="MALE / FEMALE / OTHER"
                 />
               </Field>
+              {/* Sex assigned at birth — required by the Beluga telehealth
+                  intake (distinct from Gender above; must be male/female). */}
+              <Field label="Sex assigned at birth">
+                <select
+                  value={form.assignedSex}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, assignedSex: e.target.value }))
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Select…</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </Field>
               <Field label="Language preferences">
                 <Input
                   value={form.languagePreferences}
@@ -458,16 +480,36 @@ export default function Profile() {
                 />
               </Field>
               <Field label="State">
-                <Input
+                {/* Stores the 2-letter USPS code; the backend (and Beluga)
+                    validate a 2-letter state code and reject full names. */}
+                <select
                   value={form.state}
                   onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
-                />
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Select a state…</option>
+                  {US_STATES.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Country">
-                <Input
+                {/* Stores the ISO alpha-2 code; the backend validates a
+                    2-letter code and rejects full names like "Pakistan". */}
+                <select
                   value={form.country}
                   onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
-                />
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Select a country…</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Postal code">
                 <Input

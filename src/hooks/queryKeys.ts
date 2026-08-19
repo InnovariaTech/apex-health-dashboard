@@ -5,6 +5,19 @@ export const queryKeys = {
   shop: {
     catalog: () => ["shop", "catalog"] as const,
   },
+  beluga: {
+    intakeRequirements: () => ["beluga", "intake-requirements"] as const,
+    pharmacies: (params: {
+      name?: string;
+      city?: string;
+      state?: string;
+      zip?: string;
+    }) => ["beluga", "pharmacies", params] as const,
+    visits: (statuses?: string[]) =>
+      ["beluga", "visits", statuses?.length ? [...statuses].sort() : "all"] as const,
+    visit: (masterId: string) => ["beluga", "visit", masterId] as const,
+    chat: (masterId: string) => ["beluga", "chat", masterId] as const,
+  },
   careValidate: {
     cases: (
       includePayments = false,

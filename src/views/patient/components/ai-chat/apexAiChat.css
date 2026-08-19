@@ -835,6 +835,75 @@
   stroke-width: 2.6;
 }
 
+/* ─── Shop-linked recommendation cards (matched to the storefront) ─── */
+.apex-ai-chat .rec-body {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.apex-ai-chat .rec-main {
+  flex: 1;
+  min-width: 0;
+}
+.apex-ai-chat .rec-thumb {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  background: var(--c-wash);
+  display: grid;
+  place-items: center;
+}
+.apex-ai-chat .rec-thumb img {
+  width: 100%;
+  height: 100%;
+}
+.apex-ai-chat .rec-thumb img.cover { object-fit: cover; }
+.apex-ai-chat .rec-thumb img.contain { object-fit: contain; }
+.apex-ai-chat .rec-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 1px solid var(--c-line);
+}
+.apex-ai-chat .rec-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+.apex-ai-chat .rec-per {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-ink-2);
+  margin-left: 2px;
+}
+.apex-ai-chat .rec-buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--c-ink);
+  border-radius: 8px;
+  padding: 7px 15px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+.apex-ai-chat .rec-buy:hover { opacity: 0.85; }
+.apex-ai-chat .rec-buy.is-inert {
+  background: var(--c-wash);
+  color: var(--c-ink-2);
+  border: 1px solid var(--c-line-2);
+  cursor: not-allowed;
+}
+
 /* ── response progress: live tag / completion cue ── */
 .apex-ai-chat .ai-live {
   display: inline-flex;

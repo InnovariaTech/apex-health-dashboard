@@ -21,6 +21,7 @@ import {
   ShoppingBag,
   Watch,
   Dna,
+  Stethoscope,
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
 
@@ -29,6 +30,7 @@ export const apexMdNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
   { title: "Health Analysis", url: createPageUrl("HealthAnalysis"), icon: Sparkles },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
+  { title: "Telehealth Visits", url: createPageUrl("Visits"), icon: Stethoscope },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   { title: "Genetics", url: createPageUrl("Genetics"), icon: Dna },
