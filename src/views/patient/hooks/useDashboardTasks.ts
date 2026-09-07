@@ -3,7 +3,10 @@ import { format, subDays } from "date-fns";
 import { useAppointments } from "@/hooks/trainerize/useAppointments";
 import { useBodyStatsRange } from "@/hooks/trainerize/useBodyStats";
 import { useTrainerizeLink } from "@/hooks/trainerize/useLinkage";
-import type { Appointment } from "@/types/trainerize/appointments_types";
+import {
+  toAppointmentRangeDateTime,
+  type Appointment,
+} from "@/types/trainerize/appointments_types";
 import type { BodyStatsRecord } from "@/types/trainerize/bodystats_types";
 import { createPageUrl } from "@/utils";
 
@@ -49,15 +52,17 @@ export function useDashboardTasks(): {
   const linkQuery = useTrainerizeLink();
   const linked = !!linkQuery.data;
 
-  const today = format(new Date(), "yyyy-MM-dd");
-  const weekAhead = format(
+  // Upstream expects `YYYY-MM-DD HH:MM:SS` (space-separated) for the range
+  // query — start at 00:00:00 today, end at 23:59:59 a week out.
+  const rangeStart = toAppointmentRangeDateTime(new Date());
+  const rangeEnd = toAppointmentRangeDateTime(
     new Date(Date.now() + WINDOW_DAYS * 24 * 60 * 60 * 1000),
-    "yyyy-MM-dd",
+    true,
   );
 
   const appointmentsQuery = useAppointments(
-    linked ? today : undefined,
-    linked ? weekAhead : undefined,
+    linked ? rangeStart : undefined,
+    linked ? rangeEnd : undefined,
   );
 
   // Body stats for the last 7 days — fanned out one date at a time by the

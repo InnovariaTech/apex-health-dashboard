@@ -49,6 +49,9 @@ export default function BelugaIntake() {
   const [consent, setConsent] = useState(false);
 
   const selectedType = findVisitType(visitType);
+  // Company-designated / staging pharmacy for this visit type. When present the
+  // pharmacy-search step is skipped and this id is sent as-is.
+  const fixedPharmacyId = selectedType?.pharmacyId;
 
   const goBack = () => (step === 0 ? navigate("/Visits") : setStep((s) => s - 1));
   const goNext = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
@@ -81,13 +84,16 @@ export default function BelugaIntake() {
         />
       )}
 
-      {step === 2 && (
-        <PharmacyStep
-          selected={pharmacy}
-          onSelect={setPharmacy}
-          onNext={goNext}
-        />
-      )}
+      {step === 2 &&
+        (fixedPharmacyId ? (
+          <FixedPharmacyStep pharmacyId={fixedPharmacyId} onNext={goNext} />
+        ) : (
+          <PharmacyStep
+            selected={pharmacy}
+            onSelect={setPharmacy}
+            onNext={goNext}
+          />
+        ))}
 
       {step === 3 && selectedType && (
         <DetailsStep
@@ -102,10 +108,11 @@ export default function BelugaIntake() {
         />
       )}
 
-      {step === 4 && selectedType && pharmacy && (
+      {step === 4 && selectedType && (pharmacy || fixedPharmacyId) && (
         <ReviewStep
           visitType={visitType}
           pharmacy={pharmacy}
+          fixedPharmacyId={fixedPharmacyId}
           medicationId={medicationId}
           answers={answers}
           consent={consent}
@@ -285,6 +292,29 @@ function TreatmentStep({
 
 // --- Step 2: pharmacy -------------------------------------------------------
 
+function FixedPharmacyStep({
+  pharmacyId,
+  onNext,
+}: {
+  pharmacyId: string;
+  onNext: () => void;
+}) {
+  return (
+    <StepCard title="Your pharmacy">
+      <p className="text-sm text-slate-600">
+        A pharmacy is already assigned for this visit
+        <span className="text-slate-400"> (#{pharmacyId})</span>. Your
+        prescription, if issued, will be sent there.
+      </p>
+      <div className="flex justify-end">
+        <Button onClick={onNext}>
+          Continue <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+    </StepCard>
+  );
+}
+
 function PharmacyStep({
   selected,
   onSelect,
@@ -411,13 +441,15 @@ function DetailsStep({
 function ReviewStep({
   visitType,
   pharmacy,
+  fixedPharmacyId,
   medicationId,
   answers,
   consent,
   onConsent,
 }: {
   visitType: string;
-  pharmacy: Pharmacy;
+  pharmacy: Pharmacy | null;
+  fixedPharmacyId: string | undefined;
   medicationId: string;
   answers: Record<string, string>;
   consent: boolean;
@@ -443,13 +475,15 @@ function ReviewStep({
     return out;
   }, [type, answers]);
 
+  const pharmacyId = fixedPharmacyId ?? (pharmacy ? String(pharmacy.PharmacyId) : "");
+
   const submit = async () => {
-    if (!type || !medication) return;
+    if (!type || !medication || !pharmacyId) return;
     setSubmitError(null);
     try {
       const result = await create.mutateAsync({
         visitType,
-        pharmacyId: String(pharmacy.PharmacyId),
+        pharmacyId,
         patientPreference: [medication.preference],
         ...(Object.keys(questions).length ? { questions } : {}),
         consentsSigned: true,
@@ -469,9 +503,13 @@ function ReviewStep({
         <Row label="Medication" value={medication?.label ?? "—"} />
         <Row
           label="Pharmacy"
-          value={`${pharmacy.StoreName} — ${[pharmacy.City, pharmacy.State]
-            .filter(Boolean)
-            .join(", ")}`}
+          value={
+            pharmacy
+              ? `${pharmacy.StoreName} — ${[pharmacy.City, pharmacy.State]
+                  .filter(Boolean)
+                  .join(", ")}`
+              : `Assigned pharmacy (#${pharmacyId})`
+          }
         />
       </dl>
 

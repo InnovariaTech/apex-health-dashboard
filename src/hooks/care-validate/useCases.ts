@@ -159,7 +159,7 @@ export function useCasesYearRolling(
     const seen = new Set<string>();
     const merged: CaseItem[] = [];
     for (const r of results) {
-      if (!r.data) continue;
+      if (!Array.isArray(r.data)) continue;
       for (const c of r.data) {
         if (!c?.id || seen.has(c.id)) continue;
         seen.add(c.id);

@@ -25,10 +25,10 @@ const FIVE_MIN = 5 * 60 * 1000;
 export function useAppointments(startDate?: string, endDate?: string) {
   return useQuery({
     queryKey: queryKeys.trainerize.appointments(startDate, endDate),
-    queryFn: () =>
-      listAppointments(
-        startDate && endDate ? { startDate, endDate } : {},
-      ),
+    // The upstream endpoint requires both dates; never fire without them
+    // (a param-less request 400s with "Required startDate, endDate").
+    queryFn: () => listAppointments({ startDate: startDate!, endDate: endDate! }),
+    enabled: Boolean(startDate) && Boolean(endDate),
     staleTime: 30 * 1000,
   });
 }

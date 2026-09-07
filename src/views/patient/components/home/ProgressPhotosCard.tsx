@@ -27,11 +27,13 @@ const TILE_COUNT = 6;
 
 export default function ProgressPhotosCard() {
   const linkQuery = useTrainerizeLink();
-  if (!linkQuery.isLoading && !linkQuery.data) return null;
+  const linked = Boolean(linkQuery.data);
 
   const endDate = format(new Date(), "yyyy-MM-dd");
   const startDate = format(subDays(new Date(), RANGE_DAYS), "yyyy-MM-dd");
-  const photosQuery = usePhotos(startDate, endDate);
+  // Only fetch photos once we know the user is linked — but the hook is still
+  // called every render, so hook order stays stable.
+  const photosQuery = usePhotos(startDate, endDate, linked);
 
   const tiles = useMemo<Photo[]>(() => {
     const all = photosQuery.data?.photos ?? [];
@@ -40,6 +42,11 @@ export default function ProgressPhotosCard() {
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
       .slice(0, TILE_COUNT);
   }, [photosQuery.data]);
+
+  // Hidden when the user has no Trainerize link. This early return MUST stay
+  // below every hook above — returning before them changes the hook count
+  // between renders and throws React error #300 once the link query settles.
+  if (!linkQuery.isLoading && !linked) return null;
 
   // Before/after picks the oldest + newest in the visible set.
   const before = tiles[tiles.length - 1] ?? null;

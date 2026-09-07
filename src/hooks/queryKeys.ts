@@ -18,6 +18,10 @@ export const queryKeys = {
     visit: (masterId: string) => ["beluga", "visit", masterId] as const,
     chat: (masterId: string) => ["beluga", "chat", masterId] as const,
   },
+  intake: {
+    /** Current step for a submission token (the running "fold"). */
+    step: (token: string) => ["intake", "step", token] as const,
+  },
   careValidate: {
     cases: (
       includePayments = false,

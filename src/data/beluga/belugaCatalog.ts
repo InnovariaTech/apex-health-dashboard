@@ -39,6 +39,12 @@ export interface VisitTypeOption {
   description: string;
   medications: MedicationOption[];
   questions: IntakeQuestion[];
+  /**
+   * Fixed pharmacy for this visit type (company-designated / mail-order, or a
+   * staging test value). When set, the intake skips the pharmacy-search step and
+   * sends this `pharmacyId` as-is. Absent ⇒ the patient searches and picks one.
+   */
+  pharmacyId?: string;
 }
 
 export const BELUGA_VISIT_TYPES: VisitTypeOption[] = [
@@ -47,6 +53,9 @@ export const BELUGA_VISIT_TYPES: VisitTypeOption[] = [
     label: "Sample Visit (staging)",
     description:
       "Placeholder offering seeded from the API reference. Replace with real, Beluga-enabled visit types before launch.",
+    // Beluga staging's proven test payload uses this fixed pharmacyId, so the
+    // intake skips pharmacy search and reproduces the run-log payload exactly.
+    pharmacyId: "12345",
     medications: [
       {
         id: "sample-med",

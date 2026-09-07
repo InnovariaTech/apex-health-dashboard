@@ -26,7 +26,13 @@ export async function getHealthData(
   const res = await axiosService.get<Envelope<HealthDataResponse>>(BASE, {
     params,
   });
-  return unwrap<HealthDataResponse>(res.data);
+  const data = unwrap<HealthDataResponse>(res.data);
+  // Upstream occasionally returns a non-array (or wrong shape) with HTTP 200;
+  // force `healthData` to an array so every consumer's spread/`for…of` is safe.
+  return {
+    isTracked: Boolean(data?.isTracked),
+    healthData: Array.isArray(data?.healthData) ? data.healthData : [],
+  };
 }
 
 export async function getSleepData(
@@ -36,5 +42,9 @@ export async function getSleepData(
     `${BASE}/sleep`,
     { params },
   );
-  return unwrap<HealthDataSleepResponse>(res.data);
+  const data = unwrap<HealthDataSleepResponse>(res.data);
+  return {
+    isTracked: Boolean(data?.isTracked),
+    healthData: Array.isArray(data?.healthData) ? data.healthData : [],
+  };
 }

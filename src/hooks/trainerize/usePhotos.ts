@@ -13,11 +13,11 @@ import type { UploadPhotoPayload } from "@/types/trainerize/photos_types";
  * See `docs/trainerize/goals/list-photos.md` and `upload-photo.md`.
  */
 
-export function usePhotos(startDate: string, endDate: string) {
+export function usePhotos(startDate: string, endDate: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.trainerize.photos(startDate, endDate),
     queryFn: () => listPhotos({ startDate, endDate }),
-    enabled: Boolean(startDate) && Boolean(endDate),
+    enabled: enabled && Boolean(startDate) && Boolean(endDate),
     staleTime: 30 * 1000,
   });
 }

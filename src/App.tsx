@@ -8,6 +8,7 @@ import Login from "@/views/auth/pages/Login";
 import Signup from "@/views/auth/pages/Signup";
 import ResetPassword from "@/views/auth/pages/ResetPassword";
 import ImpersonateExchange from "@/views/auth/pages/ImpersonateExchange";
+import IntakeRuntime from "@/views/intake/pages/IntakeRuntime";
 import ImpersonationBanner from "@/components/ImpersonationBanner";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
@@ -40,6 +41,12 @@ const AuthenticatedApp = () => {
   // navigates to "/" (this component re-renders and falls through normally).
   if (typeof window !== "undefined" && window.location.pathname === "/impersonate") {
     return <ImpersonateExchange />;
+  }
+
+  // Patient intake runtime — must also run BEFORE the auth gate, since the
+  // patient arrives with only a token in the URL and may have no account yet.
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/intake/")) {
+    return <IntakeRuntime />;
   }
 
   if (isLoadingAuth) {

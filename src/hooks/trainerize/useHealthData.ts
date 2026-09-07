@@ -112,7 +112,7 @@ export function aggregateSleepByNight(
   data: HealthDataSleepResponse | undefined,
 ): Record<string, number> {
   const out: Record<string, number> = {};
-  if (!data?.healthData) return out;
+  if (!Array.isArray(data?.healthData)) return out;
   for (const seg of data.healthData) {
     const start = Date.parse(seg.startTime.replace(" ", "T"));
     const end = Date.parse(seg.endTime.replace(" ", "T"));

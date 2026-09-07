@@ -90,7 +90,6 @@ const DUMMY_VITALS = {
 
 export default function TrainerizeVitalsRow() {
   const linkQuery = useTrainerizeLink();
-  if (!USE_DUMMY_VITALS && !linkQuery.isLoading && !linkQuery.data) return null;
 
   const today = format(new Date(), "yyyy-MM-dd");
   const weekAgo = format(subDays(new Date(), WEEK_DAYS), "yyyy-MM-dd");
@@ -141,6 +140,11 @@ export default function TrainerizeVitalsRow() {
 
   const nav = useNavigate();
   const onOpen = () => nav(createPageUrl("Wearables"));
+
+  // Hidden when the user has no Trainerize link (unless we're showing dummy
+  // vitals). Kept BELOW every hook above — an early return before them would
+  // change the hook count between renders and throw React error #300.
+  if (!USE_DUMMY_VITALS && !linkQuery.isLoading && !linkQuery.data) return null;
 
   return (
     <div className="mb-6">
