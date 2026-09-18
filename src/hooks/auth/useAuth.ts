@@ -13,6 +13,7 @@ import type {
 import { queryKeys } from "@/hooks/queryKeys";
 import { useNavigate } from "react-router-dom";
 import { getImpersonation } from "@/lib/impersonation";
+import { isPreAuthPath } from "@/lib/preAuthPaths";
 
 export function useAuthUser() {
   return useQuery<AuthUser | null>({
@@ -25,6 +26,9 @@ export function useAuthUser() {
       if (imp) return imp.user;
       return api.auth.me();
     },
+    // Intake / impersonation pages run without a session. Asking `/auth/me`
+    // there 401s → refresh fails → session-expired → bounce to /login.
+    enabled: !isPreAuthPath(),
     staleTime: 5 * 60 * 1000,
     retry: false,
   });

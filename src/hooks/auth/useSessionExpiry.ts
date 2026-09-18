@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router-dom";
 import { queryKeys } from "@/hooks/queryKeys";
+import { isPreAuthPath } from "@/lib/preAuthPaths";
 
 /**
  * Listens for the `auth:session-expired` event dispatched by
@@ -19,10 +20,12 @@ export function useSessionExpiry() {
   useEffect(() => {
     const handler = () => {
       queryClient.setQueryData(queryKeys.auth.user(), null);
-      // Avoid bouncing while already on the auth screens.
+      // Avoid bouncing while already on the auth screens, or on pages that
+      // are meant to work without a session (intake forms, impersonation).
       if (
         location.pathname !== "/login" &&
-        location.pathname !== "/signup"
+        location.pathname !== "/signup" &&
+        !isPreAuthPath(location.pathname)
       ) {
         navigate("/login", { replace: true });
       }
