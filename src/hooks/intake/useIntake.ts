@@ -2,11 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getIntakeStep,
   goBack,
+  startPublicIntake,
   submitAnswer,
   submitFacts,
 } from "@/api/intake/intake";
 import { queryKeys } from "@/hooks/queryKeys";
-import type { IntakeAnswer, IntakeStep } from "@/types/intake/intake_types";
+import type {
+  IntakeAnswer,
+  IntakeStep,
+  PublicStartPayload,
+} from "@/types/intake/intake_types";
 
 /**
  * Intake runtime hooks. The current step lives in the query cache keyed by
@@ -54,5 +59,12 @@ export function useBack(token: string) {
   return useMutation({
     mutationFn: () => goBack(token),
     onSuccess: advance,
+  });
+}
+
+/** Public door — mint a token from an identity block. */
+export function useStartPublicIntake() {
+  return useMutation({
+    mutationFn: (payload: PublicStartPayload) => startPublicIntake(payload),
   });
 }

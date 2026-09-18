@@ -1,5 +1,10 @@
 import { axiosService } from "@/api/http/axiosInstance";
-import type { IntakeAnswer, IntakeStep } from "@/types/intake/intake_types";
+import type {
+  IntakeAnswer,
+  IntakeStep,
+  PublicStartPayload,
+  PublicStartResult,
+} from "@/types/intake/intake_types";
 
 /**
  * Patient intake runtime — `/api/intake/:token/*`. No login: the token in the
@@ -18,6 +23,18 @@ function unwrap<T>(body: unknown): T {
     return (envelope as { data: T }).data;
   }
   return envelope as T;
+}
+
+/**
+ * The public door: a stranger mints their own token by posting an identity
+ * block. No auth. Every refusal is a flat 404 ("This form is not available").
+ * Rate limited 10/min per IP. From here the walk is identical to invited.
+ */
+export async function startPublicIntake(
+  payload: PublicStartPayload,
+): Promise<PublicStartResult> {
+  const res = await axiosService.post(`${BASE}/public/start`, payload);
+  return unwrap<PublicStartResult>(res.data);
 }
 
 /** Pure read — safe on mount, refresh, reconnect. Returns the true state. */

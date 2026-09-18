@@ -108,6 +108,17 @@ export interface TerminatedStep {
   canGoBack: boolean;
 }
 
+/** Every question answered, payment outstanding. A STEP, not the end. */
+export interface CheckoutStep {
+  kind: "checkout";
+  submissionId: string;
+  formKey: string;
+  formVersion: number;
+  content: IntakeContent[];
+  /** Stripe-hosted URL. Absent = a session couldn't be created yet; re-GET retries. */
+  checkoutUrl?: string | null;
+}
+
 export interface CompletedStep {
   kind: "completed";
   submissionId: string;
@@ -115,7 +126,12 @@ export interface CompletedStep {
   redirectUrl?: string | null;
 }
 
-export type IntakeStep = FactsStep | QuestionStep | TerminatedStep | CompletedStep;
+export type IntakeStep =
+  | FactsStep
+  | QuestionStep
+  | TerminatedStep
+  | CheckoutStep
+  | CompletedStep;
 
 /** One answer, POSTed one at a time. */
 export type IntakeAnswer =
@@ -129,3 +145,27 @@ export type IntakeErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "GONE";
+
+// ── Public door (POST /api/intake/public/start) ──────────────────────────────
+
+export interface PublicIdentity {
+  firstName: string;
+  lastName: string;
+  /** YYYY-MM-DD. */
+  dob: string;
+  email: string;
+  phone?: string;
+}
+
+export interface PublicStartPayload {
+  /** The form's key (as the admin named it), not its id. */
+  formKey: string;
+  /** Whatever the shop calls the treatment being bought. */
+  productId?: string;
+  identity: PublicIdentity;
+}
+
+export interface PublicStartResult {
+  token: string;
+  expiresAt: string;
+}

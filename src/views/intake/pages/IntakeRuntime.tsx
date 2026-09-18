@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useIntakeStep } from "@/hooks/intake/useIntake";
+import { AlertCircle, CheckCircle2, CreditCard, Loader2 } from "lucide-react";
+import { useBack, useIntakeStep } from "@/hooks/intake/useIntake";
 import FactsStepView from "@/views/intake/components/FactsStep";
 import QuestionStepView from "@/views/intake/components/QuestionStep";
 import IntakeContentBlocks from "@/views/intake/components/IntakeContentBlocks";
-import type { IntakeStep } from "@/types/intake/intake_types";
+import IntakeShell from "@/views/intake/components/IntakeShell";
+import { loadIntakeToken, saveIntakeToken } from "@/lib/intakeToken";
+import type { CheckoutStep, IntakeStep } from "@/types/intake/intake_types";
 
 /**
  * The patient intake runtime. Mounted pre-auth for `/intake/:token` — the token
@@ -16,42 +18,20 @@ function readToken(): string {
   if (typeof window === "undefined") return "";
   const raw =
     window.location.pathname.replace(/^\/intake\//, "").split(/[/?#]/)[0] ?? "";
+  // The Stripe return page is `/intake/return` and carries no token — recover
+  // the one we stashed during the walk. Any real token is persisted so it can.
+  if (!raw || raw === "return") return loadIntakeToken();
+  let token = raw;
   try {
-    return decodeURIComponent(raw);
+    token = decodeURIComponent(raw);
   } catch {
-    return raw;
+    /* keep raw */
   }
+  saveIntakeToken(token);
+  return token;
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
-      {/* Navbar — brand logo with a red accent underline */}
-      <div className="h-16 bg-white border-b-[3px] border-[#e11816] flex items-center px-5 shadow-sm">
-        <img
-          src="/images/apex-md-logo.png"
-          alt="APEX MD"
-          className="h-8 w-auto"
-        />
-      </div>
-      <div className="flex-1 flex justify-center px-4 py-8">
-        <div className="w-full max-w-xl">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
-            {/* Logo at the top of the form itself */}
-            <div className="flex justify-center pb-5 mb-6 border-b border-slate-100">
-              <img
-                src="/images/apex-md-logo.png"
-                alt="APEX MD"
-                className="h-9 w-auto"
-              />
-            </div>
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const Shell = IntakeShell;
 
 function Terminal({
   icon,
@@ -71,12 +51,85 @@ function Terminal({
   );
 }
 
-function StepView({ step, token }: { step: IntakeStep; token: string }) {
+function CheckoutStepView({
+  step,
+  token,
+  onRetry,
+}: {
+  step: CheckoutStep;
+  token: string;
+  onRetry: () => void;
+}) {
+  const back = useBack(token);
+  return (
+    <div className="space-y-6">
+      <IntakeContentBlocks content={step.content} />
+      <div className="text-center space-y-2">
+        <div className="flex justify-center">
+          <CreditCard className="w-9 h-9 text-[#e11816]" />
+        </div>
+        <h1 className="text-xl font-semibold text-slate-900">
+          One last step — payment
+        </h1>
+        <p className="text-sm text-slate-500">
+          Your answers are saved. Complete payment to finish and send your intake
+          for review.
+        </p>
+      </div>
+
+      {step.checkoutUrl ? (
+        <a
+          href={step.checkoutUrl}
+          className="block text-center rounded-lg bg-[#e11816] hover:bg-[#c3140f] text-white py-3 text-[15px] font-medium"
+        >
+          Proceed to secure payment
+        </a>
+      ) : (
+        <div className="text-center space-y-3">
+          <p className="text-sm text-slate-500 inline-flex items-center gap-2 justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" /> Preparing your secure
+            payment…
+          </p>
+          <button
+            onClick={onRetry}
+            className="block mx-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      <button
+        onClick={() => back.mutate()}
+        disabled={back.isPending}
+        className="w-full text-center text-[13px] text-slate-500 hover:text-slate-800 disabled:opacity-50"
+      >
+        ← Change my answers
+      </button>
+
+      <p className="text-[11px] text-slate-400 text-center">
+        Payment is processed securely by Stripe. You won't be charged twice.
+      </p>
+    </div>
+  );
+}
+
+function StepView({
+  step,
+  token,
+  onRetry,
+}: {
+  step: IntakeStep;
+  token: string;
+  onRetry: () => void;
+}) {
   switch (step.kind) {
     case "facts":
       return <FactsStepView step={step} token={token} />;
     case "question":
       return <QuestionStepView step={step} token={token} />;
+    case "checkout":
+      return <CheckoutStepView step={step} token={token} onRetry={onRetry} />;
     case "terminated":
       return (
         <Terminal
@@ -196,5 +249,9 @@ export default function IntakeRuntime() {
     );
   }
 
-  return <Shell>{step && <StepView step={step} token={token} />}</Shell>;
+  return (
+    <Shell>
+      {step && <StepView step={step} token={token} onRetry={() => refetch()} />}
+    </Shell>
+  );
 }

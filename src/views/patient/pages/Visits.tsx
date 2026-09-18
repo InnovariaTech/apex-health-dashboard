@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ChevronRight,
   Loader2,
+  FlaskConical,
   Plus,
   Stethoscope,
 } from "lucide-react";
@@ -52,11 +53,24 @@ export default function Visits() {
           <p className="text-sm text-slate-500 mt-1">
             Your medical visits and their status.
           </p>
+          <button
+            type="button"
+            onClick={() => navigate("/Visits/lab-analysis-test")}
+            className="text-[11px] text-slate-400 hover:text-slate-600 underline mt-1"
+          >
+            labAnalysis staging test
+          </button>
         </div>
-        <Button onClick={() => navigate("/Visits/new")}>
-          <Plus className="w-4 h-4 mr-2" />
-          Start a visit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate("/Visits/new-lab")}>
+            <FlaskConical className="w-4 h-4 mr-2" />
+            Authorize lab testing
+          </Button>
+          <Button onClick={() => navigate("/Visits/new")}>
+            <Plus className="w-4 h-4 mr-2" />
+            Start a visit
+          </Button>
+        </div>
       </header>
 
       {isLoading ? (

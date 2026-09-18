@@ -9,6 +9,7 @@ import Signup from "@/views/auth/pages/Signup";
 import ResetPassword from "@/views/auth/pages/ResetPassword";
 import ImpersonateExchange from "@/views/auth/pages/ImpersonateExchange";
 import IntakeRuntime from "@/views/intake/pages/IntakeRuntime";
+import PublicIntakeStart from "@/views/intake/pages/PublicIntakeStart";
 import ImpersonationBanner from "@/components/ImpersonationBanner";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
@@ -22,6 +23,8 @@ import MyTreatments from "@/views/patient/pages/MyTreatments";
 import MyCaseDetails from "@/views/patient/pages/MyCaseDetails";
 import VisitDetails from "@/views/patient/pages/VisitDetails";
 import BelugaIntake from "@/views/patient/pages/BelugaIntake";
+import LabAuthorization from "@/views/patient/pages/LabAuthorization";
+import LabAnalysisTest from "@/views/patient/pages/LabAnalysisTest";
 import Referral from "@/views/patient/pages/Referral";
 import Rewards from "@/views/patient/pages/Rewards";
 import Sleep from "@/views/patient/pages/Sleep";
@@ -41,6 +44,13 @@ const AuthenticatedApp = () => {
   // navigates to "/" (this component re-renders and falls through normally).
   if (typeof window !== "undefined" && window.location.pathname === "/impersonate") {
     return <ImpersonateExchange />;
+  }
+
+  // Public storefront door — checked BEFORE the generic /intake/ branch below,
+  // since "/intake/public" also starts with "/intake/". Pre-auth: a stranger
+  // with no account mints their own token here.
+  if (typeof window !== "undefined" && window.location.pathname === "/intake/public") {
+    return <PublicIntakeStart />;
   }
 
   // Patient intake runtime — must also run BEFORE the auth gate, since the
@@ -185,6 +195,22 @@ const AuthenticatedApp = () => {
         element={
           <LayoutWrapper>
             <BelugaIntake />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/Visits/new-lab"
+        element={
+          <LayoutWrapper>
+            <LabAuthorization />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/Visits/lab-analysis-test"
+        element={
+          <LayoutWrapper>
+            <LabAnalysisTest />
           </LayoutWrapper>
         }
       />

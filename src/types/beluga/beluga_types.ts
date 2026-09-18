@@ -151,6 +151,10 @@ export interface LabVisitPayload {
   results: LabResult[];
   /** Required when `testToTreat` is true; rejected by Beluga when false. */
   patientPreference?: PatientPreference[];
+  /** Flat `{ Q1, A1, Q2, A2, … }` intake answers. */
+  questions?: VisitQuestions;
+  /** Literal `true`; required by the backend — omitting it is a 400. */
+  consentsSigned: true;
 }
 
 /** All three creates return only this. */
