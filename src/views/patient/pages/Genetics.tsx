@@ -28,6 +28,7 @@ import {
   type MarkerRow,
   type ToneKey,
 } from "@/views/patient/data/genetics/markers";
+import "./genetics.mobile.css";
 
 /**
  * Genetics — verbatim port of the `New Ui/4 Genetics/apex-md-genetics`
@@ -132,6 +133,7 @@ export default function Genetics() {
       <Topbar query={query} onQuery={setQuery} />
 
       <div
+        className="gx-page"
         style={{
           padding: "36px 40px 60px",
           maxWidth: 1480,
@@ -216,7 +218,7 @@ function Topbar({
 }) {
   return (
     <header
-      className="flex items-center sticky top-0 z-20"
+      className="gx-topbar flex items-center sticky top-0 z-20"
       style={{
         gap: 18,
         padding: "18px 40px",
@@ -225,7 +227,7 @@ function Topbar({
       }}
     >
       <div
-        className="flex items-center"
+        className="gx-crumbs flex items-center"
         style={{
           gap: 9,
           fontSize: 14,
@@ -241,7 +243,7 @@ function Topbar({
         <span style={{ color: MOCKUP.ink }}>Summary</span>
       </div>
 
-      <div className="flex-1 relative" style={{ maxWidth: 560, margin: "0 auto" }}>
+      <div className="gx-search flex-1 relative" style={{ maxWidth: 560, margin: "0 auto" }}>
         <Search
           className="absolute"
           style={{
@@ -271,7 +273,7 @@ function Topbar({
         />
       </div>
 
-      <div className="flex" style={{ gap: 10 }}>
+      <div className="gx-top-icons flex" style={{ gap: 10 }}>
         <IconBtn aria-label="Notifications">
           <Bell className="w-4 h-4" strokeWidth={1.7} />
         </IconBtn>
@@ -316,6 +318,7 @@ function PageHead() {
     >
       <div>
         <h1
+          className="gx-title"
           style={{
             fontFamily: "Archivo, Inter, sans-serif",
             fontWeight: 900,
@@ -339,7 +342,7 @@ function PageHead() {
           </em>
         </h1>
         <div
-          className="flex items-center flex-wrap"
+          className="gx-meta flex items-center flex-wrap"
           style={{
             gap: "0 8px",
             marginTop: 16,
@@ -475,7 +478,7 @@ function ToggleBtn({
 function Banner() {
   return (
     <div
-      className="flex flex-wrap items-center justify-between"
+      className="gx-banner flex flex-wrap items-center justify-between"
       style={{
         gap: 16,
         marginTop: 22,
@@ -546,7 +549,7 @@ function Banner() {
 function StatCards() {
   return (
     <section
-      className="grid"
+      className="gx-stats grid"
       style={{
         gridTemplateColumns: "repeat(3, 1fr)",
         gap: 22,
@@ -605,7 +608,7 @@ function StatCard({
     tone === "att" ? MOCKUP.att : tone === "mod" ? MOCKUP.amber : MOCKUP.green;
   return (
     <div
-      className="relative overflow-hidden"
+      className="gx-stat relative overflow-hidden"
       style={{
         background: "#fff",
         border: `1px solid ${MOCKUP.line}`,
@@ -638,6 +641,7 @@ function StatCard({
         {label}
       </div>
       <div
+        className="gx-stat-value"
         style={{
           fontFamily: "Archivo, sans-serif",
           fontWeight: 800,
@@ -667,7 +671,7 @@ function StatCard({
 function ChartsRow() {
   return (
     <section
-      className="grid"
+      className="gx-charts grid"
       style={{
         gridTemplateColumns: "1fr 1fr",
         gap: 22,
@@ -682,12 +686,12 @@ function ChartsRow() {
 
 function DonutCard() {
   return (
-    <div style={cardStyle()}>
+    <div className="gx-card" style={cardStyle()}>
       <CardHead
         title="Status distribution"
         icon={<Activity className="w-4 h-4" strokeWidth={1.9} />}
       />
-      <div className="flex items-center flex-wrap" style={{ gap: 26 }}>
+      <div className="gx-donut-wrap flex items-center flex-wrap" style={{ gap: 26 }}>
         <DonutSvg />
         <div
           className="flex flex-col"
@@ -780,7 +784,7 @@ function DonutSvg() {
     off += len;
   });
   return (
-    <svg width="190" height="190" viewBox="0 0 42 42" style={{ flexShrink: 0 }}>
+    <svg className="gx-donut" width="190" height="190" viewBox="0 0 42 42" style={{ flexShrink: 0 }}>
       {parts}
       <text
         x="21"
@@ -825,7 +829,7 @@ function BarsCard() {
   const pct = (v: number) => `${((v / max) * 100).toFixed(2)}%`;
 
   return (
-    <div style={cardStyle()}>
+    <div className="gx-card" style={cardStyle()}>
       <CardHead
         title="By report section"
         icon={<BarChart3 className="w-4 h-4" strokeWidth={1.9} />}
@@ -835,7 +839,7 @@ function BarsCard() {
         {rows.map(([nm, o, m, a]) => (
           <div
             key={nm}
-            className="grid items-center"
+            className="gx-bar-row grid items-center"
             style={{
               gridTemplateColumns: "120px 1fr",
               gap: 12,
@@ -870,7 +874,7 @@ function BarsCard() {
         ))}
       </div>
       <div
-        className="grid"
+        className="gx-bar-row grid"
         style={{
           gridTemplateColumns: "120px 1fr",
           gap: 12,
@@ -902,7 +906,7 @@ function CardHead({
 }) {
   return (
     <div
-      className="flex items-center justify-between"
+      className="gx-cardhead flex items-center justify-between"
       style={{ gap: 12, marginBottom: 18 }}
     >
       <h3
@@ -952,6 +956,7 @@ function cardStyle(): React.CSSProperties {
 function FindingsSummary() {
   return (
     <section
+      className="gx-card"
       style={{
         ...cardStyle(),
         marginTop: 22,
@@ -964,6 +969,7 @@ function FindingsSummary() {
       />
 
       <div
+        className="gx-findings-text"
         style={{
           fontSize: 15.5,
           color: "#3a3a42",
@@ -1079,7 +1085,7 @@ function ConciergeBox() {
         />
       </div>
       <div
-        className="flex overflow-hidden"
+        className="gx-concierge flex overflow-hidden"
         style={{
           border: `1px solid ${MOCKUP.line}`,
           borderRadius: 16,
@@ -1087,7 +1093,7 @@ function ConciergeBox() {
         }}
       >
         <div
-          className="relative"
+          className="gx-concierge-img relative"
           style={{
             flex: "0 0 290px",
             background: "linear-gradient(150deg,#17171c,#2b2b33)",
@@ -1103,7 +1109,7 @@ function ConciergeBox() {
           />
         </div>
         <div
-          className="flex flex-col flex-1"
+          className="gx-concierge-body flex flex-col flex-1"
           style={{ padding: "24px 28px" }}
         >
           <span
@@ -1271,6 +1277,7 @@ function RecommendedSection() {
 
       <RecSubhead>Top 3 supplements</RecSubhead>
       <div
+        className="gx-supps"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
@@ -1531,7 +1538,7 @@ function SuppCard({
 function PeptideCard() {
   return (
     <div
-      className="flex overflow-hidden"
+      className="gx-peptide flex overflow-hidden"
       style={{
         border: `1px solid ${MOCKUP.line}`,
         borderRadius: 14,
@@ -1539,7 +1546,7 @@ function PeptideCard() {
       }}
     >
       <div
-        className="grid place-items-center"
+        className="gx-peptide-img grid place-items-center"
         style={{
           flex: "0 0 168px",
           background: "linear-gradient(160deg,#f6f6f6,#ececec)",
@@ -1559,7 +1566,7 @@ function PeptideCard() {
           }}
         />
       </div>
-      <div style={{ padding: "20px 22px", flex: 1 }}>
+      <div className="gx-peptide-body" style={{ padding: "20px 22px", flex: 1 }}>
         <span
           className="uppercase"
           style={{
@@ -1680,7 +1687,7 @@ function ThemeFilterBar({
 }) {
   return (
     <div
-      className="flex items-center"
+      className="gx-themebar flex items-center"
       style={{
         gap: 12,
         marginTop: 24,
@@ -1756,7 +1763,7 @@ function ResultSection({
       }}
     >
       <div
-        className="flex items-baseline"
+        className="gx-result-head flex items-baseline"
         style={{ gap: 12, padding: "22px 26px 6px" }}
       >
         <span
@@ -1788,7 +1795,7 @@ function ResultSection({
         </div>
       ) : (
         <div
-          className="grid"
+          className="gx-result-grid grid"
           style={{
             gridTemplateColumns: "1fr 1fr",
             gap: 11,
@@ -1845,7 +1852,7 @@ function MarkerItem({
           onOpen(row);
         }
       }}
-      className="flex items-center cursor-pointer transition-shadow"
+      className="gx-marker flex items-center cursor-pointer transition-shadow"
       style={{
         gap: 13,
         background: "#fff",
@@ -1893,6 +1900,7 @@ function MarkerItem({
       </div>
       <span
         title={row[2]}
+        className="gx-badge"
         style={{
           flexShrink: 0,
           fontSize: 11.5,
@@ -1971,7 +1979,7 @@ function MarkerModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center"
+      className="gx-modal fixed inset-0 flex items-center justify-center"
       style={{
         zIndex: 100,
         padding: 20,
@@ -2015,7 +2023,7 @@ function MarkerModal({
         </button>
 
         <div
-          className="overflow-y-auto"
+          className="gx-modal-body overflow-y-auto"
           style={{ padding: "24px 26px" }}
         >
           <div

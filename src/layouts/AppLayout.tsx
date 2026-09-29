@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Settings, Activity, LogOut, ChevronRight } from "lucide-react";
+import { Settings, Activity, LogOut, ChevronRight, Menu } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarProvider,
-  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { api } from "@/api/client";
 import { useEnvironment } from "@/lib/EnvironmentContext";
@@ -21,6 +21,26 @@ import { useLogout } from "@/hooks/auth/useAuth";
 import AIAssistantBar from "@/components/global/AIAssistantBar";
 import GymSwitcher from "@/components/env/GymSwitcher";
 import { getPatientNavItems, getPatientNavGroups } from "@/views/patient/config/patientNavigation";
+
+/**
+ * Phone-only drawer toggle. A labelled hamburger reads as "menu" at a glance, where the
+ * stock SidebarTrigger's small panel icon did not. Must render inside SidebarProvider.
+ */
+function MobileMenuButton() {
+  const { toggleSidebar, openMobile } = useSidebar();
+  return (
+    <button
+      type="button"
+      onClick={toggleSidebar}
+      aria-label="Open menu"
+      aria-expanded={openMobile}
+      className="md:hidden inline-flex items-center gap-2 h-10 pl-2.5 pr-3.5 -ml-2 rounded-[10px] border border-border bg-card text-foreground text-sm font-semibold shadow-sm active:bg-secondary transition-colors"
+    >
+      <Menu className="w-5 h-5" strokeWidth={2.25} />
+      Menu
+    </button>
+  );
+}
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -213,9 +233,7 @@ export default function Layout({ children }) {
 
         <main className="flex-1 flex flex-col min-w-0">
           <header className="border-b border-border bg-card px-6 py-3 sticky top-0 z-10 flex items-center gap-4">
-            <SidebarTrigger
-              className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden text-foreground"
-            />
+            <MobileMenuButton />
             <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
               <span>{environment.name}</span>
               <ChevronRight className="w-3 h-3" />

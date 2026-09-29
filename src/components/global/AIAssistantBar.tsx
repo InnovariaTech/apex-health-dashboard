@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEnvironment } from "@/lib/EnvironmentContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { api } from "@/api/client";
 import { useStreamAiChatMessage } from "@/hooks/ai-agent/useAi";
 import { useAiChatStore } from "@/stores/aiChatStore";
@@ -233,6 +234,7 @@ function AiMessage({ message }) {
 
 export default function AIAssistantBar() {
   const { environment } = useEnvironment();
+  const isMobile = useIsMobile();
   const { stream: streamAiChat } = useStreamAiChatMessage();
   const sessionId = useAiChatStore((s) => s.sessionId);
   const setSessionId = useAiChatStore((s) => s.setSessionId);
@@ -417,7 +419,8 @@ export default function AIAssistantBar() {
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-50"
-      style={{ left: "var(--sidebar-width, 0px)" }}
+      // On phones the sidebar is an off-canvas sheet, so the bar spans the full width.
+      style={{ left: isMobile ? 0 : "var(--sidebar-width, 0px)" }}
     >
       <AnimatePresence initial={false}>
         {isExpanded && (

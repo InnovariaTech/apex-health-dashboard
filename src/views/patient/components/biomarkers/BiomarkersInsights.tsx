@@ -39,7 +39,7 @@ export default function BiomarkersInsights() {
 
   return (
     <div className="mb-6">
-      <div className="flex items-baseline justify-between mb-3.5 px-1">
+      <div className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:justify-between md:gap-0 mb-3.5 px-1">
         <h2
           className="m-0 font-sans"
           style={{
@@ -55,10 +55,7 @@ export default function BiomarkersInsights() {
         </span>
       </div>
 
-      <div
-        className="apex-card"
-        style={{ padding: "0 22px" }}
-      >
+      <div className="apex-card px-4 md:px-[22px]">
         {positive[0] && (
           <InsightRow
             tone="good"
@@ -114,7 +111,7 @@ function InsightRow({
 
   return (
     <div
-      className="flex items-start gap-4 border-b border-[var(--line)] last:border-b-0"
+      className="flex items-start gap-3 md:gap-4 border-b border-[var(--line)] last:border-b-0"
       style={{ padding: "18px 0" }}
     >
       <span
@@ -123,8 +120,10 @@ function InsightRow({
       >
         {icon}
       </span>
+      {/* Phones stack the link under the text so the copy keeps full width. */}
+      <div className="flex-1 min-w-0 flex flex-col gap-2 md:flex-row md:items-center md:gap-4 md:self-stretch">
       <div
-        className="flex-1"
+        className="md:flex-1 md:self-start"
         style={{ fontSize: 13.5, lineHeight: 1.6, color: "var(--ink)" }}
       >
         <span style={{ fontWeight: 600, marginRight: 4 }}>{lede}</span>
@@ -133,7 +132,7 @@ function InsightRow({
       <button
         type="button"
         onClick={onOpenReport}
-        className="inline-flex items-center gap-1 self-center shrink-0 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+        className="inline-flex items-center gap-1 self-start md:self-center shrink-0 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         style={{
           fontSize: 12,
           color: "var(--apex-accent-bright)",
@@ -145,6 +144,7 @@ function InsightRow({
         Open report
         <ArrowRight className="w-3 h-3" strokeWidth={2.4} />
       </button>
+      </div>
     </div>
   );
 }

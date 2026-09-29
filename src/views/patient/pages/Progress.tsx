@@ -577,8 +577,9 @@ function PillTabs({
   onChange: (v: TabKey) => void;
 }) {
   return (
+    // Phones: a 2×2 grid so every tab stays visible without widening the page.
     <div
-      className="inline-flex"
+      className="inline-flex max-md:grid max-md:grid-cols-2 max-md:w-full"
       style={{
         background: "#EDEDEF",
         padding: 5,
@@ -633,7 +634,7 @@ function PillButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex items-center gap-2 whitespace-nowrap max-md:justify-center max-md:!px-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{
         padding: "9px 18px",
         borderRadius: 9,
@@ -681,10 +682,7 @@ function PhotosTrendPanel({
       <BiomarkersImprovingCard … />
       */}
 
-      <div
-        className="grid gap-5"
-        style={{ gridTemplateColumns: "minmax(0,1.62fr) minmax(0,1fr)" }}
-      >
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-[minmax(0,1.62fr)_minmax(0,1fr)]">
         <TrendCard
           isLoading={isRangeLoading}
           data={chartData}
@@ -2087,7 +2085,7 @@ function MeasurementsPanel({
       }}
     >
       <div
-        className="flex items-center justify-between"
+        className="flex flex-wrap items-center justify-between gap-3 max-md:!px-4 max-md:!pt-[18px]"
         style={{ padding: "22px 26px 0" }}
       >
         <div>
@@ -2117,7 +2115,7 @@ function MeasurementsPanel({
         <button
           type="button"
           onClick={() => onLog()}
-          className="inline-flex items-center gap-2"
+          className="inline-flex items-center gap-2 whitespace-nowrap"
           style={{
             background: "var(--apex-accent-bright)",
             color: "#fff",
@@ -2133,7 +2131,7 @@ function MeasurementsPanel({
         </button>
       </div>
 
-      <div style={{ padding: "10px 26px 24px" }}>
+      <div className="max-md:!px-4" style={{ padding: "10px 26px 24px" }}>
         {isRangeLoading ? (
           <div className="py-10 flex items-center justify-center">
             <Loader2 className="w-7 h-7 animate-spin text-mute" />
@@ -2210,7 +2208,7 @@ function MeasurementCard({
         borderBottom: "1px solid var(--line)",
       }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <p
           style={{
             fontWeight: 700,
@@ -2347,7 +2345,7 @@ function NarrativeCard() {
 
   return (
     <div
-      className="mt-7"
+      className="mt-7 max-md:!px-5 max-md:!pt-5 max-md:!pb-6"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--line)",
@@ -2356,7 +2354,7 @@ function NarrativeCard() {
         boxShadow: CARD_SHADOW,
       }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <div
           className="flex items-center gap-2.5 uppercase"
           style={{
@@ -2381,7 +2379,7 @@ function NarrativeCard() {
       </div>
 
       <div
-        className="flex items-center gap-2.5 mt-4"
+        className="flex flex-wrap items-center gap-2.5 mt-4 max-md:!text-[19px]"
         style={{
           fontSize: 22,
           fontWeight: 700,

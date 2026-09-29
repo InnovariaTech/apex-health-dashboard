@@ -1,0 +1,178 @@
+/*
+ * Genetics — phone layout (< 768px, same breakpoint as `useIsMobile` / Tailwind `md`).
+ *
+ * The page is a verbatim mockup port styled almost entirely with inline styles,
+ * so these rules need !important to win. Everything is scoped to the media
+ * query: desktop and tablet keep the inline mockup styles untouched.
+ */
+@media (max-width: 767px) {
+  /* Page + top bar */
+  .gx-page {
+    padding: 20px 16px 40px !important;
+  }
+  .gx-topbar {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding: 12px 16px !important;
+    position: static !important;
+  }
+  .gx-crumbs {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px !important;
+  }
+  .gx-top-icons {
+    order: 2;
+  }
+  .gx-top-icons > button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .gx-search {
+    order: 3;
+    flex: 1 1 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* Head */
+  .gx-title {
+    font-size: 40px !important;
+  }
+  .gx-meta {
+    font-size: 13.5px !important;
+    margin-top: 12px !important;
+  }
+  .gx-banner {
+    padding: 14px 16px !important;
+    gap: 12px !important;
+  }
+  .gx-banner > div:first-child {
+    font-size: 13.5px !important;
+    align-items: flex-start !important;
+  }
+
+  /* Stat cards — one per row */
+  .gx-stats {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    margin-top: 18px !important;
+  }
+  .gx-stat {
+    padding: 20px 20px 18px !important;
+  }
+  .gx-stat-value {
+    font-size: 42px !important;
+  }
+
+  /* Charts — stacked */
+  .gx-charts {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    margin-top: 12px !important;
+  }
+  .gx-card {
+    padding: 18px 16px !important;
+  }
+  .gx-cardhead {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .gx-donut-wrap {
+    justify-content: center !important;
+    gap: 20px !important;
+  }
+  .gx-donut {
+    width: 160px !important;
+    height: 160px !important;
+  }
+  .gx-bar-row {
+    grid-template-columns: 96px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Findings */
+  .gx-findings-text {
+    font-size: 14.5px !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Concierge — image on top, copy below */
+  .gx-concierge {
+    flex-direction: column !important;
+  }
+  .gx-concierge-img {
+    flex: 0 0 auto !important;
+    height: 190px !important;
+    min-height: 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid #ececeb;
+  }
+  .gx-concierge-body {
+    padding: 18px 16px !important;
+  }
+  .gx-concierge-body h4 {
+    font-size: 18px !important;
+  }
+
+  /* Supplements — one per row */
+  .gx-supps {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+
+  /* Peptide — image on top, copy below */
+  .gx-peptide {
+    flex-direction: column !important;
+  }
+  .gx-peptide-img {
+    flex: 0 0 auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid #ececeb;
+  }
+  .gx-peptide-img img {
+    height: 160px !important;
+  }
+  .gx-peptide-body {
+    padding: 16px !important;
+  }
+
+  /* Theme filter */
+  .gx-themebar {
+    flex-wrap: wrap !important;
+  }
+
+  /* Result sections — one marker per row */
+  .gx-result-head {
+    flex-wrap: wrap !important;
+    gap: 2px 12px !important;
+    padding: 18px 16px 4px !important;
+  }
+  .gx-result-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+    padding: 12px 12px 6px !important;
+  }
+  .gx-marker {
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .gx-badge {
+    max-width: 118px !important;
+  }
+  /* Let the marker name wrap instead of truncating on narrow rows. */
+  .gx-marker > div > div:first-child {
+    white-space: normal !important;
+    line-height: 1.3;
+  }
+
+  /* Marker modal */
+  .gx-modal {
+    padding: 12px !important;
+  }
+  .gx-modal-body {
+    padding: 20px 18px !important;
+  }
+}

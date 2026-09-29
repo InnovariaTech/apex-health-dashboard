@@ -135,6 +135,7 @@ export default function LabKits() {
       className="min-h-screen"
     >
       <div
+        className="max-md:!px-4 max-md:!pt-5 max-md:!pb-10"
         style={{
           padding: "34px 40px 64px",
           maxWidth: 1320,
@@ -144,7 +145,7 @@ export default function LabKits() {
       >
         {/* Breadcrumb */}
         <div
-          className="flex items-center mb-6"
+          className="flex items-center mb-6 max-md:!mb-4"
           style={{
             gap: 8,
             fontSize: 14,
@@ -159,11 +160,12 @@ export default function LabKits() {
 
         {/* Page head */}
         <div
-          className="flex flex-wrap items-start justify-between"
+          className="flex flex-wrap items-start justify-between max-md:!gap-4 max-md:!mb-5"
           style={{ gap: 24, marginBottom: 30 }}
         >
           <div>
             <h1
+              className="max-md:!text-[34px]"
               style={{
                 fontSize: 42,
                 fontWeight: 800,
@@ -200,7 +202,7 @@ export default function LabKits() {
 
         {/* Kit grid */}
         <section
-          className="grid items-stretch"
+          className="grid items-stretch max-md:!grid-cols-1 max-md:!gap-4"
           style={{
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 22,
@@ -292,7 +294,7 @@ function KitCard({ kit }: { kit: KitDef }) {
         />
       </div>
       <div
-        className="flex flex-col flex-1"
+        className="flex flex-col flex-1 max-md:!px-5 max-md:!pt-5 max-md:!pb-5"
         style={{ padding: "22px 24px 24px" }}
       >
         <div
@@ -331,7 +333,7 @@ function KitCard({ kit }: { kit: KitDef }) {
         </p>
 
         <div
-          className="grid"
+          className="grid max-md:!gap-2"
           style={{
             gridTemplateColumns: "1fr 1fr",
             gap: 10,
@@ -396,7 +398,7 @@ function GhostBtn({
   return (
     <button
       type="button"
-      className="inline-flex items-center justify-center cursor-pointer transition-colors"
+      className="inline-flex items-center justify-center cursor-pointer transition-colors max-md:!px-2 max-md:!text-[13px] max-md:!gap-1.5"
       style={{
         background: "#fff",
         border: `1px solid ${MOCKUP.line}`,

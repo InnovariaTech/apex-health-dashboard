@@ -7,6 +7,7 @@ import {
   resolveRegistryRange,
   toNumeric,
 } from "@/views/patient/utils/biomarkerHelpers";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * Registry-backed reference scale — the 5-zone (or 3-zone) gauge from the
@@ -60,6 +61,7 @@ export default function BiomarkerReferenceScale({
 }: {
   item: BiomarkerSummaryItem;
 }) {
+  const isMobile = useIsMobile();
   const range = resolveRegistryRange(item);
   if (!range) return null;
 
@@ -78,6 +80,12 @@ export default function BiomarkerReferenceScale({
   // Keep the value / "Your Score" labels from spilling past the card edge (and
   // overlapping the neighbouring tile) when the marker sits at an extreme.
   const labelPct = valuePct !== null ? Math.max(13, Math.min(87, valuePct)) : null;
+  // On phones the card is narrow enough that close thresholds (e.g. 1.5 / 2)
+  // print on top of each other, so push neighbouring ticks apart there.
+  const tickPcts = spreadTicks(
+    ticks.map((t) => Math.max(4, Math.min(96, pct(t)))),
+    isMobile ? 12 : 0,
+  );
 
   return (
     <div className="overflow-hidden">
@@ -135,13 +143,13 @@ export default function BiomarkerReferenceScale({
       </div>
 
       {/* Boundary tick numbers */}
-      <div className="relative" style={{ height: 30, marginTop: 6 }}>
-        {ticks.map((t) => (
+      <div className="relative" style={{ height: isMobile ? 34 : 30, marginTop: 6 }}>
+        {ticks.map((t, i) => (
           <span
             key={t}
             className="absolute font-mono tabular-nums text-center"
             style={{
-              left: `${Math.max(4, Math.min(96, pct(t)))}%`,
+              left: `${tickPcts[i]}%`,
               transform: "translateX(-50%)",
               fontSize: 10.5,
               color: "var(--ink-3)",
@@ -157,7 +165,7 @@ export default function BiomarkerReferenceScale({
             style={{
               left: `${labelPct}%`,
               transform: "translateX(-50%)",
-              top: 13,
+              top: isMobile ? 17 : 13,
               fontSize: 9.5,
               fontWeight: 700,
               letterSpacing: "0.04em",
@@ -205,6 +213,25 @@ export default function BiomarkerReferenceScale({
       </div>
     </div>
   );
+}
+
+/**
+ * Enforce a minimum gap (in %) between ascending tick positions, keeping them
+ * inside 4–96%. A gap of 0 returns the positions unchanged.
+ */
+function spreadTicks(positions: number[], minGap: number): number[] {
+  if (minGap <= 0 || positions.length < 2) return positions;
+  const out = [...positions];
+  for (let i = 1; i < out.length; i++) {
+    out[i] = Math.max(out[i]!, out[i - 1]! + minGap);
+  }
+  if (out[out.length - 1]! > 96) {
+    out[out.length - 1] = 96;
+    for (let i = out.length - 2; i >= 0; i--) {
+      out[i] = Math.min(out[i]!, out[i + 1]! - minGap);
+    }
+  }
+  return out;
 }
 
 const TIER_TEXT: Record<Tier, string> = {

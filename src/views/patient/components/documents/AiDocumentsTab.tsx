@@ -127,7 +127,7 @@ export default function AiDocumentsTab() {
     notes: "",
   });
 
-  const { data: apiDocuments = [], isLoading, isError } = useDocuments();
+  const { data: apiDocuments = [], isLoading } = useDocuments();
   const latestCaseQuery = useLatestCaseId();
   // Six parallel 2-month windows (1 year), pre-filtered server-side to
   // the 4 statuses the user can actually attach documents against
@@ -438,18 +438,7 @@ export default function AiDocumentsTab() {
         </p>
       </div>
 
-      {isError && (
-        <div
-          className="apex-card mb-6 p-4 text-sm"
-          style={{
-            borderColor: "var(--att)",
-            background: "var(--att-soft)",
-            color: "var(--att)",
-          }}
-        >
-          Unable to load documents right now. Please refresh and try again.
-        </div>
-      )}
+      {/* Load-error banner hidden on request; a failed fetch falls through to the empty state. */}
 
       {/* Filter */}
       <div className="flex gap-1.5 flex-wrap mb-6">
@@ -841,7 +830,7 @@ function GeneralDocumentsSection() {
   const setSessionId = useAiChatStore((s) => s.setSessionId);
   const setPendingPrompt = useAiChatStore((s) => s.setPendingPrompt);
 
-  const { data: documents = [], isLoading, isError } =
+  const { data: documents = [], isLoading } =
     usePatientDocuments({ cvUpload: true });
   const uploadMutation = useUploadPatientDocument();
   const deleteMutation = useDeletePatientDocument();
@@ -1013,18 +1002,8 @@ function GeneralDocumentsSection() {
         </Button>
       </div>
 
-      {isError ? (
-        <div
-          className="apex-card mb-2 p-4 text-sm"
-          style={{
-            borderColor: "var(--att)",
-            background: "var(--att-soft)",
-            color: "var(--att)",
-          }}
-        >
-          Unable to load documents right now.
-        </div>
-      ) : isLoading ? (
+      {/* Load-error banner hidden on request; a failed fetch falls through to the empty state. */}
+      {isLoading ? (
         <div className="py-8 flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
         </div>

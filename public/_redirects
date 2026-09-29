@@ -1,1 +1,4 @@
+# API proxy — must stay above the SPA fallback. Keeps the auth cookies first-party so iOS
+# (WebKit) keeps them; see src/constants/api.ts.
+/api/*  https://api-staging.innovariatech.space/api/:splat  200
 /*  /index.html  200

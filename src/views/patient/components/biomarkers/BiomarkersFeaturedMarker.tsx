@@ -66,8 +66,8 @@ export default function BiomarkersFeaturedMarker({
   const id = item.loinc || item.canonicalName || item.biomarkerName;
 
   return (
-    <div className="apex-card mb-[22px]" style={{ padding: "24px 28px" }}>
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-9">
+    <div className="apex-card mb-[22px] px-4 py-5 md:px-7 md:py-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-6 md:gap-9">
       {/* Left column */}
       <div>
         <span
@@ -86,10 +86,9 @@ export default function BiomarkersFeaturedMarker({
           {tagCopy}
         </span>
         <h2
-          className="font-sans m-0 flex items-center gap-3"
+          className="font-sans m-0 flex items-center gap-3 text-[22px] md:text-[28px] break-words"
           style={{
             fontWeight: 700,
-            fontSize: 28,
             lineHeight: 1.1,
             letterSpacing: "-0.015em",
           }}
@@ -120,9 +119,8 @@ export default function BiomarkersFeaturedMarker({
           style={{ marginTop: 18 }}
         >
           <span
-            className="font-mono tabular-nums"
+            className="font-mono tabular-nums text-[44px] md:text-[56px]"
             style={{
-              fontSize: 56,
               fontWeight: 600,
               lineHeight: 1,
               letterSpacing: "-0.03em",
@@ -254,18 +252,16 @@ function FeaturedStats({
 
   return (
     <div
-      className="mt-[18px] grid"
+      className={`mt-[18px] grid grid-cols-1 py-1 px-1.5 md:py-4 ${goal ? "md:grid-cols-[1.7fr_1fr_1.15fr]" : "md:grid-cols-[1.7fr_1fr]"}`}
       style={{
-        gridTemplateColumns: `1.7fr 1fr${goal ? " 1.15fr" : ""}`,
         background: "var(--card, #fff)",
         border: "1px solid var(--line)",
         borderRadius: 10,
-        padding: "16px 6px",
       }}
     >
       <div
-        className="flex items-center gap-3"
-        style={{ padding: "0 16px", minWidth: 0 }}
+        className="flex items-center gap-3 px-4 py-3 md:py-0"
+        style={{ minWidth: 0 }}
       >
         <span
           className="grid place-items-center shrink-0"
@@ -330,8 +326,8 @@ function StatCell({
 }) {
   return (
     <div
-      className="flex items-center gap-3"
-      style={{ padding: "0 16px", borderLeft: "1px solid var(--line)", minWidth: 0 }}
+      className="flex items-center gap-3 px-4 py-3 md:py-0 border-t md:border-t-0 md:border-l"
+      style={{ borderColor: "var(--line)", minWidth: 0 }}
     >
       <span
         className="grid place-items-center shrink-0"
@@ -349,7 +345,7 @@ function StatCell({
         <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{label}</div>
         <div
           style={{ fontSize: 15, fontWeight: 700, color: valueColor, marginTop: 1 }}
-          className="truncate"
+          className="break-words md:truncate"
         >
           {value}
         </div>
