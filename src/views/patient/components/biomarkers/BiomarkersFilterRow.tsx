@@ -83,7 +83,7 @@ function CategoryPill({
         background: active ? "var(--apex-accent-bright)" : "var(--ink)",
         color: "#FFFFFF",
         letterSpacing: "-0.005em",
-        boxShadow: active ? "0 2px 8px rgba(225, 24, 22, 0.25)" : undefined,
+        boxShadow: active ? "0 2px 8px rgba(211, 7, 4, 0.25)" : undefined,
       }}
     >
       {label}

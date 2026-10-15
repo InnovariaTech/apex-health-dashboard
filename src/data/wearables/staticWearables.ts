@@ -43,8 +43,8 @@ export const STATIC_WEARABLES = {
     unit: "bpm",
     trend: "−3 bpm vs last wk",
     scale: [50, 64] as [number, number],
-    color: "#E11816",
-    colorDark: "#B70402",
+    color: "#D30704",
+    colorDark: "#A80503",
   },
 
   bp: {

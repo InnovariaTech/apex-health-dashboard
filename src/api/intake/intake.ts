@@ -1,7 +1,10 @@
 import { axiosService } from "@/api/http/axiosInstance";
+import type { IntakeManifest, PublicIntakeForm } from "@/types/intake/intake_types";
 import type {
   IntakeAnswer,
   IntakeStep,
+  PatientIntake,
+  PendingIntake,
   PublicStartPayload,
   PublicStartResult,
 } from "@/types/intake/intake_types";
@@ -23,6 +26,15 @@ function unwrap<T>(body: unknown): T {
     return (envelope as { data: T }).data;
   }
   return envelope as T;
+}
+
+/**
+ * The details page's title and theme, read before the public door. Same 404 cases as `/start`
+ * (unknown, unpublished, not public, sold through Healthie, another partner's form). Never cached.
+ */
+export async function getPublicIntakeForm(formKey: string): Promise<PublicIntakeForm> {
+  const res = await axiosService.get(`${BASE}/public/${encodeURIComponent(formKey)}`);
+  return unwrap<PublicIntakeForm>(res.data);
 }
 
 /**
@@ -77,10 +89,29 @@ export async function goBack(token: string): Promise<IntakeStep> {
   return unwrap<IntakeStep>(res.data);
 }
 
-/** The whole form up front (progress bar / review). Carries no conditions. */
-export async function getManifest(token: string): Promise<unknown> {
+/**
+ * The whole form up front (progress bar / review). Carries no conditions. Also carries the
+ * `theme` the walk wears: the partner it was started through, else the form's own, with the
+ * form's published override merged in.
+ */
+export async function getManifest(token: string): Promise<IntakeManifest> {
   const res = await axiosService.get(
     `${BASE}/${encodeURIComponent(token)}/manifest`,
   );
-  return unwrap<unknown>(res.data);
+  return unwrap<IntakeManifest>(res.data);
+}
+
+/**
+ * Paid, unfinished forms for the signed-in patient — someone who bought a form on the public buy
+ * page pays first and answers after logging in. Session required. Every call mints new tokens.
+ */
+export async function getPendingIntakes(): Promise<PendingIntake[]> {
+  const res = await axiosService.get("/api/patient/intakes/pending");
+  return unwrap<{ intakes: PendingIntake[] }>(res.data).intakes ?? [];
+}
+
+/** All the patient's forms and their status. Session required; safe to re-read (mints nothing). */
+export async function getMyIntakes(): Promise<PatientIntake[]> {
+  const res = await axiosService.get("/api/patient/intakes");
+  return unwrap<{ intakes: PatientIntake[] }>(res.data).intakes ?? [];
 }

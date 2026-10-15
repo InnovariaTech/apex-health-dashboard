@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 import {
   fetchCheckUser,
   fetchPatientProfile,
@@ -68,6 +69,8 @@ export function useProfilePartnerIntegration(
   const linkName = params.linkName;
 
   return useQuery<PatientProfilePartnerIntegrationInfo>({
+    // CareValidate-only (Healthie has no equivalent): off with the CareValidate switch.
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.profilePartnerIntegration(linkName),
     queryFn: () =>
       fetchPatientProfilePartnerIntegration(linkName ? { linkName } : {}),
@@ -77,6 +80,8 @@ export function useProfilePartnerIntegration(
 
 export function useProfileGlobalSettings() {
   return useQuery<PatientProfileGlobalSettingsInfo>({
+    // CareValidate-only (Healthie has no equivalent): off with the CareValidate switch.
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.profileGlobalSettings(),
     queryFn: fetchPatientProfileGlobalSettings,
     staleTime: 60_000,
@@ -96,7 +101,7 @@ export function useProfilePromoCode(
         ...(code ? { code } : {}),
         ...(productBundleId ? { productBundleId } : {}),
       }),
-    enabled: Boolean(code),
+    enabled: CAREVALIDATE_ENABLED && Boolean(code),
     staleTime: 60_000,
   });
 }

@@ -65,11 +65,11 @@
   background: rgba(255, 255, 255, 0.08);
 }
 .bm-pdf-modal .tb-btn.primary {
-  background: var(--apex-accent, #e11816);
-  border-color: var(--apex-accent, #e11816);
+  background: var(--apex-accent, #D30704);
+  border-color: var(--apex-accent, #D30704);
 }
 .bm-pdf-modal .tb-btn.primary:hover {
-  background: var(--apex-accent-dark, #b70402);
+  background: var(--apex-accent-dark, #A80503);
 }
 
 .bm-pdf-modal .pdf-pages-wrap {
@@ -150,7 +150,7 @@
   margin: 0 0 6px;
 }
 .bm-pdf-modal .rep-title em {
-  color: var(--apex-accent, #e11816);
+  color: var(--apex-accent, #D30704);
   font-style: italic;
   font-weight: 500;
 }
@@ -198,7 +198,7 @@
   font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--apex-accent, #e11816);
+  color: var(--apex-accent, #D30704);
   font-weight: 600;
   margin: 20px 0 10px;
   display: flex;
@@ -280,8 +280,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(225, 24, 22, 0.1);
-  color: var(--apex-accent, #e11816);
+  background: rgba(211, 7, 4, 0.1);
+  color: var(--apex-accent, #D30704);
   padding: 3px 9px;
   border-radius: 100px;
   font-family: var(--font-mono, monospace);

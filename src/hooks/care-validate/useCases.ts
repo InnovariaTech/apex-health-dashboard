@@ -16,6 +16,7 @@ import type {
   FetchCaseDetailsParams,
   GetCasesParams,
 } from "@/types/care-validate/case_types";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 
 export function useCases(params: GetCasesParams): ReturnType<typeof useQuery<CaseItem[]>>;
 export function useCases(includePayments?: boolean): ReturnType<typeof useQuery<CaseItem[]>>;
@@ -38,6 +39,7 @@ export function useCases(
   const status = params.status;
 
   return useQuery<CaseItem[]>({
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.cases(
       includePayments,
       startTime,
@@ -128,6 +130,7 @@ export function useCasesYearRolling(
 
   const results = useQueries({
     queries: windows.map((w) => ({
+      enabled: CAREVALIDATE_ENABLED,
       queryKey: queryKeys.careValidate.cases(
         includePayments,
         w.startTime,
@@ -251,7 +254,7 @@ export function useCaseDetails(
         includeCaseProducts,
         includePayments,
       }),
-    enabled: Boolean(caseId),
+    enabled: CAREVALIDATE_ENABLED && Boolean(caseId),
     staleTime: enablePolling ? 10_000 : 60_000,
     refetchInterval: enablePolling ? 15_000 : false,
     refetchIntervalInBackground: false,
@@ -260,6 +263,7 @@ export function useCaseDetails(
 
 export function useLatestCaseId() {
   return useQuery<string>({
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.latestCaseId(),
     queryFn: getLatestCaseId,
     staleTime: 60_000,

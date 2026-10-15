@@ -118,7 +118,7 @@ function BioAgeBody({ bioAge }: { bioAge: BiologicalAge }) {
         >
           <BodyModel3D
             scanState="complete"
-            color="#E11816"
+            color="#D30704"
             autoRotate
             autoRotateSpeed={1.2}
             className="absolute inset-0"
@@ -301,8 +301,8 @@ function RecoItem({
         gridTemplateColumns: "52px 1fr auto",
         gap: 12,
         padding: "10px 12px",
-        border: `1px solid ${isPeptide ? "rgba(225, 24, 22,0.25)" : "var(--line)"}`,
-        background: isPeptide ? "rgba(225, 24, 22,0.035)" : "transparent",
+        border: `1px solid ${isPeptide ? "rgba(211, 7, 4,0.25)" : "var(--line)"}`,
+        background: isPeptide ? "rgba(211, 7, 4,0.035)" : "transparent",
         borderRadius: 10,
       }}
     >

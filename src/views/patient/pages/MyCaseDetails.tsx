@@ -102,7 +102,7 @@ export default function MyCaseDetails() {
   }
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground min-h-screen">
       <Link
         to={createPageUrl("MyCases")}
         className="inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.08em] font-medium text-muted-foreground hover:text-foreground transition-colors mb-4"

@@ -4,13 +4,13 @@
  * leak into the rest of the portal. The demo's own sidebar/topbar styles are
  * dropped (the portal supplies the layout); only page-content styles remain.
  *
- * The accent maps to the portal's unified brand red (`--apex-accent`, #E11816)
+ * The accent maps to the portal's unified brand red (`--apex-accent`, #D30704)
  * instead of the demo's #D30603.
  */
 
 .apex-shop {
-  --shop-accent: var(--apex-accent, #e11816);
-  --shop-accent-dark: var(--apex-accent-dark, #b70402);
+  --shop-accent: var(--apex-accent, #D30704);
+  --shop-accent-dark: var(--apex-accent-dark, #A80503);
   --shop-ink: #16181c;
   --shop-ink-2: #5b616e;
   --shop-ink-3: #9aa0ab;

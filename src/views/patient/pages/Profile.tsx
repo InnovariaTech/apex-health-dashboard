@@ -277,7 +277,7 @@ export default function Profile() {
   const initial = (displayName && displayName !== "—" ? displayName[0] : "U").toUpperCase();
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Page head */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6">
         <div>

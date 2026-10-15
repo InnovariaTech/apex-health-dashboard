@@ -101,7 +101,7 @@ function TrainerChatInner() {
       : "";
 
   return (
-    <div className="p-4 md:p-9 max-w-[1280px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Page head */}
       <div
         className="mb-3"
@@ -147,7 +147,7 @@ function TrainerChatInner() {
             fontSize: 13.5,
             padding: "11px 18px",
             borderRadius: 100,
-            boxShadow: "0 2px 10px rgba(225, 24, 22, 0.22)",
+            boxShadow: "0 2px 10px rgba(211, 7, 4, 0.22)",
             cursor: trainerUserId ? "pointer" : "not-allowed",
           }}
         >

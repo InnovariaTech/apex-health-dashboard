@@ -17,6 +17,7 @@ import type {
   TreatmentBundleItem,
   TreatmentProductItem,
 } from "@/types/care-validate/treatments_types";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 
 export function useTreatments(
   params: FetchAvailableTreatmentBundlesParams = { isVisible: true }
@@ -24,6 +25,7 @@ export function useTreatments(
   const isVisible = params.isVisible;
 
   return useQuery<TreatmentBundleItem[]>({
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.treatmentBundles(isVisible),
     queryFn: () =>
       fetchAvailableTreatmentBundles({
@@ -40,6 +42,7 @@ export function useTreatmentProducts(
   const isVisible = params.isVisible;
 
   return useQuery<TreatmentProductItem[]>({
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.treatmentProducts(isVisible),
     queryFn: () =>
       fetchTreatmentProducts({
@@ -66,7 +69,7 @@ export function useTreatmentBundleById(
       includeFollowupForm
     ),
     queryFn: () => fetchTreatmentBundleById(bundleUUID, params),
-    enabled: Boolean(bundleUUID),
+    enabled: CAREVALIDATE_ENABLED && Boolean(bundleUUID),
     staleTime: 60_000,
   });
 }

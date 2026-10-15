@@ -25,7 +25,7 @@ export default function BrowseTreatments() {
   };
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground min-h-screen">
       {/* Page head */}
       <div className="mb-6 pb-5 border-b border-border">
         <div className="apex-eyebrow mb-2">Catalog</div>

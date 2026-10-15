@@ -114,7 +114,7 @@ function NutritionInner() {
   const planQuery = useMealPlan();
 
   return (
-    <div className="p-4 md:p-9 max-w-[1320px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Breadcrumb */}
       <div
         className="mb-3"
@@ -837,7 +837,7 @@ function CalorieTrendSvg({
               textAnchor="end"
               fontSize="12"
               fill="#9aa1a9"
-              fontFamily="Inter"
+              fontFamily="Archivo, sans-serif"
             >
               {v.toLocaleString()}
             </text>
@@ -854,7 +854,7 @@ function CalorieTrendSvg({
           fontSize="12.5"
           fill="#9aa1a9"
           fontWeight={600}
-          fontFamily="Inter"
+          fontFamily="Archivo, sans-serif"
         >
           {shortDateLabel(d.date)}
         </text>
@@ -880,7 +880,7 @@ function CalorieTrendSvg({
             fontSize="12"
             fill="#2f7d5b"
             fontWeight={700}
-            fontFamily="Inter"
+            fontFamily="Archivo, sans-serif"
           >
             Goal
           </text>
@@ -950,7 +950,7 @@ function MacroBarsSvg({
               textAnchor="end"
               fontSize="12"
               fill="#9aa1a9"
-              fontFamily="Inter"
+              fontFamily="Archivo, sans-serif"
             >
               {v}
             </text>
@@ -995,7 +995,7 @@ function MacroBarsSvg({
               fontSize="12.5"
               fill="#9aa1a9"
               fontWeight={600}
-              fontFamily="Inter"
+              fontFamily="Archivo, sans-serif"
             >
               {shortDateLabel(row.date)}
             </text>

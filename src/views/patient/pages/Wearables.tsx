@@ -125,7 +125,7 @@ function AxisX({ days }: { days: readonly string[] }) {
 
 const CARD_THEME = {
   steps: { c: "#059669", cDark: "#047857", cSoft: "#E6F6EF" },
-  rhr: { c: "#E11816", cDark: "#B70402", cSoft: "#FCEAEA" },
+  rhr: { c: "#D30704", cDark: "#A80503", cSoft: "#FCEAEA" },
   bp: { c: "#2563EB", cDark: "#1D4ED8", cSoft: "#E6EDFC" },
   sleep: { c: "#7C3AED", cDark: "#5B21B6", cSoft: "#EEEAFB" },
 } as const;
@@ -155,7 +155,7 @@ function MetricCard({
     trendTone === "up"
       ? { color: "#3E7C57", borderColor: "#CFE6D8", background: "#F2FAF5" }
       : trendTone === "down"
-        ? { color: "#B70402", borderColor: "#F3D4D4", background: "#FDF2F2" }
+        ? { color: "#A80503", borderColor: "#F3D4D4", background: "#FDF2F2" }
         : { color: "#3A3D44", borderColor: "#E4E4E1", background: "#fff" };
 
   return (
@@ -508,7 +508,7 @@ export default function Wearables() {
   const bpLatest = `${m.bp.systolic[m.bp.systolic.length - 1]}/${m.bp.diastolic[m.bp.diastolic.length - 1]}`;
 
   return (
-    <div className="p-4 md:p-9 max-w-[1280px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Keyframes for the "Synced" pulse ring */}
       <style>{`@keyframes apexWearRing{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.7);opacity:0}}`}</style>
 

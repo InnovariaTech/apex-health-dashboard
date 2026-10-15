@@ -1,3 +1,4 @@
+import type { ResolvedTheme } from "@/types/intake/theme_types";
 /**
  * Patient intake runtime types — the server-driven "fold".
  *
@@ -168,4 +169,51 @@ export interface PublicStartPayload {
 export interface PublicStartResult {
   token: string;
   expiresAt: string;
+}
+
+/**
+ * `GET /api/patient/intakes/pending` — forms the patient has PAID for and not finished (a
+ * refunded purchase drops out). Each call issues a fresh `token` and retires the previous one,
+ * so it is never cached.
+ */
+export interface PendingIntake {
+  submissionId: string;
+  formKey: string;
+  title: string;
+  /** A fresh intake link token: open `/intake/<token>`. */
+  token: string;
+}
+
+/**
+ * `GET /api/patient/intakes` — every form of the patient's and where it stands. Read from our own
+ * records (no call to the care platform). `submitted` ones are what the dashboard tracks.
+ */
+export interface PatientIntake {
+  submissionId: string;
+  formKey: string;
+  title: string;
+  status: "awaiting_answers" | "awaiting_payment" | "submitted" | "not_eligible";
+  startedAt: string;
+  submittedAt: string | null;
+  /** When the answers reached the care team's record. Null until then. */
+  sentToCareTeamAt: string | null;
+}
+
+/** `GET /api/intake/:token/manifest` — only the parts the runtime reads. */
+/**
+ * `GET /api/intake/public/:formKey` — what the details page of a public form needs before any
+ * token exists: the title and the theme (partner from the request's `Origin`, plus the form's own).
+ */
+export interface PublicIntakeForm {
+  formKey: string;
+  title: string;
+  theme: ResolvedTheme;
+}
+
+export interface IntakeManifest {
+  formKey: string;
+  title: string;
+  version: number;
+  /** The merged look for this walk; absent from older backends. */
+  theme?: ResolvedTheme;
 }

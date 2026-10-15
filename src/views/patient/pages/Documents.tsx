@@ -14,7 +14,7 @@ import MyUploadsTab from "@/views/patient/components/documents/MyUploadsTab";
  */
 export default function Documents() {
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground min-h-screen">
       <div className="mb-6 pb-5 border-b border-border">
         <div className="apex-eyebrow mb-1.5">Health Records</div>
         <h1 className="apex-page-title">

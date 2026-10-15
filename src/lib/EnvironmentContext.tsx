@@ -79,6 +79,17 @@ function applyEnvironmentTokens(env) {
   root.style.setProperty("--sidebar-accent-foreground",       hexToHsl(env.sidebarText));
   root.style.setProperty("--sidebar-border",                  borderHsl);
   root.style.setProperty("--sidebar-ring",                    primaryHsl);
+
+  // Sidebar rail (AppLayout): a dark rail gets the design's warm-ink states, a light rail the
+  // neutral ones, so partner environments with white sidebars keep working.
+  const darkRail = !isLightColor(env.sidebarBg);
+  root.style.setProperty("--rail-bg",          env.sidebarBg);
+  root.style.setProperty("--rail-text",        env.sidebarText);
+  root.style.setProperty("--rail-label",       darkRail ? "#8F877C" : "#8A8A8A");
+  root.style.setProperty("--rail-active-bg",   darkRail ? "#2A251E" : "#F1F1EE");
+  root.style.setProperty("--rail-active-text", darkRail ? "#FF5A4D" : "#1A1A1A");
+  root.style.setProperty("--rail-line",        darkRail ? "#2A251E" : env.borderColor);
+  root.dataset.rail = darkRail ? "dark" : "light";
 }
 
 export function EnvironmentProvider({ children }) {

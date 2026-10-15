@@ -124,7 +124,7 @@ export default function Genetics() {
       style={{
         background: MOCKUP.bg,
         color: MOCKUP.ink,
-        fontFamily: "Inter, system-ui, sans-serif",
+        fontFamily: "Archivo, system-ui, sans-serif",
         lineHeight: 1.5,
       }}
       className="min-h-screen"
@@ -797,7 +797,7 @@ function DonutSvg() {
         x="21"
         y="25.5"
         textAnchor="middle"
-        fontFamily="Inter"
+        fontFamily="Archivo, sans-serif"
         fontWeight={500}
         fontSize="2.6"
         fill="#9aa0a8"

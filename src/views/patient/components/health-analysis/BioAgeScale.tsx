@@ -84,7 +84,7 @@ export default function BioAgeScale({
           x={xBio}
           y="18"
           textAnchor="middle"
-          fontFamily="Inter, sans-serif"
+          fontFamily="Archivo, sans-serif"
           fontSize="12"
           fill="var(--opt)"
           fontWeight={700}
@@ -106,7 +106,7 @@ export default function BioAgeScale({
           x={xChrono}
           y="18"
           textAnchor="middle"
-          fontFamily="Inter, sans-serif"
+          fontFamily="Archivo, sans-serif"
           fontSize="12"
           fill="#525252"
           fontWeight={700}

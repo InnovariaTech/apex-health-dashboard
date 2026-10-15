@@ -10,6 +10,10 @@ import ResetPassword from "@/views/auth/pages/ResetPassword";
 import ImpersonateExchange from "@/views/auth/pages/ImpersonateExchange";
 import IntakeRuntime from "@/views/intake/pages/IntakeRuntime";
 import PublicIntakeStart from "@/views/intake/pages/PublicIntakeStart";
+import BuyPage from "@/views/purchase/pages/BuyPage";
+import ServiceMoved from "@/components/global/ServiceMoved";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
+import { CAREVALIDATE_PAGES } from "@/views/patient/config/patientNavigation";
 import ImpersonationBanner from "@/components/ImpersonationBanner";
 import Profile from "@/views/patient/pages/Profile";
 import Billing from "@/views/patient/pages/Billing";
@@ -20,6 +24,8 @@ import AdvancedBiomarkers from "@/views/patient/pages/AdvancedBiomarkers";
 import LabKits from "@/views/patient/pages/LabKits";
 import Shop from "@/views/patient/pages/Shop";
 import MyTreatments from "@/views/patient/pages/MyTreatments";
+import TreatmentDetails from "@/views/patient/pages/TreatmentDetails";
+import OutstandingForms from "@/views/patient/pages/OutstandingForms";
 import MyCaseDetails from "@/views/patient/pages/MyCaseDetails";
 import VisitDetails from "@/views/patient/pages/VisitDetails";
 import BelugaIntake from "@/views/patient/pages/BelugaIntake";
@@ -44,6 +50,12 @@ const AuthenticatedApp = () => {
   // navigates to "/" (this component re-renders and falls through normally).
   if (typeof window !== "undefined" && window.location.pathname === "/impersonate") {
     return <ImpersonateExchange />;
+  }
+
+  // Public buy page for a form sold through Healthie — pre-auth: a stranger pays first, gets a
+  // set-password email, and the form opens after they log in.
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/buy/")) {
+    return <BuyPage />;
   }
 
   // Public storefront door — checked BEFORE the generic /intake/ branch below,
@@ -105,11 +117,24 @@ const AuthenticatedApp = () => {
           path={`/${path}`}
           element={
             <LayoutWrapper>
-              <Page />
+              {/* CareValidate pages are disconnected while it's switched off — the page itself is untouched. */}
+              {!CAREVALIDATE_ENABLED && CAREVALIDATE_PAGES.includes(path) ? (
+                <ServiceMoved title={path === "BrowseTreatments" ? "Treatments" : path === "MyCases" ? "My Cases" : path} />
+              ) : (
+                <Page />
+              )}
             </LayoutWrapper>
           }
         />
       ))}
+      <Route
+        path="/OutstandingForms"
+        element={
+          <LayoutWrapper>
+            <OutstandingForms />
+          </LayoutWrapper>
+        }
+      />
       <Route
         path="/Profile"
         element={
@@ -122,7 +147,7 @@ const AuthenticatedApp = () => {
         path="/Billing"
         element={
           <LayoutWrapper>
-            <Billing />
+            {CAREVALIDATE_ENABLED ? <Billing /> : <ServiceMoved title="Billing" />}
           </LayoutWrapper>
         }
       />
@@ -183,10 +208,18 @@ const AuthenticatedApp = () => {
         }
       />
       <Route
+        path="/MyTreatments/:id"
+        element={
+          <LayoutWrapper>
+            <TreatmentDetails />
+          </LayoutWrapper>
+        }
+      />
+      <Route
         path="/MyCases/:caseId"
         element={
           <LayoutWrapper>
-            <MyCaseDetails />
+            {CAREVALIDATE_ENABLED ? <MyCaseDetails /> : <ServiceMoved title="My Cases" />}
           </LayoutWrapper>
         }
       />

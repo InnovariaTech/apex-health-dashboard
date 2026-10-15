@@ -18,9 +18,33 @@ export const queryKeys = {
     visit: (masterId: string) => ["beluga", "visit", masterId] as const,
     chat: (masterId: string) => ["beluga", "chat", masterId] as const,
   },
+  healthie: {
+    /** The patient's message threads with the care team, and the unread count. */
+    threads: () => ["healthie", "threads"] as const,
+    /** One thread's messages, newest first. */
+    messages: (threadId: string) => ["healthie", "messages", threadId] as const,
+    /** Bookable visit types (Healthie, live). */
+    visitTypes: () => ["healthie", "visit-types"] as const,
+    /** Open days in a month for a visit type. */
+    visitDays: (typeKey: string, month: string, timezone: string) =>
+      ["healthie", "visit-days", typeKey, month, timezone] as const,
+    /** Open times on a day for a visit type. */
+    visitSlots: (typeKey: string, date: string, timezone: string) =>
+      ["healthie", "visit-slots", typeKey, date, timezone] as const,
+    /** The patient's visits; every filter shares the `visits` prefix for invalidation. */
+    visits: (filter: string) => ["healthie", "visits", filter] as const,
+  },
   intake: {
     /** Current step for a submission token (the running "fold"). */
     step: (token: string) => ["intake", "step", token] as const,
+    /** The form's manifest for a token: title and the theme the walk wears. */
+    manifest: (token: string) => ["intake", "manifest", token] as const,
+    /** The public details page's title and theme. */
+    publicForm: (formKey: string) => ["intake", "public-form", formKey] as const,
+    /** Paid, unfinished intakes for the signed-in patient. Fetched once: each read mints new links. */
+    pending: () => ["intake", "pending"] as const,
+    /** All the patient's forms and their status (submitted included). */
+    mine: () => ["intake", "mine"] as const,
   },
   careValidate: {
     cases: (

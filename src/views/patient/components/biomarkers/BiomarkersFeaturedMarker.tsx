@@ -558,7 +558,7 @@ function FeaturedTrendChart({
             y={h - 6}
             fontSize="9"
             fill="var(--ink-3)"
-            fontFamily="Inter, sans-serif"
+            fontFamily="Archivo, sans-serif"
             textAnchor="middle"
           >
             {formatXLabel(p.date)}

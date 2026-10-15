@@ -14,6 +14,7 @@ import type {
   FetchCaseCommentsParams,
   GetCaseCommentsByIDParams,
 } from "@/types/care-validate/communication_types";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 
 export function useCommunications(
   params: FetchCaseCommentsParams = { recordsPerPage: 20 }
@@ -21,6 +22,7 @@ export function useCommunications(
   const recordsPerPage = params.recordsPerPage ?? 20;
 
   return useQuery<CommunicationCommentItem[]>({
+    enabled: CAREVALIDATE_ENABLED,
     queryKey: queryKeys.careValidate.caseComments(recordsPerPage),
     queryFn: () => fetchAllCaseComments({ recordsPerPage }),
     staleTime: 60_000,
@@ -45,7 +47,7 @@ export function useCaseCommentsByID(
         recordsPerPage,
         sortOrder,
       }),
-    enabled: Boolean(caseId),
+    enabled: CAREVALIDATE_ENABLED && Boolean(caseId),
     staleTime: 10_000,
     refetchInterval: 15_000,
     refetchIntervalInBackground: false,

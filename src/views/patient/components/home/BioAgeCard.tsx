@@ -71,7 +71,7 @@ export default function BioAgeCard() {
             >
               <BodyModel3D
                 scanState="complete"
-                color="#E11816"
+                color="#D30704"
                 autoRotate
                 autoRotateSpeed={1.2}
                 className="absolute inset-0"

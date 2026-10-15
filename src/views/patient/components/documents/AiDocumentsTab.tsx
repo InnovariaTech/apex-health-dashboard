@@ -10,6 +10,7 @@ import {
   useAnalyzeDocument,
 } from "@/hooks/care-validate/useDocuments";
 import { useCasesYearRolling, useLatestCaseId } from "@/hooks/care-validate/useCases";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 import { ELIGIBLE_CASE_STATUSES } from "@/types/care-validate/case_types";
 import { fileToBase64, isAllowedUploadMimeType } from "@/api/care-validate/files";
 import {
@@ -181,11 +182,13 @@ export default function AiDocumentsTab() {
   const documents = apiDocuments.map(mapApiDocumentToPageDocument);
   // Case section list: scoped to the case the user picked. If nothing is
   // picked (rare — both auto-select branches above missed) we show empty.
-  const filtered = selectedCaseId
+  // With CareValidate switched off there are no cases: show the whole chart, unfiltered.
+  const filtered = CAREVALIDATE_ENABLED && selectedCaseId
     ? documents.filter((d) => d.case_id === selectedCaseId)
     : documents;
   const isUploading = uploadFileMutation.isPending;
-  const canUpload = Boolean(selectedCaseId);
+  // Uploads go to the patient's chart; a case is only asked for while CareValidate is on.
+  const canUpload = !CAREVALIDATE_ENABLED || Boolean(selectedCaseId);
 
   // Drag-state for the case upload zone — toggled in the dragover/leave
   // handlers so the dashed border switches to the primary color while a
@@ -199,7 +202,7 @@ export default function AiDocumentsTab() {
    */
   const processCaseFile = async (file: File | null) => {
     if (!file) return;
-    if (!selectedCaseId) {
+    if (CAREVALIDATE_ENABLED && !selectedCaseId) {
       toast({
         title: "No case selected",
         description:
@@ -222,7 +225,7 @@ export default function AiDocumentsTab() {
       await uploadFileMutation.mutateAsync({
         name: file.name,
         data,
-        caseId: selectedCaseId,
+        ...(CAREVALIDATE_ENABLED && selectedCaseId ? { caseId: selectedCaseId } : {}),
         mimeType: file.type,
       });
       toast({
@@ -358,15 +361,17 @@ export default function AiDocumentsTab() {
       <section>
         <div className="mb-5">
           <h2 className="apex-card-title flex items-center gap-2 mb-1">
-            <FlaskConical className="w-4 h-4 text-primary" /> Case documents
+            <FlaskConical className="w-4 h-4 text-primary" /> {CAREVALIDATE_ENABLED ? "Case documents" : "My documents"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Attach files to a specific case. Each upload is AI-analyzable.
+            {CAREVALIDATE_ENABLED
+              ? "Attach files to a specific case. Each upload is AI-analyzable."
+              : "Upload files to your record so your care team can see them. Each upload is AI-analyzable."}
           </p>
         </div>
 
-        {/* Case picker */}
-        {casesQuery.isLoading ? (
+        {/* Case picker — only while CareValidate (the source of cases) is on. */}
+        {!CAREVALIDATE_ENABLED ? null : casesQuery.isLoading ? (
           <p className="text-sm text-muted-foreground mb-5">Loading cases…</p>
         ) : cases.length === 0 ? (
           // Covers both "no cases at all" and "every case the user has

@@ -1,17 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, CreditCard, Loader2 } from "lucide-react";
-import { useBack, useIntakeStep } from "@/hooks/intake/useIntake";
+import { useBack, useIntakeManifest, useIntakeStep } from "@/hooks/intake/useIntake";
 import FactsStepView from "@/views/intake/components/FactsStep";
 import QuestionStepView from "@/views/intake/components/QuestionStep";
 import IntakeContentBlocks from "@/views/intake/components/IntakeContentBlocks";
 import IntakeShell from "@/views/intake/components/IntakeShell";
 import { loadIntakeToken, saveIntakeToken } from "@/lib/intakeToken";
+import { getPendingIntakes } from "@/api/intake/intake";
+import { announceIntakeCompleted } from "@/lib/intakeChannel";
 import type { CheckoutStep, IntakeStep } from "@/types/intake/intake_types";
 
 /**
  * The patient intake runtime. Mounted pre-auth for `/intake/:token` — the token
  * is the only credential. One component switches on `data.kind`; every endpoint
  * returns the same union. `GET` on mount is the source of truth.
+ *
+ * The walk wears the theme from its manifest (the partner it was started through, else the form's
+ * own); every screen is drawn with the theme's `apx-*` parts.
  */
 
 function readToken(): string {
@@ -31,8 +36,6 @@ function readToken(): string {
   return token;
 }
 
-const Shell = IntakeShell;
-
 function Terminal({
   icon,
   title,
@@ -43,9 +46,9 @@ function Terminal({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="text-center space-y-4">
+    <div className="flex flex-col items-center gap-3 text-center">
       <div className="flex justify-center">{icon}</div>
-      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
+      <h2 className="apx-question-text" style={{ fontSize: "1.2em" }}>{title}</h2>
       {children}
     </div>
   );
@@ -62,55 +65,51 @@ function CheckoutStepView({
 }) {
   const back = useBack(token);
   return (
-    <div className="space-y-6">
+    <>
       <IntakeContentBlocks content={step.content} />
-      <div className="text-center space-y-2">
-        <div className="flex justify-center">
-          <CreditCard className="w-9 h-9 text-[#e11816]" />
-        </div>
-        <h1 className="text-xl font-semibold text-slate-900">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <CreditCard className="w-9 h-9" style={{ color: "var(--apx-color-primary, #d30704)" }} />
+        <h2 className="apx-question-text" style={{ fontSize: "1.2em" }}>
           One last step — payment
-        </h1>
-        <p className="text-sm text-slate-500">
+        </h2>
+        <p className="apx-help-text">
           Your answers are saved. Complete payment to finish and send your intake
           for review.
         </p>
       </div>
 
       {step.checkoutUrl ? (
-        <a
-          href={step.checkoutUrl}
-          className="block text-center rounded-lg bg-[#e11816] hover:bg-[#c3140f] text-white py-3 text-[15px] font-medium"
-        >
-          Proceed to secure payment
-        </a>
+        <div className="flex">
+          <a href={step.checkoutUrl} className="apx-button-primary flex-1">
+            Proceed to secure payment
+          </a>
+        </div>
       ) : (
-        <div className="text-center space-y-3">
-          <p className="text-sm text-slate-500 inline-flex items-center gap-2 justify-center">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <p className="apx-help-text inline-flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" /> Preparing your secure
             payment…
           </p>
-          <button
-            onClick={onRetry}
-            className="block mx-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"
-          >
+          <button onClick={onRetry} className="apx-button-secondary">
             Try again
           </button>
         </div>
       )}
 
-      <button
-        onClick={() => back.mutate()}
-        disabled={back.isPending}
-        className="w-full text-center text-[13px] text-slate-500 hover:text-slate-800 disabled:opacity-50"
-      >
-        ← Change my answers
-      </button>
+      <div className="flex justify-center">
+        <button
+          onClick={() => back.mutate()}
+          disabled={back.isPending}
+          className="apx-help-text underline-offset-2 hover:underline disabled:opacity-50"
+        >
+          ← Change my answers
+        </button>
+      </div>
 
-      <p className="text-[11px] text-slate-400 text-center">
+      <p className="apx-help-text text-center" style={{ fontSize: "11.5px" }}>
         Payment is processed securely by Stripe. You won't be charged twice.
       </p>
-    </div>
+    </>
   );
 }
 
@@ -133,15 +132,15 @@ function StepView({
     case "terminated":
       return (
         <Terminal
-          icon={<AlertCircle className="w-10 h-10 text-slate-400" />}
+          icon={<AlertCircle className="w-10 h-10 opacity-40" />}
           title="We're unable to proceed"
         >
           {step.content?.length ? (
-            <div className="text-left">
+            <div className="w-full text-left">
               <IntakeContentBlocks content={step.content} />
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="apx-help-text">
               Based on your answers, we can't continue with this request. Please
               contact your care team if you have questions.
             </p>
@@ -151,23 +150,20 @@ function StepView({
     case "completed":
       return (
         <Terminal
-          icon={<CheckCircle2 className="w-10 h-10 text-emerald-500" />}
+          icon={<CheckCircle2 className="w-10 h-10" style={{ color: "var(--apx-color-success, #2e7d5a)" }} />}
           title="All done — thank you"
         >
           {step.content?.length ? (
-            <div className="text-left">
+            <div className="w-full text-left">
               <IntakeContentBlocks content={step.content} />
             </div>
           ) : null}
-          <p className="text-sm text-slate-500">
+          <p className="apx-help-text">
             We'll be in touch shortly. Please look out for any email or text
             messages at the contact information you provided.
           </p>
           {step.redirectUrl && (
-            <a
-              href={step.redirectUrl}
-              className="inline-block rounded-lg bg-[#e11816] hover:bg-[#c3140f] text-white px-5 py-2.5 text-[15px] font-medium"
-            >
+            <a href={step.redirectUrl} className="apx-button-primary">
               Continue
             </a>
           )}
@@ -181,10 +177,44 @@ function StepView({
 export default function IntakeRuntime() {
   const token = readToken();
   const { data: step, isLoading, isError, error, refetch } = useIntakeStep(token);
+  // Title and theme for the frame. Not waited on: the form works (in the Apex look) without it.
+  const manifest = useIntakeManifest(token);
+  const theme = manifest.data?.theme ?? null;
+  const title = manifest.data?.title ?? null;
 
-  const status = (error as { response?: { status?: number } })?.response?.status;
-  const code = (error as { response?: { data?: { code?: string } } })?.response
-    ?.data?.code;
+  // The app's axios layer hands errors over normalised — `{ status, code, details }` — so read
+  // those first; `response` is only there for a raw axios error.
+  const err = error as
+    | { status?: number; code?: string; response?: { status?: number; data?: { code?: string } } }
+    | null;
+  const status = err?.status ?? err?.response?.status;
+  const code = err?.code ?? err?.response?.data?.code;
+
+  // A link opened from "Outstanding forms" carries its submission (`?s=`). Each read of the
+  // pending list retires older links, so one can die while its tab is open; the answers are saved
+  // server-side, so a signed-in patient just gets a fresh link for the same form and carries on.
+  const submissionId =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("s") : null;
+  const [renewing, setRenewing] = useState<"idle" | "trying" | "failed">("idle");
+  useEffect(() => {
+    if (!isError || status !== 404 || !submissionId || renewing !== "idle") return;
+    setRenewing("trying");
+    getPendingIntakes()
+      .then((intakes) => {
+        const same = intakes.find((i) => i.submissionId === submissionId);
+        if (!same) return setRenewing("failed");
+        saveIntakeToken(same.token);
+        window.location.replace(
+          `/intake/${encodeURIComponent(same.token)}?s=${encodeURIComponent(submissionId)}`,
+        );
+      })
+      .catch(() => setRenewing("failed"));
+  }, [isError, status, submissionId, renewing]);
+
+  // Finished: let a dashboard open in another tab drop it from "Outstanding forms".
+  useEffect(() => {
+    if (step?.kind === "completed") announceIntakeCompleted(step.submissionId);
+  }, [step]);
 
   // 409 = already submitted (reopened old tab). Re-GET to render the terminal.
   useEffect(() => {
@@ -193,27 +223,32 @@ export default function IntakeRuntime() {
 
   if (!token) {
     return (
-      <Shell>
+      <IntakeShell theme={theme} title={title}>
         <Terminal
-          icon={<AlertCircle className="w-10 h-10 text-red-400" />}
+          icon={<AlertCircle className="w-10 h-10" style={{ color: "var(--apx-color-error, #b23a3a)" }} />}
           title="This link isn't valid"
         >
-          <p className="text-sm text-slate-500">
+          <p className="apx-help-text">
             Ask your care team for a new one.
           </p>
         </Terminal>
-      </Shell>
+      </IntakeShell>
     );
   }
 
-  if (isLoading || (isError && (status === 409 || code === "CONFLICT"))) {
+  if (
+    isLoading ||
+    (isError && (status === 409 || code === "CONFLICT")) ||
+    renewing === "trying" ||
+    (isError && status === 404 && submissionId && renewing === "idle")
+  ) {
     return (
-      <Shell>
-        <div className="flex flex-col items-center py-10 text-slate-400">
+      <IntakeShell theme={theme} title={title}>
+        <div className="flex flex-col items-center py-10 opacity-60">
           <Loader2 className="w-8 h-8 animate-spin" />
-          <p className="mt-3 text-sm">Loading…</p>
+          <p className="apx-help-text mt-3">Loading…</p>
         </div>
-      </Shell>
+      </IntakeShell>
     );
   }
 
@@ -221,9 +256,9 @@ export default function IntakeRuntime() {
     const expired = status === 410 || code === "GONE";
     const notFound = status === 404 || code === "NOT_FOUND";
     return (
-      <Shell>
+      <IntakeShell theme={theme} title={title}>
         <Terminal
-          icon={<AlertCircle className="w-10 h-10 text-red-400" />}
+          icon={<AlertCircle className="w-10 h-10" style={{ color: "var(--apx-color-error, #b23a3a)" }} />}
           title={
             expired
               ? "This link has expired"
@@ -233,25 +268,22 @@ export default function IntakeRuntime() {
           }
         >
           {expired || notFound ? (
-            <p className="text-sm text-slate-500">
+            <p className="apx-help-text">
               Ask your care team for a new one.
             </p>
           ) : (
-            <button
-              onClick={() => refetch()}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"
-            >
+            <button onClick={() => refetch()} className="apx-button-secondary">
               Try again
             </button>
           )}
         </Terminal>
-      </Shell>
+      </IntakeShell>
     );
   }
 
   return (
-    <Shell>
+    <IntakeShell theme={theme} title={title}>
       {step && <StepView step={step} token={token} onRetry={() => refetch()} />}
-    </Shell>
+    </IntakeShell>
   );
 }

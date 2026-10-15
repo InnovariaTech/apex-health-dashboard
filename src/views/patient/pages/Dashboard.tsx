@@ -8,6 +8,8 @@ import HealthScoreCardNew from "@/views/patient/components/home/HealthScoreCardN
 import BioAgeCard from "@/views/patient/components/home/BioAgeCard";
 import TrainerizeVitalsRow from "@/views/patient/components/home/TrainerizeVitalsRow";
 import ProgressPhotosCard from "@/views/patient/components/home/ProgressPhotosCard";
+import PendingIntakesAlert from "@/views/patient/components/intake/PendingIntakesAlert";
+import SubmittedIntakesCard from "@/views/patient/components/intake/SubmittedIntakesCard";
 
 /**
  * Patient dashboard — recomposed to mirror the `New Ui` mockup:
@@ -34,8 +36,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4 md:p-9 max-w-[1280px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       <DashboardPageHead />
+
+      {/* Paid forms not filled in yet: banner + first-visit popup. */}
+      <PendingIntakesAlert />
+
+      {/* Submitted forms and where each stands. */}
+      <SubmittedIntakesCard />
 
       <CareHubRow />
 

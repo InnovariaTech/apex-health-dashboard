@@ -21,7 +21,7 @@
   --c-green: #3e7c57;
   --c-amber: #b45309;
   --c-mono: "JetBrains Mono", ui-monospace, monospace;
-  --c-sans: "Inter", -apple-system, sans-serif;
+  --c-sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
 
   font-family: var(--c-sans);
   color: var(--c-ink);

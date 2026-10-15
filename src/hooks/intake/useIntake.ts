@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getIntakeStep,
+  getManifest,
+  getPublicIntakeForm,
   goBack,
   startPublicIntake,
   submitAnswer,
@@ -27,6 +29,36 @@ export function useIntakeStep(token: string) {
     // 404/410 are terminal; don't hammer a dead/expired link.
     retry: false,
     staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * The walk's manifest — read once per token for the title and the theme. A failure is harmless:
+ * the form still works and wears the Apex look.
+ */
+export function useIntakeManifest(token: string) {
+  return useQuery({
+    queryKey: queryKeys.intake.manifest(token),
+    queryFn: () => getManifest(token),
+    enabled: Boolean(token),
+    retry: false,
+    staleTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * The public details page's title and theme. The server sends `no-store`, so a newly published
+ * theme shows on the next visit; within a visit it is read once. A 404 means the form isn't open.
+ */
+export function usePublicIntakeForm(formKey: string) {
+  return useQuery({
+    queryKey: queryKeys.intake.publicForm(formKey),
+    queryFn: () => getPublicIntakeForm(formKey),
+    enabled: Boolean(formKey),
+    retry: false,
+    staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
 }

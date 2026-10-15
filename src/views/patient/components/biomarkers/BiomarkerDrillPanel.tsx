@@ -688,7 +688,7 @@ function TrajectoryChart({ item }: { item: BiomarkerSummaryItem }) {
             y={h - 6}
             fontSize="9"
             fill="#8A8A8A"
-            fontFamily="Inter, sans-serif"
+            fontFamily="Archivo, sans-serif"
             textAnchor="middle"
           >
             {fmtX(p.date)}

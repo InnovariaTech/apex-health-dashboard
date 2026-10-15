@@ -9,7 +9,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
   SidebarProvider,
@@ -21,6 +20,37 @@ import { useLogout } from "@/hooks/auth/useAuth";
 import AIAssistantBar from "@/components/global/AIAssistantBar";
 import GymSwitcher from "@/components/env/GymSwitcher";
 import { getPatientNavItems, getPatientNavGroups } from "@/views/patient/config/patientNavigation";
+
+/**
+ * One menu row, sized like the design's sidebar (.nav a / .nav a.on). Rendered as a plain link
+ * rather than SidebarMenuButton, whose own padding/height/text utilities would override these.
+ */
+function RailItem({ item, active }) {
+  return (
+    <SidebarMenuItem>
+      <Link
+        to={item.url}
+        aria-current={active ? "page" : undefined}
+        className={`flex items-center gap-[13px] rounded-[10px] px-[11px] py-[10px] text-[15px] leading-[16px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--rail-active-text)] ${
+          active ? "font-medium" : "font-normal"
+        }`}
+        style={{
+          background: active ? "var(--rail-active-bg)" : undefined,
+          color: active ? "var(--rail-active-text)" : "var(--rail-text)",
+        }}
+        onMouseEnter={(e) => {
+          if (!active) e.currentTarget.style.background = "var(--rail-active-bg)";
+        }}
+        onMouseLeave={(e) => {
+          if (!active) e.currentTarget.style.background = "";
+        }}
+      >
+        <item.icon className="w-[18px] h-[18px] shrink-0" strokeWidth={1.7} />
+        <span className="truncate">{item.title}</span>
+      </Link>
+    </SidebarMenuItem>
+  );
+}
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -61,21 +91,21 @@ export default function Layout({ children }) {
   return (
     <SidebarProvider style={{ "--sidebar-width": "268px" } as React.CSSProperties}>
       <div className="min-h-screen flex w-full bg-background">
-        <Sidebar className="border-r border-border bg-card">
-          <SidebarHeader className="px-4 pt-5 pb-2">
+        <Sidebar className="apex-rail">
+          <SidebarHeader className="px-4 pt-[18px] pb-1">
             <Link
               to={createPageUrl("Dashboard")}
-              className="flex items-center px-2 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+              className="flex min-h-[40px] items-center px-[11px] pt-0.5 pb-1 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Apex MD home"
             >
               <img
-                src="/images/apex-md-logo.png"
+                src={isGymEnv ? "/images/apex-md-logo.png" : "/images/apexmd-side-white.png"}
                 alt="Apex MD"
-                className="h-[32px] w-auto block"
+                className="h-[34px] w-auto block"
               />
             </Link>
             {isGymEnv && (
-              <p className="text-[10px] mt-1 px-2 text-muted-foreground tracking-wide">
+              <p className="px-[11px] text-[10.5px]" style={{ color: "var(--rail-label)" }}>
                 Powered by Apex MD
               </p>
             )}
@@ -83,92 +113,42 @@ export default function Layout({ children }) {
 
           <SidebarContent className="px-4">
             <SidebarGroup className="p-0">
-              <div className="apex-eyebrow px-[11px] mt-[18px] mb-[9px]">Menu</div>
+              <div className="apex-rail-label px-[11px] mt-[26px] mb-[8px]">Menu</div>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-[2px]">
-                  {navGroups.md.map((item) => {
-                    const isActive = location.pathname === item.url;
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton
-                          asChild
-                          className={`h-auto rounded-[11px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card ${
-                            isActive
-                              ? "bg-[var(--surface-3)] text-white hover:bg-[var(--surface-3)] hover:text-white"
-                              : "text-[#33372F] hover:bg-secondary hover:text-foreground"
-                          }`}
-                        >
-                          <Link
-                            to={item.url}
-                            className="flex items-center gap-3 px-[11px] py-[9px] leading-none"
-                          >
-                            <item.icon
-                              className={`w-[19px] h-[19px] shrink-0 transition-colors duration-150 ${
-                                isActive ? "text-white" : "text-[#8A908A] group-hover/menu-item:text-[#5A615A]"
-                              }`}
-                              strokeWidth={1.8}
-                            />
-                            <span className="text-[14.5px] font-medium">{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
+                  {navGroups.md.map((item) => (
+                    <RailItem key={item.title} item={item} active={location.pathname === item.url || location.pathname.startsWith(`${item.url}/`)} />
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
             {navGroups.fit.length > 0 && (
               <SidebarGroup className="p-0">
-                <div className="mx-[11px] mt-[22px] mb-[14px] border-t border-border" />
+                <div className="apex-rail-line mx-[11px] mt-[16px] mb-[10px] border-t" />
                 <SidebarGroupContent>
                   <SidebarMenu className="gap-[2px]">
-                    {navGroups.fit.map((item) => {
-                      const isActive = location.pathname === item.url;
-                      return (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton
-                            asChild
-                            className={`h-auto rounded-[11px] transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card ${
-                              isActive
-                                ? "bg-[var(--surface-3)] text-white hover:bg-[var(--surface-3)] hover:text-white"
-                                : "text-[#33372F] hover:bg-secondary hover:text-foreground"
-                            }`}
-                          >
-                            <Link
-                              to={item.url}
-                              className="flex items-center gap-3 px-[11px] py-[9px] leading-none"
-                            >
-                              <item.icon
-                                className={`w-[19px] h-[19px] shrink-0 transition-colors duration-150 ${
-                                  isActive ? "text-white" : "text-[#8A908A] group-hover/menu-item:text-[#5A615A]"
-                                }`}
-                                strokeWidth={1.8}
-                              />
-                              <span className="text-[14.5px] font-medium">{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      );
-                    })}
+                    {navGroups.fit.map((item) => (
+                      <RailItem key={item.title} item={item} active={location.pathname === item.url || location.pathname.startsWith(`${item.url}/`)} />
+                    ))}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
             )}
 
             {currentUser?.health_score != null && (
-              <div className="mt-5 apex-card p-4">
+              <div className="mt-5 rounded-[14px] p-4" style={{ background: "var(--rail-active-bg)" }}>
                 <div className="flex items-center justify-between mb-2.5">
-                  <span className="apex-eyebrow">Health Score</span>
-                  <Activity className="w-3.5 h-3.5" style={{ color: "var(--apex-accent)" }} />
+                  <span className="apex-rail-label">Health Score</span>
+                  <Activity className="w-3.5 h-3.5" style={{ color: "var(--rail-active-text)" }} />
                 </div>
                 <div className="flex items-baseline gap-1.5 mb-2.5">
-                  <span className="text-3xl font-mono font-medium text-foreground tracking-[-0.03em]">
+                  <span className="text-3xl font-extrabold tracking-[-0.03em]" style={{ color: "var(--rail-text)" }}>
                     {Math.round(currentUser.health_score)}
                   </span>
-                  <span className="text-sm font-mono text-muted-foreground">/100</span>
+                  <span className="text-sm font-mono" style={{ color: "var(--rail-label)" }}>/100</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden bg-secondary">
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--rail-line)" }}>
                   <div
                     className="h-full transition-all duration-500 rounded-full bg-primary"
                     style={{ width: `${currentUser.health_score}%` }}
@@ -178,45 +158,49 @@ export default function Layout({ children }) {
             )}
           </SidebarContent>
 
-          <div className="border-t border-border p-3.5 mx-4">
+          <div className="apex-rail-line mx-4 mt-2.5 border-t px-1.5 pt-3.5 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-primary text-primary-foreground grid place-items-center text-xs font-medium flex-shrink-0">
-                <img
-                  src="/images/patient-headshot.jpg"
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
+              <div
+                className="w-[34px] h-[34px] rounded-full overflow-hidden grid place-items-center text-[12.5px] font-semibold flex-shrink-0"
+                style={{ background: "var(--rail-active-bg)", color: "var(--rail-active-text)" }}
+              >
+                <img src="/images/patient-headshot.jpg" alt={displayName} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium leading-tight truncate text-foreground">
+                <p className="text-[13.5px] font-medium leading-tight truncate" style={{ color: "var(--rail-active-text)" }}>
                   {displayName}
                 </p>
-                <p className="text-[11px] text-muted-foreground truncate">
+                <p className="mt-0.5 text-[11.5px] truncate" style={{ color: "var(--rail-label)" }}>
                   {currentUser?.email}
                 </p>
               </div>
-              <Link to={createPageUrl("Profile")} aria-label="Settings" title="Settings">
-                <Settings className="w-[18px] h-[18px] text-muted-foreground hover:text-foreground transition-colors" />
+              <Link
+                to={createPageUrl("Profile")}
+                aria-label="Settings"
+                title="Settings"
+                className="transition-opacity hover:opacity-80"
+                style={{ color: "var(--rail-label)" }}
+              >
+                <Settings className="w-[17px] h-[17px]" strokeWidth={1.7} />
               </Link>
               <button
                 type="button"
                 onClick={() => void logoutMutation.mutateAsync()}
-                className="hover:text-foreground transition-colors text-muted-foreground"
+                className="transition-opacity hover:opacity-80"
+                style={{ color: "var(--rail-label)" }}
                 aria-label="Logout"
                 title="Logout"
               >
-                <LogOut className="w-[18px] h-[18px]" />
+                <LogOut className="w-[17px] h-[17px]" strokeWidth={1.7} />
               </button>
             </div>
           </div>
         </Sidebar>
 
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="border-b border-border bg-card px-6 py-3 sticky top-0 z-10 flex items-center gap-4">
-            <SidebarTrigger
-              className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden text-foreground"
-            />
-            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+          <header className="h-[52px] border-b border-border bg-background px-4 md:px-9 sticky top-0 z-10 flex items-center gap-3 text-[12px]">
+            <SidebarTrigger className="hover:opacity-70 p-2 rounded-lg transition-opacity md:hidden text-foreground" />
+            <div className="hidden sm:flex items-center gap-2.5" style={{ color: "var(--mute)" }}>
               <span>{environment.name}</span>
               <ChevronRight className="w-3 h-3" />
               <span className="text-foreground">{pageLabel}</span>
@@ -226,10 +210,10 @@ export default function Layout({ children }) {
 
             <Link
               to={createPageUrl("Profile")}
-              className="w-[34px] h-[34px] rounded-[8px] border border-border bg-card grid place-items-center text-muted-foreground hover:bg-secondary transition-colors"
+              className="w-8 h-8 rounded-[8px] border border-border bg-card grid place-items-center text-ink-2 hover:border-[var(--mute)] transition-colors"
               aria-label="Settings"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-[17px] h-[17px]" strokeWidth={1.7} />
             </Link>
             <div className="hidden">
               <GymSwitcher />

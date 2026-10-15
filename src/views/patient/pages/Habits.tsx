@@ -83,11 +83,11 @@ const STATUS_TABS: { value: HabitStatusFilter; label: string }[] = [
 const HABIT_THEMES = [
   {
     key: "red",
-    c: "#E11816",
+    c: "#D30704",
     c2: "#ef2a27",
-    tint: "rgba(225, 24, 22,.06)",
-    badge: "rgba(225, 24, 22,.10)",
-    sbg: "rgba(225, 24, 22,.04)",
+    tint: "rgba(211, 7, 4,.06)",
+    badge: "rgba(211, 7, 4,.10)",
+    sbg: "rgba(211, 7, 4,.04)",
   },
   {
     key: "blue",
@@ -209,7 +209,7 @@ function HabitsInner() {
   const headerDate = safeFormat(today, "EEE, MMM d") ?? today;
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Page head */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-6">
         <div>
@@ -248,9 +248,9 @@ function HabitsInner() {
         />
         <HeroStat
           icon={Check}
-          iconColor="#E11816"
-          iconBg="rgba(225, 24, 22,.10)"
-          tint="rgba(225, 24, 22,.08)"
+          iconColor="#D30704"
+          iconBg="rgba(211, 7, 4,.10)"
+          tint="rgba(211, 7, 4,.08)"
           label="Checked in today"
           value={
             <>
@@ -751,9 +751,9 @@ function TodayHabitCard({
             marginTop: 14,
             padding: 10,
             borderRadius: 10,
-            border: "1px solid rgba(225, 24, 22,.3)",
-            background: "rgba(225, 24, 22,.06)",
-            color: "#E11816",
+            border: "1px solid rgba(211, 7, 4,.3)",
+            background: "rgba(211, 7, 4,.06)",
+            color: "#D30704",
             fontSize: 11.5,
           }}
         >
@@ -769,7 +769,7 @@ function TodayHabitCard({
       {dailyItemQuery.isError && !isPrivilegeBlocked && (
         <div
           className="relative z-[1] flex items-start gap-1.5 mt-3"
-          style={{ fontSize: 11.5, color: "#E11816" }}
+          style={{ fontSize: 11.5, color: "#D30704" }}
         >
           <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
           <span>
@@ -796,7 +796,7 @@ function TodayHabitCard({
             style={{
               background: isTracked
                 ? "linear-gradient(180deg,#3E7C57,#2f6044)"
-                : "linear-gradient(180deg,#E11816,#B70402)",
+                : "linear-gradient(180deg,#D30704,#A80503)",
               color: "#fff",
               border: "none",
               borderRadius: 12,
@@ -1184,9 +1184,9 @@ function ErrorRow({ message }: { message?: string }) {
     <div
       className="apex-card p-4 flex items-start gap-2"
       style={{
-        borderColor: "rgba(225, 24, 22,.3)",
-        background: "rgba(225, 24, 22,.06)",
-        color: "#E11816",
+        borderColor: "rgba(211, 7, 4,.3)",
+        background: "rgba(211, 7, 4,.06)",
+        color: "#D30704",
         fontSize: 13,
       }}
     >

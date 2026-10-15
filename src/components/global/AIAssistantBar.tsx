@@ -416,8 +416,9 @@ export default function AIAssistantBar() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50"
-      style={{ left: "var(--sidebar-width, 0px)" }}
+      className="fixed bottom-0 left-0 right-0 z-50 md:px-5"
+      // Lines up with the page column (36px gutter, 1240px wide), as in the design.
+      style={{ left: "var(--sidebar-width, 0px)", maxWidth: "calc(1240px + 72px)" }}
     >
       <AnimatePresence initial={false}>
         {isExpanded && (

@@ -220,7 +220,7 @@ export default function Chat() {
     <div className="flex flex-col h-[calc(100vh-64px)] bg-background text-foreground">
       {/* Header */}
       <div className="border-b border-border px-4 md:px-9 py-5 bg-background flex-shrink-0">
-        <div className="max-w-[1480px] mx-auto">
+        <div className="max-w-[1240px]">
           <div className="apex-eyebrow mb-1.5">Care Team</div>
           <h1 className="apex-page-title">
             Care team <em>messages</em>
@@ -233,7 +233,7 @@ export default function Chat() {
 
       {/* Chat area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden max-w-[1480px] w-full mx-auto px-4 md:px-9 py-4 md:py-6">
+        <div className="flex-1 flex flex-col overflow-hidden max-w-[1240px] w-full px-4 md:px-9 py-4 md:py-6">
           <div className="apex-card flex-1 flex flex-col overflow-hidden">
             {/* Recipient bar */}
             {activeCase && (

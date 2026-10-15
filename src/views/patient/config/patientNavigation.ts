@@ -24,22 +24,26 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import { CAREVALIDATE_ENABLED } from "@/constants/features";
 
 /** Apex MD (clinical) section — top of sidebar. */
 export const apexMdNavItems = [
   { title: "Dashboard", url: createPageUrl("Dashboard"), icon: Home },
+  { title: "My Treatments", url: createPageUrl("MyTreatments"), icon: Pill },
   { title: "Health Analysis", url: createPageUrl("HealthAnalysis"), icon: Sparkles },
   { title: "My Cases", url: createPageUrl("MyCases"), icon: Pill },
   { title: "Telehealth Visits", url: createPageUrl("Visits"), icon: Stethoscope },
+  // Visits with our own care team (Healthie). Gym portals show Trainerize here instead.
+  { title: "Appointments", url: createPageUrl("Appointments"), icon: CalendarDays },
   { title: "Chat", url: createPageUrl("Chat"), icon: MessageSquare },
   { title: "Biomarkers", url: createPageUrl("Biomarkers"), icon: FlaskConical },
   { title: "Genetics", url: createPageUrl("Genetics"), icon: Dna },
   { title: "Progress", url: createPageUrl("Progress"), icon: TrendingUp },
   { title: "Lab Kits", url: createPageUrl("LabKits"), icon: TestTube },
   { title: "Wearables", url: createPageUrl("Wearables"), icon: Watch },
-  // { title: "Appointments", url: createPageUrl("Appointments"), icon: CalendarDays }, // hidden — no backend yet
   { title: "Documents", url: createPageUrl("Documents"), icon: FolderOpen },
-  { title: "My Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
+  // The CareValidate catalogue. Hidden while CareValidate is switched off (`@/constants/features`).
+  { title: "Browse Treatments", url: createPageUrl("BrowseTreatments"), icon: Pill },
   { title: "Shop", url: createPageUrl("Shop"), icon: ShoppingBag },
 ];
 
@@ -81,16 +85,25 @@ export const gymPatientNavItems = [
   { title: "Profile", url: createPageUrl("Profile"), icon: UserCircle },
 ];
 
+/**
+ * Pages served only by CareValidate. Hidden from the menu while CareValidate is switched off
+ * (see `@/constants/features`); the pages themselves show a "moved" notice if opened directly.
+ */
+export const CAREVALIDATE_PAGES = ["MyCases", "Chat", "BrowseTreatments", "Billing"];
+const CAREVALIDATE_URLS = new Set(CAREVALIDATE_PAGES.map((p) => createPageUrl(p)));
+const visible = (items) =>
+  CAREVALIDATE_ENABLED ? items : items.filter((item) => !CAREVALIDATE_URLS.has(item.url));
+
 /** Flat nav items — used by callers that only need a single list (e.g. breadcrumb lookup). */
 export function getPatientNavItems(isGymEnv) {
-  return isGymEnv ? gymPatientNavItems : apexPatientNavItems;
+  return visible(isGymEnv ? gymPatientNavItems : apexPatientNavItems);
 }
 
 /** Grouped nav items for the sidebar. Everything now lives in a single list
  *  (`md`); the Fit items are merged in and Profile is pinned to the bottom. */
 export function getPatientNavGroups(isGymEnv) {
   if (isGymEnv) {
-    return { md: gymPatientNavItems, fit: [] };
+    return { md: visible(gymPatientNavItems), fit: [] };
   }
-  return { md: [...apexMdNavItems, ...apexFitNavItems, profileNavItem], fit: [] };
+  return { md: visible([...apexMdNavItems, ...apexFitNavItems, profileNavItem]), fit: [] };
 }

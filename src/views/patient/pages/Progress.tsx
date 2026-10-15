@@ -207,7 +207,7 @@ function ProgressInner() {
   };
 
   return (
-    <div className="p-4 md:p-9 max-w-[1500px] mx-auto bg-background text-foreground">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground">
       {/* Breadcrumb */}
       <div
         className="mb-3"
@@ -287,7 +287,7 @@ function ProgressInner() {
               padding: "12px 18px",
               borderRadius: 11,
               cursor: "pointer",
-              boxShadow: "0 2px 10px rgba(225, 24, 22, 0.18)",
+              boxShadow: "0 2px 10px rgba(211, 7, 4, 0.18)",
             }}
           >
             <Plus className="w-4 h-4" strokeWidth={2} />
@@ -890,7 +890,7 @@ function TrendSvg({
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className="w-full h-auto block mt-3.5"
-      fontFamily="Inter, sans-serif"
+      fontFamily="Archivo, sans-serif"
     >
       {/* Gridlines */}
       <g stroke="#EDEEF0" strokeWidth={1}>

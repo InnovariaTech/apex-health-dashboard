@@ -154,7 +154,7 @@ export default function MyCases() {
   }
 
   return (
-    <div className="p-4 md:p-9 max-w-[1480px] mx-auto bg-background text-foreground min-h-screen">
+    <div className="p-4 md:p-9 max-w-[1240px] bg-background text-foreground min-h-screen">
       {/* Page head */}
       <div className="mb-6 pb-5 border-b border-border">
         <p className="apex-eyebrow">Care portal</p>

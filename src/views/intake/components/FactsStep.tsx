@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSubmitFacts } from "@/hooks/intake/useIntake";
+import { ThemedQuestion, usePlaceholder } from "@/components/theme/ThemeScope";
 import type { FactPrompt, FactsStep } from "@/types/intake/intake_types";
 
 /**
  * The prelude: demographics we don't already hold. Every listed prompt is
  * REQUIRED (optionalIfKnown just means "we'd have filled it if we had it").
  * A facts step coming back after submit = "these didn't take".
+ *
+ * Each prompt is a themed question whose type follows how it's collected (`rendering-the-theme.md`
+ * §1): choice → single_select, number → number, dateOfBirth → date_text, others → free_text.
  */
 
-const INPUT =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#e11816]/25 focus:border-[#e11816]";
+const QUESTION_TYPE: Record<string, string> = {
+  choice: "single_select",
+  number: "number",
+  dateOfBirth: "date_text",
+};
+const typeFor = (p: FactPrompt) => QUESTION_TYPE[p.collect] ?? "free_text";
 
 function collectError(err: unknown): string {
   const data = (err as { response?: { data?: { message?: string } } })?.response
@@ -27,36 +35,35 @@ function PromptField({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const themed = usePlaceholder(prompt.key, typeFor(prompt));
   switch (prompt.collect) {
     case "dateOfBirth":
       return (
         <input
           type="date"
-          className={INPUT}
+          className="apx-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
       );
     case "choice":
       return (
-        <div className="space-y-2">
+        <div className="apx-options">
           {(prompt.options ?? []).map((o) => (
             <label
               key={o.key}
-              className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer ${
-                value === o.key
-                  ? "border-[#e11816] bg-red-50"
-                  : "border-slate-300"
-              }`}
+              className={`apx-option ${value === o.key ? "apx-option-selected" : ""}`}
             >
               <input
                 type="radio"
                 name={prompt.key}
                 checked={value === o.key}
                 onChange={() => onChange(o.key)}
-                className="accent-[#e11816]"
+                className="mt-[3px] h-4 w-4 shrink-0 accent-[var(--apx-color-primary,#d30704)]"
               />
-              <span className="text-[15px]">{o.label}</span>
+              <span className="apx-option-text">
+                <span className="apx-option-label">{o.label}</span>
+              </span>
             </label>
           ))}
         </div>
@@ -65,8 +72,9 @@ function PromptField({
       return (
         <input
           type="number"
-          className={INPUT}
+          className="apx-input"
           value={value}
+          placeholder={themed || undefined}
           onChange={(e) => onChange(e.target.value)}
         />
       );
@@ -74,17 +82,18 @@ function PromptField({
       return (
         <input
           inputMode="numeric"
-          className={INPUT}
+          className="apx-input"
           value={value}
-          placeholder="ZIP code"
+          placeholder={themed || "ZIP code"}
           onChange={(e) => onChange(e.target.value)}
         />
       );
     default:
       return (
         <input
-          className={INPUT}
+          className="apx-input"
           value={value}
+          placeholder={themed || undefined}
           onChange={(e) => onChange(e.target.value)}
         />
       );
@@ -123,44 +132,39 @@ export default function FactsStepView({
   };
 
   return (
-    <div className="space-y-6">
+    <>
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h2 className="apx-question-text" style={{ fontSize: "1.15em" }}>
           A few details to get started
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          We use these to confirm you're eligible.
-        </p>
+        </h2>
+        <p className="apx-help-text">We use these to confirm you're eligible.</p>
       </div>
 
-      <div className="space-y-5">
-        {step.prompts.map((p) => (
-          <div key={p.key} className="space-y-1.5">
-            <label className="block text-[15px] font-medium text-slate-800">
-              {p.prompt}
-            </label>
-            {p.helpText && (
-              <p className="text-[13px] text-slate-500">{p.helpText}</p>
-            )}
-            <PromptField
-              prompt={p}
-              value={values[p.key] ?? ""}
-              onChange={(v) => setValues((s) => ({ ...s, [p.key]: v }))}
-            />
-          </div>
-        ))}
+      {step.prompts.map((p) => (
+        <ThemedQuestion key={p.key} type={typeFor(p)} fieldKey={p.key} className="gap-1.5">
+          <label className="apx-question-text">{p.prompt}</label>
+          {p.helpText && <p className="apx-help-text">{p.helpText}</p>}
+          <PromptField
+            prompt={p}
+            value={values[p.key] ?? ""}
+            onChange={(v) => setValues((s) => ({ ...s, [p.key]: v }))}
+          />
+        </ThemedQuestion>
+      ))}
+
+      {error && <p className="apx-error" role="alert">{error}</p>}
+
+      {/* Width on a wrapper: the theme owns the button's own width. */}
+      <div className="flex">
+        <button
+          onClick={onSubmit}
+          disabled={!allAnswered || submit.isPending}
+          className="apx-button-primary flex-1"
+        >
+          {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+          Continue
+        </button>
       </div>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <button
-        onClick={onSubmit}
-        disabled={!allAnswered || submit.isPending}
-        className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#e11816] hover:bg-[#c3140f] text-white py-3 text-[15px] font-medium disabled:opacity-50"
-      >
-        {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-        Continue
-      </button>
-    </div>
+    </>
   );
 }

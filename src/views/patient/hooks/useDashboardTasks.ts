@@ -82,7 +82,16 @@ export function useDashboardTasks(): {
     const dayMs = 24 * 60 * 60 * 1000;
 
     // 1. Upcoming appointments
-    const appointments = (appointmentsQuery.data ?? []) as Appointment[];
+    // Not always a list: an unlinked or new patient can get an object back (e.g. an error body),
+    // and iterating that crashed the whole dashboard. Anything else counts as no appointments.
+    const raw = appointmentsQuery.data as unknown;
+    const appointments = (
+      Array.isArray(raw)
+        ? raw
+        : Array.isArray((raw as { appointments?: unknown } | null)?.appointments)
+          ? (raw as { appointments: Appointment[] }).appointments
+          : []
+    ) as Appointment[];
     for (const appt of appointments) {
       if (!appt.startDate) continue;
       const startMs = Date.parse(appt.startDate);

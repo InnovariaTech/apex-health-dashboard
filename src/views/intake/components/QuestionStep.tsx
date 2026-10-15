@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Loader2, Upload } from "lucide-react";
 import IntakeContentBlocks from "./IntakeContentBlocks";
+import { ThemedQuestion, usePlaceholder } from "@/components/theme/ThemeScope";
 import { useBack, useSubmitAnswer } from "@/hooks/intake/useIntake";
 import type {
   IntakeAnswer,
@@ -14,10 +15,11 @@ import type {
  * hard-fail rather than silently skip. Document uploads render a picker but
  * cannot submit yet (server side isn't built) — we block rather than send an
  * empty `fileRefs`.
+ *
+ * Drawn with the theme's parts (`apx-question`, `apx-option`, `apx-input`…): the look comes from
+ * the walk's theme, placeholder words too. A follow-up field is its own themed question (its own
+ * key and type), as the theme rules expect.
  */
-
-const INPUT =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#e11816]/25 focus:border-[#e11816]";
 
 interface Local {
   sel: Record<string, string[]>;
@@ -132,43 +134,48 @@ function FieldView({
       });
     };
     return (
-      <div className="space-y-2">
+      <div className="apx-options">
         {(field.options ?? []).map((o) => {
           const on = chosen.includes(o.key);
           return (
             <div key={o.key}>
-              <label
-                className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer ${
-                  on ? "border-[#e11816] bg-red-50" : "border-slate-300"
-                }`}
-              >
+              <label className={`apx-option ${on ? "apx-option-selected" : ""}`}>
                 <input
                   type={isMulti ? "checkbox" : "radio"}
                   name={field.key}
                   checked={on}
                   onChange={() => toggle(o.key, o.exclusive)}
-                  className="accent-[#e11816]"
+                  className="mt-[3px] h-4 w-4 shrink-0 accent-[var(--apx-color-primary,#d30704)]"
                 />
-                <span className="text-[15px]">{o.label}</span>
+                <span className="apx-option-text">
+                  <span className="apx-option-label">{o.label}</span>
+                </span>
               </label>
               {on && o.followup && (
-                <input
-                  className={`${INPUT} mt-2`}
-                  placeholder={o.followup.prompt}
-                  value={state.follow[field.key]?.[o.followup.key] ?? ""}
-                  onChange={(e) =>
-                    set((s) => ({
-                      ...s,
-                      follow: {
-                        ...s.follow,
-                        [field.key]: {
-                          ...(s.follow[field.key] ?? {}),
-                          [o.followup!.key]: e.target.value,
+                <ThemedQuestion type={String(o.followup.type)} fieldKey={o.followup.key} className="mt-2 pl-1">
+                  <label className="apx-help-text" htmlFor={`fu-${o.followup.key}`}>
+                    {o.followup.prompt}
+                    {o.followup.required && " *"}
+                  </label>
+                  <FollowupInput
+                    id={`fu-${o.followup.key}`}
+                    fieldKey={o.followup.key}
+                    type={String(o.followup.type)}
+                    value={state.follow[field.key]?.[o.followup.key] ?? ""}
+                    onChange={(v) =>
+                      set((s) => ({
+                        ...s,
+                        follow: {
+                          ...s.follow,
+                          [field.key]: {
+                            ...(s.follow[field.key] ?? {}),
+                            [o.followup!.key]: v,
+                          },
                         },
-                      },
-                    }))
-                  }
-                />
+                      }))
+                    }
+                  />
+                </ThemedQuestion>
               )}
             </div>
           );
@@ -179,42 +186,60 @@ function FieldView({
 
   if (field.type === "document_upload") {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-center">
-        <Upload className="w-6 h-6 text-slate-400 mx-auto" />
-        <p className="text-sm text-slate-600 mt-2">
-          File upload isn't available yet.
-        </p>
-        <p className="text-[12px] text-slate-400 mt-0.5">
-          This screen can't be submitted until uploads are enabled.
-        </p>
+      <div className="apx-upload">
+        <div className="flex w-full flex-col items-center text-center">
+          <Upload className="w-6 h-6 opacity-50" />
+          <span className="mt-1.5">File upload isn't available yet.</span>
+          <span className="text-[12px] opacity-70">
+            This screen can't be submitted until uploads are enabled.
+          </span>
+        </div>
       </div>
     );
   }
 
-  if (field.type === "number") {
-    return (
-      <input
-        type="number"
-        className={INPUT}
-        value={state.txt[field.key] ?? ""}
-        onChange={(e) =>
-          set((s) => ({ ...s, txt: { ...s.txt, [field.key]: e.target.value } }))
-        }
-      />
-    );
-  }
-
-  // free_text | date_text (both free text; date_text just has a pattern)
   return (
-    <input
-      className={INPUT}
+    <TextInput
+      fieldKey={field.key}
+      type={field.type}
       value={state.txt[field.key] ?? ""}
-      placeholder={field.type === "date_text" ? "mm/dd/yyyy" : ""}
-      onChange={(e) =>
-        set((s) => ({ ...s, txt: { ...s.txt, [field.key]: e.target.value } }))
-      }
+      onChange={(v) => set((s) => ({ ...s, txt: { ...s.txt, [field.key]: v } }))}
     />
   );
+}
+
+/** A themed text/number input whose placeholder words come from the theme. */
+function TextInput({
+  id,
+  fieldKey,
+  type,
+  value,
+  onChange,
+}: {
+  id?: string;
+  fieldKey: string;
+  type: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const themed = usePlaceholder(fieldKey, type);
+  // date_text keeps a format hint when the theme sets no placeholder.
+  const placeholder = themed || (type === "date_text" ? "mm/dd/yyyy" : "");
+  return (
+    <input
+      id={id}
+      type={type === "number" ? "number" : "text"}
+      className="apx-input"
+      value={value}
+      placeholder={placeholder || undefined}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+}
+
+/** A follow-up revealed by an option: free text or a number, styled under its own key. */
+function FollowupInput(props: { id: string; fieldKey: string; type: string; value: string; onChange: (v: string) => void }) {
+  return <TextInput {...props} />;
 }
 
 export default function QuestionStepView({
@@ -266,59 +291,55 @@ export default function QuestionStepView({
   const busy = submit.isPending || back.isPending;
 
   return (
-    <div className="space-y-6">
+    <>
       {step.progress && (
-        <div>
-          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#e11816] transition-all"
-              style={{ width: `${Math.min(100, step.progress.percent)}%` }}
-            />
-          </div>
+        <div className="apx-progress">
+          <div
+            className="apx-progress-bar"
+            style={{ width: `${Math.min(100, step.progress.percent)}%` }}
+          />
         </div>
       )}
 
       <IntakeContentBlocks content={step.content} />
 
-      <div className="space-y-7">
-        {step.fields.map((f, i) => (
-          <div key={f.key} className="space-y-2">
-            <label className="block text-[16px] font-medium text-slate-900">
-              {f.prompt}
-              {f.required && <span className="text-red-400"> *</span>}
-            </label>
-            {f.helpText && (
-              <p className="text-[13px] text-slate-500 -mt-1">{f.helpText}</p>
-            )}
-            <FieldView field={f} state={state} set={setState} />
-            {showErrors && fieldErrors[i] && (
-              <p className="text-[13px] text-red-600">{fieldErrors[i]}</p>
-            )}
-          </div>
-        ))}
-      </div>
+      {step.fields.map((f, i) => (
+        <ThemedQuestion key={f.key} type={f.type} fieldKey={f.key} className="gap-1.5">
+          <label className="apx-question-text">
+            {f.prompt}
+            {f.required && <span style={{ color: "var(--apx-color-error, #b23a3a)" }}> *</span>}
+          </label>
+          {f.helpText && <p className="apx-help-text">{f.helpText}</p>}
+          <FieldView field={f} state={state} set={setState} />
+          {showErrors && fieldErrors[i] && (
+            <p className="apx-error" role="alert">{fieldErrors[i]}</p>
+          )}
+        </ThemedQuestion>
+      ))}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="apx-error" role="alert">{error}</p>}
 
-      <div className="flex items-center gap-3">
-        {step.canGoBack && (
+      <div className="apx-actions">
+        {step.canGoBack ? (
           <button
             onClick={() => back.mutate()}
             disabled={busy}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-300 px-4 py-3 text-[15px] text-slate-700 disabled:opacity-50"
+            className="apx-button-secondary"
           >
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
+        ) : (
+          <span />
         )}
         <button
           onClick={onContinue}
           disabled={busy || hasUpload}
-          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#e11816] hover:bg-[#c3140f] text-white py-3 text-[15px] font-medium disabled:opacity-50"
+          className="apx-button-primary flex-1 sm:flex-none sm:min-w-[160px]"
         >
           {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
           Continue
         </button>
       </div>
-    </div>
+    </>
   );
 }

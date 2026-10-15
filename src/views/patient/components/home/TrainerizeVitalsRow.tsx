@@ -668,7 +668,7 @@ function CalorieBurnTile({
       }
       iconBg="var(--apex-accent-soft)"
       iconColor="var(--apex-accent)"
-      iconShadow="0 4px 11px -3px rgba(225, 24, 22, 0.45)"
+      iconShadow="0 4px 11px -3px rgba(211, 7, 4, 0.45)"
       label="Caloric burn"
       loading={query.isLoading}
       error={query.isError && !USE_DUMMY_VITALS}

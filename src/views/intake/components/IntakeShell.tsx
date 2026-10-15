@@ -1,31 +1,31 @@
+import { ThemeScope } from "@/components/theme/ThemeScope";
+import type { ResolvedTheme } from "@/types/intake/theme_types";
+
 /**
- * Shared brand shell for the intake surfaces (the walk and the public entry):
- * APEX MD navbar with a red accent underline, the logo atop a centered card.
+ * The frame every intake screen sits in: the themed page (`.apx-page`), the form card
+ * (`.apx-container`) and its header — the partner's logo when the theme has one, else Apex's, and
+ * the form title. Without a theme (the public start page, or before the manifest loads) it wears
+ * the Apex look. See `Documents/Intake-Form/Branding and partner onboarding/branding/rendering-the-theme.md`.
  */
 export default function IntakeShell({
+  theme,
+  title,
   children,
 }: {
+  theme?: ResolvedTheme | null;
+  /** The form's title from the manifest. */
+  title?: string | null;
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
-      <div className="h-16 bg-white border-b-[3px] border-[#e11816] flex items-center px-5 shadow-sm">
-        <img src="/images/apex-md-logo.png" alt="APEX MD" className="h-8 w-auto" />
-      </div>
-      <div className="flex-1 flex justify-center px-4 py-8">
-        <div className="w-full max-w-xl">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
-            <div className="flex justify-center pb-5 mb-6 border-b border-slate-100">
-              <img
-                src="/images/apex-md-logo.png"
-                alt="APEX MD"
-                className="h-9 w-auto"
-              />
-            </div>
-            {children}
-          </div>
+    <ThemeScope values={theme?.values} className="min-h-screen px-4 py-8 sm:py-12">
+      <div className="apx-container">
+        <div className="apx-header">
+          <img className="apx-logo" src={theme?.logoUrl || "/images/apex-md-logo.png"} alt="" />
+          {title && <h1 className="apx-title">{title}</h1>}
         </div>
+        {children}
       </div>
-    </div>
+    </ThemeScope>
   );
 }

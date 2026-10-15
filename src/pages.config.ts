@@ -20,7 +20,7 @@ import Genetics from "./views/patient/pages/Genetics";
 import Progress from "./views/patient/pages/Progress";
 import TrainerChat from "./views/patient/pages/TrainerChat";
 import Habits from "./views/patient/pages/Habits";
-import Appointments from "./views/patient/pages/Appointments";
+import Appointments from "./views/patient/pages/AppointmentsPage";
 import Wearables from "./views/patient/pages/Wearables";
 import Visits from "./views/patient/pages/Visits";
 import __Layout from "./layouts/AppLayout";
