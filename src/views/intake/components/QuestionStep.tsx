@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Loader2, Upload } from "lucide-react";
 import IntakeContentBlocks from "./IntakeContentBlocks";
-import { ThemedQuestion, usePlaceholder } from "@/components/theme/ThemeScope";
+import { ThemedQuestion, useImagePlacement, usePlaceholder } from "@/components/theme/ThemeScope";
 import { useBack, useSubmitAnswer } from "@/hooks/intake/useIntake";
 import type {
   IntakeAnswer,
@@ -101,6 +101,46 @@ function buildAnswer(field: IntakeField, state: Local): IntakeAnswer {
     return { kind: "number", value: Number(state.txt[field.key] ?? 0) };
   }
   return { kind: "text", value: state.txt[field.key] ?? "" };
+}
+
+/**
+ * One question: prompt, help text, the answer, its error, and the question's image where the theme
+ * puts it (top / middle / bottom, or a column on the left / right that stacks on top on phones).
+ */
+function Question({
+  field,
+  error,
+  children,
+}: {
+  field: IntakeField;
+  error: string | null;
+  children: React.ReactNode;
+}) {
+  const placement = useImagePlacement(field.key, field.type);
+  const side = field.image && (placement === "left" || placement === "right") ? placement : undefined;
+  const image = field.image && (
+    <div className="apx-question-image-row">
+      <img className="apx-question-image" src={field.image.url} alt={field.image.alt} loading="lazy" />
+    </div>
+  );
+
+  return (
+    <ThemedQuestion type={field.type} fieldKey={field.key} imageSide={side}>
+      {/* First in the DOM for left/right too, so a phone that drops the columns shows it on top. */}
+      {(side || placement === "top") && image}
+      <div className="apx-question-body gap-1.5">
+        <label className="apx-question-text">
+          {field.prompt}
+          {field.required && <span style={{ color: "var(--apx-color-error, #b23a3a)" }}> *</span>}
+        </label>
+        {field.helpText && <p className="apx-help-text">{field.helpText}</p>}
+        {placement === "middle" && image}
+        {children}
+        {error && <p className="apx-error" role="alert">{error}</p>}
+        {placement === "bottom" && image}
+      </div>
+    </ThemedQuestion>
+  );
 }
 
 function FieldView({
@@ -304,17 +344,9 @@ export default function QuestionStepView({
       <IntakeContentBlocks content={step.content} />
 
       {step.fields.map((f, i) => (
-        <ThemedQuestion key={f.key} type={f.type} fieldKey={f.key} className="gap-1.5">
-          <label className="apx-question-text">
-            {f.prompt}
-            {f.required && <span style={{ color: "var(--apx-color-error, #b23a3a)" }}> *</span>}
-          </label>
-          {f.helpText && <p className="apx-help-text">{f.helpText}</p>}
+        <Question key={f.key} field={f} error={showErrors ? fieldErrors[i] : null}>
           <FieldView field={f} state={state} set={setState} />
-          {showErrors && fieldErrors[i] && (
-            <p className="apx-error" role="alert">{fieldErrors[i]}</p>
-          )}
-        </ThemedQuestion>
+        </Question>
       ))}
 
       {error && <p className="apx-error" role="alert">{error}</p>}

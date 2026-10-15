@@ -3,11 +3,13 @@ import {
   buildThemeCss,
   identityPlaceholder,
   identityVariables,
+  imagePlacement,
   loadThemeFont,
   placeholderText,
   questionVariables,
   themeToVariables,
   varsToStyle,
+  type ImagePlacement,
   type ThemeVariables,
 } from "@/lib/theme/themeKit";
 import type { IdentityThemeField, Theme, ThemeRulesTable } from "@/types/intake/theme_types";
@@ -71,11 +73,14 @@ export function ThemeScope({
 export function ThemedQuestion({
   type,
   fieldKey,
+  imageSide,
   className = "",
   children,
 }: {
   type: string;
   fieldKey: string;
+  /** Its image sits beside it (`left`/`right`): the question becomes two columns. */
+  imageSide?: "left" | "right";
   className?: string;
   children: ReactNode;
 }) {
@@ -85,6 +90,7 @@ export function ThemedQuestion({
       className={`apx-question ${className}`}
       data-type={type}
       data-key={fieldKey}
+      data-image={imageSide}
       style={varsToStyle(questionVariables(vars, type, fieldKey))}
     >
       {children}
@@ -124,4 +130,10 @@ export function ThemedIdentityField({
 export function useIdentityPlaceholder(field: IdentityThemeField, fallback: string): string {
   const { values } = useContext(ThemeContext);
   return identityPlaceholder(values, field, fallback);
+}
+
+/** Where a question's image goes (`questionImage.placement`): its own, its type's, the form's, else middle. */
+export function useImagePlacement(fieldKey: string, type: string): ImagePlacement {
+  const { values } = useContext(ThemeContext);
+  return imagePlacement(values, fieldKey, type);
 }

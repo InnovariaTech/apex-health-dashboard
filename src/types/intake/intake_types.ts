@@ -71,6 +71,11 @@ export interface IntakeField {
   helpText?: string;
   options?: FieldOption[];
   constraints?: FieldConstraints;
+  /**
+   * An image the admin attached to this question (top-level questions only). Where it sits and its
+   * size come from the theme (`questionImage`), not from here. `alt` is required, put it on the img.
+   */
+  image?: { url: string; alt: string };
 }
 
 export interface IntakeProgress {

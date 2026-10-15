@@ -117,6 +117,19 @@ export function identityPlaceholder(values: Theme | null | undefined, field: Ide
   return typeof t === "string" ? t : fallback;
 }
 
+export type ImagePlacement = "top" | "middle" | "bottom" | "left" | "right";
+const PLACEMENTS = new Set<string>(["top", "middle", "bottom", "left", "right"]);
+
+/** Where a question's image goes: the question's own, then its type's, then the form's, else middle. */
+export function imagePlacement(values: Theme | null | undefined, key: string, type: string): ImagePlacement {
+  const v = values ?? {};
+  const read = (els?: ThemeElements) => {
+    const p = els?.questionImage?.placement;
+    return typeof p === "string" && PLACEMENTS.has(p) ? (p as ImagePlacement) : undefined;
+  };
+  return read(v.questions?.[key]) ?? read(v.questionTypes?.[type]) ?? read(v.elements) ?? "middle";
+}
+
 /** Placeholder words: the question's own, then its type's, then the default, else empty. */
 export function placeholderText(values: Theme | null | undefined, key: string, type: string): string {
   const v = values ?? {};
@@ -153,6 +166,9 @@ const HOVER_SELECTORS: Record<string, string> = {
 /** A selected option/plan falls back to the option's own themed value before the base. */
 const PARENT: Record<string, string> = { optionSelected: "option", planSelected: "plan" };
 
+/** Properties an element's theme rule leaves to the structure rules (they style a wrapper). */
+const WRAPPER_PROPERTIES: Record<string, string[]> = { questionImage: ["textAlign", "marginBottom"] };
+
 const selectorFor = (element: string) => SELECTORS[element] ?? `.apx-${kebab(element)}`;
 const varFor = (element: string, property: string, state?: string) =>
   `--apx-${kebab(element)}-${kebab(property)}${state ? `-${state}` : ""}`;
@@ -188,10 +204,11 @@ export function buildThemeCss(rules: ThemeRulesTable | null | undefined, scope: 
     const properties = rule
       ? rule.properties.filter((p) => p.variable).map((p) => p.name)
       : Object.keys(APEX_BASE[element] ?? {});
-    if (properties.length === 0) continue;
+    const own = properties.filter((p) => !WRAPPER_PROPERTIES[element]?.includes(p));
+    if (own.length === 0) continue;
 
     const selector = `${scope} ${selectorFor(element)}`;
-    css.push(`${selector} { ${properties.map((p) => declare(p, `var(${varFor(element, p)}, ${fallback(element, p)})`)).join(" ")} }`);
+    css.push(`${selector} { ${own.map((p) => declare(p, `var(${varFor(element, p)}, ${fallback(element, p)})`)).join(" ")} }`);
 
     const states = rule
       ? rule.states.map((s) => ({ name: s.name, properties: s.properties.map((p) => p.name) }))

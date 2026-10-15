@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import IntakeShell from "@/views/intake/components/IntakeShell";
-import { ThemedIdentityField, useIdentityPlaceholder } from "@/components/theme/ThemeScope";
+import IdentityFieldInput from "@/components/theme/IdentityFieldInput";
+import { IDENTITY_FIELDS, identityError } from "@/lib/theme/identityFields";
 import { usePublicIntakeForm, useStartPublicIntake } from "@/hooks/intake/useIntake";
 import { saveIntakeToken } from "@/lib/intakeToken";
 import type { IdentityThemeField } from "@/types/intake/theme_types";
+
+type Values = Record<IdentityThemeField, string>;
+const EMPTY: Values = { firstName: "", lastName: "", dob: "", email: "", phone: "" };
 
 /**
  * The public storefront door: `/intake/public?formKey=…&productId=…`.
@@ -19,44 +23,6 @@ import type { IdentityThemeField } from "@/types/intake/theme_types";
  * See `branding/theme-rules.md` § identity.
  */
 
-/** A labelled details field: the theme's question parts plus that field's `identity` styles. */
-function Field({
-  field,
-  label,
-  optional,
-  type = "text",
-  value,
-  onChange,
-  defaultPlaceholder = "",
-}: {
-  field: IdentityThemeField;
-  label: string;
-  optional?: boolean;
-  type?: string;
-  value: string;
-  onChange: (v: string) => void;
-  defaultPlaceholder?: string;
-}) {
-  const placeholder = useIdentityPlaceholder(field, defaultPlaceholder);
-  const id = `identity-${field}`;
-  return (
-    <ThemedIdentityField field={field} className="gap-1.5">
-      <label className="apx-question-text" htmlFor={id}>
-        {label}
-        {optional && <span className="opacity-60" style={{ fontWeight: 400 }}> (optional)</span>}
-      </label>
-      <input
-        id={id}
-        type={type}
-        className="apx-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder || undefined}
-      />
-    </ThemedIdentityField>
-  );
-}
-
 function readQuery(): { formKey: string; productId: string } {
   if (typeof window === "undefined") return { formKey: "", productId: "" };
   const q = new URLSearchParams(window.location.search);
@@ -70,19 +36,32 @@ export default function PublicIntakeStart() {
   const theme = form.data?.theme ?? null;
   const title = form.data?.title ?? null;
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dob, setDob] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [values, setValues] = useState<Values>(EMPTY);
+  // A field shows its error once it's been left, or after Start was pressed.
+  const [touched, setTouched] = useState<Partial<Record<IdentityThemeField, boolean>>>({});
   const [error, setError] = useState<string | null>(null);
   const [notAvailable, setNotAvailable] = useState(!formKey);
 
-  const valid =
-    firstName.trim() && lastName.trim() && dob && /.+@.+\..+/.test(email);
+  const errors = Object.fromEntries(
+    (Object.keys(EMPTY) as IdentityThemeField[]).map((f) => [f, identityError(f, values[f])]),
+  ) as Record<IdentityThemeField, string | null>;
+  const valid = Object.values(errors).every((e) => !e);
+
+  const field = (f: IdentityThemeField) => ({
+    spec: IDENTITY_FIELDS[f],
+    value: values[f],
+    onChange: (v: string) => setValues((s) => ({ ...s, [f]: v })),
+    onBlur: () => setTouched((t) => ({ ...t, [f]: true })),
+    error: touched[f] ? errors[f] : null,
+  });
 
   const submit = async () => {
     setError(null);
+    if (!valid) {
+      setTouched({ firstName: true, lastName: true, dob: true, email: true, phone: true });
+      return;
+    }
+    const { firstName, lastName, dob, email, phone } = values;
     try {
       const res = await start.mutateAsync({
         formKey,
@@ -152,35 +131,17 @@ export default function PublicIntakeStart() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field field="firstName" label="First name" value={firstName} onChange={setFirstName} />
-        <Field field="lastName" label="Last name" value={lastName} onChange={setLastName} />
+        <IdentityFieldInput {...field("firstName")} />
+        <IdentityFieldInput {...field("lastName")} />
       </div>
-
-      <Field field="dob" label="Date of birth" type="date" value={dob} onChange={setDob} />
-
-      <Field
-        field="email"
-        label="Email"
-        type="email"
-        value={email}
-        onChange={setEmail}
-        defaultPlaceholder="you@example.com"
-      />
-
-      <Field
-        field="phone"
-        label="Phone"
-        optional
-        type="tel"
-        value={phone}
-        onChange={setPhone}
-        defaultPlaceholder="+1 512 555 0100"
-      />
+      <IdentityFieldInput {...field("dob")} />
+      <IdentityFieldInput {...field("email")} />
+      <IdentityFieldInput {...field("phone")} />
 
       {error && <p className="apx-error" role="alert">{error}</p>}
 
       <div className="flex">
-        <button onClick={submit} disabled={!valid || start.isPending} className="apx-button-primary flex-1">
+        <button onClick={submit} disabled={start.isPending} className="apx-button-primary flex-1">
           {start.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
           Start
         </button>

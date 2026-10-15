@@ -109,6 +109,14 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     gap: "8px",
   },
   error: { fontSize: "12.5px", color: "var(--apx-color-error, #b23a3a)" },
+  // The picture itself. Its row's alignment and spacing (`textAlign`, `marginBottom`) are in the
+  // structure rules below, since they apply to the row, not the image.
+  questionImage: {
+    width: "100%",
+    borderRadius: "var(--apx-radius, 12px)",
+    borderStyle: "none",
+    shadow: "none",
+  },
   content: {
     fontSize: "13.5px",
     lineHeight: "1.55",
@@ -196,6 +204,29 @@ export const APEX_STRUCTURE_CSS = `
 %S .apx-progress { overflow: hidden; }
 %S .apx-progress-bar { height: 100%; transition: width .25s ease; }
 %S .apx-question { display: flex; flex-direction: column; }
+%S .apx-question-body { display: flex; flex-direction: column; min-width: 0; }
+/* Question images: top / middle / bottom sit in a row; left / right make two columns, where the
+   theme's width sizes the column and the picture fills it. Under 640px the columns stack (the image
+   is first in the DOM, so it shows on top). */
+%S .apx-question-image-row {
+  text-align: var(--apx-question-image-text-align, center);
+  margin-bottom: var(--apx-question-image-margin-bottom, 12px);
+}
+%S .apx-question-image { display: inline-block; height: auto; vertical-align: top; }
+/* The theme's maxWidth applies, but never wider than the card. */
+%S .apx-question-image-row > .apx-question-image { max-width: min(100%, var(--apx-question-image-max-width, 100%)); }
+%S .apx-question[data-image] {
+  display: grid; gap: 16px; align-items: start;
+  grid-template-columns: var(--apx-question-image-width, 40%) minmax(0, 1fr);
+}
+%S .apx-question[data-image="right"] { grid-template-columns: minmax(0, 1fr) var(--apx-question-image-width, 40%); }
+%S .apx-question[data-image="right"] .apx-question-image-row { order: 2; }
+%S .apx-question[data-image] .apx-question-image-row { margin-bottom: 0; }
+%S .apx-question[data-image] .apx-question-image { width: 100%; }
+@media (max-width: 639px) {
+  %S .apx-question[data-image] { display: flex; flex-direction: column; }
+  %S .apx-question[data-image] .apx-question-image-row { margin-bottom: var(--apx-question-image-margin-bottom, 12px); }
+}
 %S .apx-options, %S .apx-plans { display: flex; flex-direction: column; gap: 8px; }
 %S .apx-option, %S .apx-plan { display: flex; align-items: flex-start; cursor: pointer; transition: border-color .15s, background-color .15s; }
 %S .apx-option-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
