@@ -80,7 +80,7 @@ export function ThemedQuestion({
   type: string;
   fieldKey: string;
   /** Its image sits beside it (`left`/`right`): the question becomes two columns. */
-  imageSide?: "left" | "right";
+  imageSide?: "left" | "right" | undefined;
   className?: string;
   children: ReactNode;
 }) {

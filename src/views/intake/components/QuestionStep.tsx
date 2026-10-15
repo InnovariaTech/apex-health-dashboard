@@ -344,7 +344,7 @@ export default function QuestionStepView({
       <IntakeContentBlocks content={step.content} />
 
       {step.fields.map((f, i) => (
-        <Question key={f.key} field={f} error={showErrors ? fieldErrors[i] : null}>
+        <Question key={f.key} field={f} error={showErrors ? fieldErrors[i] ?? null : null}>
           <FieldView field={f} state={state} set={setState} />
         </Question>
       ))}
