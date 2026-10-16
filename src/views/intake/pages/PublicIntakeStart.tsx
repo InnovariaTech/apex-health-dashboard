@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import IntakeShell from "@/views/intake/components/IntakeShell";
-import IdentityFieldInput from "@/components/theme/IdentityFieldInput";
+import { DetailsIntro, IdentityFieldInput } from "@/shared/form-renderer";
 import { IDENTITY_FIELDS, identityError } from "@/lib/theme/identityFields";
 import { usePublicIntakeForm, useStartPublicIntake } from "@/hooks/intake/useIntake";
 import { saveIntakeToken } from "@/lib/intakeToken";
@@ -120,15 +120,7 @@ export default function PublicIntakeStart() {
 
   return (
     <IntakeShell theme={theme} title={title}>
-      <div>
-        <h2 className="apx-question-text" style={{ fontSize: "1.2em" }}>
-          Let's get started
-        </h2>
-        <p className="apx-help-text">
-          A few details before your questions. This lets us save your progress
-          and follow up if needed.
-        </p>
-      </div>
+      <DetailsIntro />
 
       <div className="grid grid-cols-2 gap-3">
         <IdentityFieldInput {...field("firstName")} />

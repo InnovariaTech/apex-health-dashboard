@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSubmitFacts } from "@/hooks/intake/useIntake";
-import { ThemedQuestion, usePlaceholder } from "@/components/theme/ThemeScope";
+import { ChoiceList, ThemedQuestion, usePlaceholder } from "@/shared/form-renderer";
 import type { FactPrompt, FactsStep } from "@/types/intake/intake_types";
 
 /**
@@ -48,25 +48,13 @@ function PromptField({
       );
     case "choice":
       return (
-        <div className="apx-options">
-          {(prompt.options ?? []).map((o) => (
-            <label
-              key={o.key}
-              className={`apx-option ${value === o.key ? "apx-option-selected" : ""}`}
-            >
-              <input
-                type="radio"
-                name={prompt.key}
-                checked={value === o.key}
-                onChange={() => onChange(o.key)}
-                className="mt-[3px] h-4 w-4 shrink-0 accent-[var(--apx-color-primary,#d30704)]"
-              />
-              <span className="apx-option-text">
-                <span className="apx-option-label">{o.label}</span>
-              </span>
-            </label>
-          ))}
-        </div>
+        <ChoiceList
+          name={prompt.key}
+          options={prompt.options ?? []}
+          selected={value ? [value] : []}
+          multi={false}
+          onChange={(next) => onChange(next[0] ?? "")}
+        />
       );
     case "number":
       return (

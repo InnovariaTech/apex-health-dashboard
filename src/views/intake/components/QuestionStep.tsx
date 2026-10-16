@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, Loader2, Upload } from "lucide-react";
-import IntakeContentBlocks from "./IntakeContentBlocks";
-import { ThemedQuestion, useImagePlacement, usePlaceholder } from "@/components/theme/ThemeScope";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ChoiceList,
+  ContentBlocks,
+  FormQuestion,
+  TextAnswer,
+  ThemedQuestion,
+  UploadNotice,
+} from "@/shared/form-renderer";
 import { useBack, useSubmitAnswer } from "@/hooks/intake/useIntake";
 import type {
   IntakeAnswer,
@@ -104,45 +110,9 @@ function buildAnswer(field: IntakeField, state: Local): IntakeAnswer {
 }
 
 /**
- * One question: prompt, help text, the answer, its error, and the question's image where the theme
- * puts it (top / middle / bottom, or a column on the left / right that stacks on top on phones).
+ * One question's answer, drawn with the shared form parts (the builder preview uses the same):
+ * choices with their follow-ups, a typed answer, or the upload notice.
  */
-function Question({
-  field,
-  error,
-  children,
-}: {
-  field: IntakeField;
-  error: string | null;
-  children: React.ReactNode;
-}) {
-  const placement = useImagePlacement(field.key, field.type);
-  const side = field.image && (placement === "left" || placement === "right") ? placement : undefined;
-  const image = field.image && (
-    <div className="apx-question-image-row">
-      <img className="apx-question-image" src={field.image.url} alt={field.image.alt} loading="lazy" />
-    </div>
-  );
-
-  return (
-    <ThemedQuestion type={field.type} fieldKey={field.key} imageSide={side}>
-      {/* First in the DOM for left/right too, so a phone that drops the columns shows it on top. */}
-      {(side || placement === "top") && image}
-      <div className="apx-question-body gap-1.5">
-        <label className="apx-question-text">
-          {field.prompt}
-          {field.required && <span style={{ color: "var(--apx-color-error, #b23a3a)" }}> *</span>}
-        </label>
-        {field.helpText && <p className="apx-help-text">{field.helpText}</p>}
-        {placement === "middle" && image}
-        {children}
-        {error && <p className="apx-error" role="alert">{error}</p>}
-        {placement === "bottom" && image}
-      </div>
-    </ThemedQuestion>
-  );
-}
-
 function FieldView({
   field,
   state,
@@ -152,134 +122,54 @@ function FieldView({
   state: Local;
   set: (updater: (s: Local) => Local) => void;
 }) {
-  const isMulti = field.type === "multi_select";
-
   if (field.type === "single_select" || field.type === "multi_select") {
-    const chosen = state.sel[field.key] ?? [];
-    const toggle = (optKey: string, exclusive?: boolean) => {
-      set((s) => {
-        let next: string[];
-        if (!isMulti) next = [optKey];
-        else if (exclusive) next = chosen.includes(optKey) ? [] : [optKey];
-        else {
-          const exclusiveKeys = new Set(
-            (field.options ?? []).filter((o) => o.exclusive).map((o) => o.key),
-          );
-          const base = chosen.filter((k) => !exclusiveKeys.has(k));
-          next = base.includes(optKey)
-            ? base.filter((k) => k !== optKey)
-            : [...base, optKey];
-        }
-        return { ...s, sel: { ...s.sel, [field.key]: next } };
-      });
-    };
+    const options = field.options ?? [];
     return (
-      <div className="apx-options">
-        {(field.options ?? []).map((o) => {
-          const on = chosen.includes(o.key);
+      <ChoiceList
+        name={field.key}
+        options={options}
+        selected={state.sel[field.key] ?? []}
+        multi={field.type === "multi_select"}
+        onChange={(next) => set((s) => ({ ...s, sel: { ...s.sel, [field.key]: next } }))}
+        renderBelow={(o) => {
+          const fu = options.find((x) => x.key === o.key)?.followup;
+          if (!fu) return null;
           return (
-            <div key={o.key}>
-              <label className={`apx-option ${on ? "apx-option-selected" : ""}`}>
-                <input
-                  type={isMulti ? "checkbox" : "radio"}
-                  name={field.key}
-                  checked={on}
-                  onChange={() => toggle(o.key, o.exclusive)}
-                  className="mt-[3px] h-4 w-4 shrink-0 accent-[var(--apx-color-primary,#d30704)]"
-                />
-                <span className="apx-option-text">
-                  <span className="apx-option-label">{o.label}</span>
-                </span>
+            <ThemedQuestion type={String(fu.type)} fieldKey={fu.key} className="mt-2 pl-1">
+              <label className="apx-help-text" htmlFor={`fu-${fu.key}`}>
+                {fu.prompt}
+                {fu.required && " *"}
               </label>
-              {on && o.followup && (
-                <ThemedQuestion type={String(o.followup.type)} fieldKey={o.followup.key} className="mt-2 pl-1">
-                  <label className="apx-help-text" htmlFor={`fu-${o.followup.key}`}>
-                    {o.followup.prompt}
-                    {o.followup.required && " *"}
-                  </label>
-                  <FollowupInput
-                    id={`fu-${o.followup.key}`}
-                    fieldKey={o.followup.key}
-                    type={String(o.followup.type)}
-                    value={state.follow[field.key]?.[o.followup.key] ?? ""}
-                    onChange={(v) =>
-                      set((s) => ({
-                        ...s,
-                        follow: {
-                          ...s.follow,
-                          [field.key]: {
-                            ...(s.follow[field.key] ?? {}),
-                            [o.followup!.key]: v,
-                          },
-                        },
-                      }))
-                    }
-                  />
-                </ThemedQuestion>
-              )}
-            </div>
+              <TextAnswer
+                id={`fu-${fu.key}`}
+                fieldKey={fu.key}
+                type={String(fu.type)}
+                value={state.follow[field.key]?.[fu.key] ?? ""}
+                onChange={(v) =>
+                  set((s) => ({
+                    ...s,
+                    follow: { ...s.follow, [field.key]: { ...(s.follow[field.key] ?? {}), [fu.key]: v } },
+                  }))
+                }
+              />
+            </ThemedQuestion>
           );
-        })}
-      </div>
+        }}
+      />
     );
   }
 
-  if (field.type === "document_upload") {
-    return (
-      <div className="apx-upload">
-        <div className="flex w-full flex-col items-center text-center">
-          <Upload className="w-6 h-6 opacity-50" />
-          <span className="mt-1.5">File upload isn't available yet.</span>
-          <span className="text-[12px] opacity-70">
-            This screen can't be submitted until uploads are enabled.
-          </span>
-        </div>
-      </div>
-    );
-  }
+  if (field.type === "document_upload") return <UploadNotice />;
 
   return (
-    <TextInput
+    <TextAnswer
       fieldKey={field.key}
       type={field.type}
       value={state.txt[field.key] ?? ""}
       onChange={(v) => set((s) => ({ ...s, txt: { ...s.txt, [field.key]: v } }))}
+      maxLength={field.constraints?.maxLength}
     />
   );
-}
-
-/** A themed text/number input whose placeholder words come from the theme. */
-function TextInput({
-  id,
-  fieldKey,
-  type,
-  value,
-  onChange,
-}: {
-  id?: string;
-  fieldKey: string;
-  type: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const themed = usePlaceholder(fieldKey, type);
-  // date_text keeps a format hint when the theme sets no placeholder.
-  const placeholder = themed || (type === "date_text" ? "mm/dd/yyyy" : "");
-  return (
-    <input
-      id={id}
-      type={type === "number" ? "number" : "text"}
-      className="apx-input"
-      value={value}
-      placeholder={placeholder || undefined}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  );
-}
-
-/** A follow-up revealed by an option: free text or a number, styled under its own key. */
-function FollowupInput(props: { id: string; fieldKey: string; type: string; value: string; onChange: (v: string) => void }) {
-  return <TextInput {...props} />;
 }
 
 export default function QuestionStepView({
@@ -341,12 +231,21 @@ export default function QuestionStepView({
         </div>
       )}
 
-      <IntakeContentBlocks content={step.content} />
+      <ContentBlocks content={step.content} />
 
       {step.fields.map((f, i) => (
-        <Question key={f.key} field={f} error={showErrors ? fieldErrors[i] ?? null : null}>
+        <FormQuestion
+          key={f.key}
+          fieldKey={f.key}
+          type={f.type}
+          prompt={f.prompt}
+          required={f.required}
+          helpText={f.helpText}
+          image={f.image}
+          error={showErrors ? fieldErrors[i] ?? null : null}
+        >
           <FieldView field={f} state={state} set={setState} />
-        </Question>
+        </FormQuestion>
       ))}
 
       {error && <p className="apx-error" role="alert">{error}</p>}

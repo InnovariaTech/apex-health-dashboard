@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, CreditCard, Loader2 } from "lucide-react";
-import { useBack, useIntakeManifest, useIntakeStep } from "@/hooks/intake/useIntake";
+import { useBack, useChooseCheckout, useIntakeManifest, useIntakeStep } from "@/hooks/intake/useIntake";
 import FactsStepView from "@/views/intake/components/FactsStep";
 import QuestionStepView from "@/views/intake/components/QuestionStep";
 import IntakeContentBlocks from "@/views/intake/components/IntakeContentBlocks";
@@ -8,7 +8,7 @@ import IntakeShell from "@/views/intake/components/IntakeShell";
 import { loadIntakeToken, saveIntakeToken } from "@/lib/intakeToken";
 import { getPendingIntakes } from "@/api/intake/intake";
 import { announceIntakeCompleted } from "@/lib/intakeChannel";
-import type { CheckoutStep, IntakeStep } from "@/types/intake/intake_types";
+import type { CheckoutOption, CheckoutStep, IntakeStep } from "@/types/intake/intake_types";
 
 /**
  * The patient intake runtime. Mounted pre-auth for `/intake/:token` — the token
@@ -54,6 +54,15 @@ function Terminal({
   );
 }
 
+/** "$299", "$299 / month for 3 months", "$897 · covers 3 months". Display only; Stripe charges the real amount. */
+function planPriceLine(o: CheckoutOption): string {
+  if (o.cost == null) return "";
+  const n = Number(o.cost);
+  const amount = `${o.currency === "USD" ? "$" : `${o.currency} `}${Number.isInteger(n) ? n : n.toFixed(2)}`;
+  if (o.billingMode === "per_cycle") return `${amount} / month${o.totalCycles ? ` for ${o.totalCycles} months` : ""}`;
+  return o.totalCycles && o.totalCycles > 1 ? `${amount} · covers ${o.totalCycles} months` : amount;
+}
+
 function CheckoutStepView({
   step,
   token,
@@ -64,20 +73,96 @@ function CheckoutStepView({
   onRetry: () => void;
 }) {
   const back = useBack(token);
+  const choose = useChooseCheckout(token);
+  const options = step.options ?? [];
+  const many = options.length > 1;
+  // With several plans the patient picks one; the server then answers with that plan's Stripe link.
+  const [picked, setPicked] = useState<string | null>(null);
+  const [changing, setChanging] = useState(false);
+  const [chooseError, setChooseError] = useState<string | null>(null);
+  const choosing = many && (!step.checkoutUrl || changing);
+  const chosen = many && step.checkoutUrl ? options.find((o) => o.checkoutFormId === picked) ?? null : null;
+
+  const confirmPlan = async () => {
+    if (!picked) return;
+    setChooseError(null);
+    try {
+      await choose.mutateAsync(picked);
+      setChanging(false);
+    } catch {
+      setChooseError("That plan couldn't be selected. Please try again.");
+    }
+  };
+
   return (
     <>
       <IntakeContentBlocks content={step.content} />
       <div className="flex flex-col items-center gap-2 text-center">
         <CreditCard className="w-9 h-9" style={{ color: "var(--apx-color-primary, #d30704)" }} />
         <h2 className="apx-question-text" style={{ fontSize: "1.2em" }}>
-          One last step — payment
+          {choosing ? "Choose your plan" : "One last step — payment"}
         </h2>
         <p className="apx-help-text">
-          Your answers are saved. Complete payment to finish and send your intake
-          for review.
+          {choosing
+            ? "Your answers are saved. Pick the plan that suits you, then continue to secure payment."
+            : "Your answers are saved. Complete payment to finish and send your intake for review."}
         </p>
       </div>
 
+      {choosing ? (
+        <>
+          <div className="apx-plans" role="radiogroup" aria-label="Plans">
+            {options.map((o) => {
+              const on = picked === o.checkoutFormId;
+              return (
+                <button
+                  key={o.checkoutFormId}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => setPicked(o.checkoutFormId)}
+                  className={`apx-plan ${on ? "apx-plan-selected" : ""}`}
+                >
+                  <span
+                    className="mt-[3px] grid h-4 w-4 shrink-0 place-items-center rounded-full border-2"
+                    style={{ borderColor: "currentColor", opacity: on ? 1 : 0.45 }}
+                  >
+                    {on && <span className="h-2 w-2 rounded-full" style={{ background: "currentColor" }} />}
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+                    <span className="font-semibold">{o.title}</span>
+                    {o.description && <span className="apx-help-text" style={{ marginBottom: 0 }}>{o.description}</span>}
+                  </span>
+                  {planPriceLine(o) && <span className="shrink-0 font-semibold">{planPriceLine(o)}</span>}
+                </button>
+              );
+            })}
+          </div>
+          {chooseError && <p className="apx-error" role="alert">{chooseError}</p>}
+          <div className="flex">
+            <button
+              onClick={() => void confirmPlan()}
+              disabled={!picked || choose.isPending}
+              className="apx-button-primary flex-1"
+            >
+              {choose.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Continue to payment
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          {chosen && (
+            <div className="apx-plan apx-plan-selected" style={{ cursor: "default" }}>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="font-semibold">{chosen.title}</span>
+                {planPriceLine(chosen) && <span className="apx-help-text" style={{ marginBottom: 0 }}>{planPriceLine(chosen)}</span>}
+              </span>
+              <button type="button" onClick={() => setChanging(true)} className="apx-help-text shrink-0 underline-offset-2 hover:underline">
+                Change plan
+              </button>
+            </div>
+          )}
       {step.checkoutUrl ? (
         <div className="flex">
           <a href={step.checkoutUrl} className="apx-button-primary flex-1">
@@ -94,6 +179,8 @@ function CheckoutStepView({
             Try again
           </button>
         </div>
+      )}
+        </>
       )}
 
       <div className="flex justify-center">

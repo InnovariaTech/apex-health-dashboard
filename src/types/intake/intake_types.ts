@@ -114,6 +114,20 @@ export interface TerminatedStep {
   canGoBack: boolean;
 }
 
+/** One plan on the payment screen: everything a patient needs to choose between them. */
+export interface CheckoutOption {
+  checkoutFormId: string;
+  title: string;
+  description?: string | null;
+  /** Display only; Stripe charges the real amount. */
+  cost: number | null;
+  currency: string;
+  /** Months the plan covers; null on a single purchase. */
+  totalCycles: number | null;
+  /** `upfront`: the cost is for the whole plan. `per_cycle`: charged every month. */
+  billingMode: "upfront" | "per_cycle";
+}
+
 /** Every question answered, payment outstanding. A STEP, not the end. */
 export interface CheckoutStep {
   kind: "checkout";
@@ -121,7 +135,12 @@ export interface CheckoutStep {
   formKey: string;
   formVersion: number;
   content: IntakeContent[];
-  /** Stripe-hosted URL. Absent = a session couldn't be created yet; re-GET retries. */
+  /** The plans the form sells, in order. With more than one, the patient picks before paying. */
+  options?: CheckoutOption[];
+  /**
+   * Stripe-hosted URL. Absent with several plans = the patient hasn't picked one yet; absent with
+   * one plan = a session couldn't be created yet, and re-GET retries.
+   */
   checkoutUrl?: string | null;
 }
 

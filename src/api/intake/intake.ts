@@ -80,6 +80,15 @@ export async function submitAnswer(
   return unwrap<IntakeStep>(res.data);
 }
 
+/**
+ * Pick one of the form's plans (`POST /intake/:token/checkout`). Answers with the checkout step,
+ * now carrying the Stripe link for that plan. Picking again switches plan.
+ */
+export async function chooseCheckout(token: string, checkoutFormId: string): Promise<IntakeStep> {
+  const res = await axiosService.post(`${BASE}/${encodeURIComponent(token)}/checkout`, { checkoutFormId });
+  return unwrap<IntakeStep>(res.data);
+}
+
 /** Server-driven back — it forgets the previous screen's answers and re-derives. */
 export async function goBack(token: string): Promise<IntakeStep> {
   const res = await axiosService.post(

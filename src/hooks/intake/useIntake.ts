@@ -3,6 +3,7 @@ import {
   getIntakeStep,
   getManifest,
   getPublicIntakeForm,
+  chooseCheckout,
   goBack,
   startPublicIntake,
   submitAnswer,
@@ -90,6 +91,15 @@ export function useBack(token: string) {
   const advance = useAdvance(token);
   return useMutation({
     mutationFn: () => goBack(token),
+    onSuccess: advance,
+  });
+}
+
+/** Choose a plan on the payment screen; the answer carries the Stripe link. */
+export function useChooseCheckout(token: string) {
+  const advance = useAdvance(token);
+  return useMutation({
+    mutationFn: (checkoutFormId: string) => chooseCheckout(token, checkoutFormId),
     onSuccess: advance,
   });
 }
