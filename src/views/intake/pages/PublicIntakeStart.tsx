@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import IntakeShell from "@/views/intake/components/IntakeShell";
-import { DetailsIntro, IdentityFieldInput } from "@/shared/form-renderer";
+import { DetailsIntro, IdentityFieldInput, FormActions, FormLabel } from "@/shared/form-renderer";
 import { IDENTITY_FIELDS, identityError } from "@/lib/theme/identityFields";
 import { usePublicIntakeForm, useStartPublicIntake } from "@/hooks/intake/useIntake";
 import { saveIntakeToken } from "@/lib/intakeToken";
@@ -132,12 +132,12 @@ export default function PublicIntakeStart() {
 
       {error && <p className="apx-error" role="alert">{error}</p>}
 
-      <div className="flex">
-        <button onClick={submit} disabled={start.isPending} className="apx-button-primary flex-1">
+      <FormActions>
+        <button onClick={submit} disabled={start.isPending} className="apx-button-primary">
           {start.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          Start
+          <FormLabel name="start" fallback="Start" />
         </button>
-      </div>
+      </FormActions>
     </IntakeShell>
   );
 }

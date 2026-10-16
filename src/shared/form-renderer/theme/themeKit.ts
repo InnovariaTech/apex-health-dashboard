@@ -1,5 +1,5 @@
 // GENERATED from apex-form-renderer/src — do not edit here. Edit there, then run `npm run sync`.
-import type { IdentityThemeField, Theme, ThemeElementStyle, ThemeElements, ThemeRulesTable } from "../types";
+import type { FormLabelKey, IdentityThemeField, Theme, ThemeElementStyle, ThemeElements, ThemeRulesTable } from "../types";
 import { APEX_BASE, APEX_BASE_STATES, APEX_STRUCTURE_CSS } from "./apexBase";
 
 /**
@@ -53,14 +53,27 @@ export function loadThemeFont(fontFamily: string | undefined | null): void {
   document.head.appendChild(link);
 }
 
-const cssValue = (property: string, value: string | number) =>
-  property === "shadow" ? SHADOWS[String(value)] ?? "none" : String(value);
+/** How fast hover/focus changes animate (theme `transition` preset → a duration). */
+export const TRANSITIONS: Record<string, string> = { none: "0s", fast: "150ms", slow: "300ms" };
+/** Hover motion presets: fixed, small amounts so nothing can cover content. */
+export const MOTIONS: Record<string, string> = { none: "none", lift: "translateY(-2px)", grow: "scale(1.02)" };
+
+/** Values the frontend reads (words, links, places, layout choices), never written as CSS. */
+export const VALUE_ONLY = new Set(["text", "placement", "attach", "align", "arrange", "link"]);
+
+const cssValue = (property: string, value: string | number) => {
+  const v = String(value);
+  if (property === "shadow") return SHADOWS[v] ?? "none";
+  if (property === "transition") return TRANSITIONS[v] ?? v;
+  if (property === "motion") return MOTIONS[v] ?? "none";
+  return v;
+};
 
 export type CssVars = Record<string, string>;
 
 function blockVariables(element: string, block: ThemeElementStyle | undefined, out: CssVars): CssVars {
   for (const [key, value] of Object.entries(block ?? {})) {
-    if (key === "text" || key === "placement" || value === undefined) continue; // words and a place, not CSS
+    if (VALUE_ONLY.has(key) || value === undefined) continue; // read by the layout, not CSS
     if ((key === "hover" || key === "focus") && typeof value === "object") {
       for (const [p, v] of Object.entries(value)) out[`--apx-${kebab(element)}-${kebab(p)}-${key}`] = cssValue(p, v);
     } else if (typeof value !== "object") {
@@ -141,6 +154,60 @@ export function placeholderText(values: Theme | null | undefined, key: string, t
   return read(v.questions?.[key]) ?? read(v.questionTypes?.[type as keyof NonNullable<Theme["questionTypes"]>]) ?? read(v.elements) ?? "";
 }
 
+// ── The page frame (rules v3) ────────────────────────────────────────────────
+
+export type Side = "left" | "center" | "right";
+export type Attach = "form" | "page";
+export type Arrange = "spread" | "left" | "center" | "right" | "stretch";
+
+/** The layout choices of the frame: value-only properties the layout reads, never CSS. */
+export interface FrameLayout {
+  headerAttach: Attach;
+  logoAlign: Side;
+  /** Where the header button sits: its own side, else the side opposite the logo (never the same). */
+  buttonAlign: Side;
+  /** The header button: shown only when it has both words and an https link. */
+  button: { text: string; link: string } | null;
+  containerAlign: Side;
+  stepAlign: Side;
+  actionsAttach: Attach;
+  arrange: Arrange;
+}
+
+const pick = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
+  typeof value === "string" && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+const SIDES = ["left", "center", "right"] as const;
+
+export function frameLayout(values: Theme | null | undefined): FrameLayout {
+  const el = values?.elements ?? {};
+  const logoAlign = pick(el.logo?.align, SIDES, "left");
+  const opposite: Side = logoAlign === "right" ? "left" : "right";
+  let buttonAlign = pick(el.headerButton?.align, SIDES, opposite);
+  if (buttonAlign === logoAlign) buttonAlign = opposite;
+  const text = el.headerButton?.text;
+  const link = el.headerButton?.link;
+  const button =
+    typeof text === "string" && text.trim() && typeof link === "string" && /^https:\/\//i.test(link)
+      ? { text: text.trim(), link }
+      : null;
+  return {
+    headerAttach: pick(el.header?.attach, ["form", "page"] as const, "form"),
+    logoAlign,
+    buttonAlign,
+    button,
+    containerAlign: pick(el.container?.align, SIDES, "center"),
+    stepAlign: pick(el.step?.align, SIDES, "center"),
+    actionsAttach: pick(el.actions?.attach, ["form", "page"] as const, "form"),
+    arrange: pick(el.actions?.arrange, ["spread", "left", "center", "right", "stretch"] as const, "spread"),
+  };
+}
+
+/** A button's words: the theme's, else the page's own. */
+export function formLabel(values: Theme | null | undefined, key: FormLabelKey, fallback: string): string {
+  const t = values?.labels?.[key];
+  return typeof t === "string" && t.trim() ? t : fallback;
+}
+
 // ── The generated stylesheet ─────────────────────────────────────────────────
 
 /** Two declarations for the shorthand-free padding keys. */
@@ -148,6 +215,8 @@ const DECLARATIONS: Record<string, string[]> = {
   paddingX: ["padding-left", "padding-right"],
   paddingY: ["padding-top", "padding-bottom"],
   shadow: ["box-shadow"],
+  transition: ["transition-duration"],
+  motion: ["transform"],
 };
 
 const SELECTORS: Record<string, string> = {
@@ -171,6 +240,8 @@ const PARENT: Record<string, string> = { optionSelected: "option", planSelected:
 const WRAPPER_PROPERTIES: Record<string, string[]> = { questionImage: ["textAlign", "marginBottom"] };
 
 const selectorFor = (element: string) => SELECTORS[element] ?? `.apx-${kebab(element)}`;
+/** The page is the scope element itself, so its rule must not look for a descendant. */
+const scoped = (scope: string, element: string) => (element === "page" ? scope : `${scope} ${selectorFor(element)}`);
 const varFor = (element: string, property: string, state?: string) =>
   `--apx-${kebab(element)}-${kebab(property)}${state ? `-${state}` : ""}`;
 
@@ -208,7 +279,7 @@ export function buildThemeCss(rules: ThemeRulesTable | null | undefined, scope: 
     const own = properties.filter((p) => !WRAPPER_PROPERTIES[element]?.includes(p));
     if (own.length === 0) continue;
 
-    const selector = `${scope} ${selectorFor(element)}`;
+    const selector = scoped(scope, element);
     css.push(`${selector} { ${own.map((p) => declare(p, `var(${varFor(element, p)}, ${fallback(element, p)})`)).join(" ")} }`);
 
     const states = rule

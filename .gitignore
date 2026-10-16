@@ -37,3 +37,6 @@ dist-ssr
 .env
 shop-legacy-rows.json
 shop-data/
+
+# Local Netlify folder
+.netlify

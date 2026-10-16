@@ -1,11 +1,12 @@
-import { ThemeScope } from "@/components/theme/ThemeScope";
+import { FormFrame } from "@/shared/form-renderer";
 import type { ResolvedTheme } from "@/types/intake/theme_types";
 
 /**
- * The frame every intake screen sits in: the themed page (`.apx-page`), the form card
- * (`.apx-container`) and its header — the partner's logo when the theme has one, else Apex's, and
- * the form title. Without a theme (the public start page, or before the manifest loads) it wears
- * the Apex look. See `Documents/Intake-Form/Branding and partner onboarding/branding/rendering-the-theme.md`.
+ * The frame every intake screen sits in — the shared `FormFrame`: the themed page, the header (the
+ * partner's logo when the theme has one, else Apex's; the organization's header button; the form
+ * title), the form box, and the Back / Next area wherever the theme puts it. Without a theme (the
+ * public start page, or before the manifest loads) it wears the Apex look. See
+ * `Documents/Intake-Form/Branding and partner onboarding/branding/rendering-the-theme.md`.
  */
 export default function IntakeShell({
   theme,
@@ -18,14 +19,8 @@ export default function IntakeShell({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeScope values={theme?.values} className="min-h-screen px-4 py-8 sm:py-12">
-      <div className="apx-container">
-        <div className="apx-header">
-          <img className="apx-logo" src={theme?.logoUrl || "/images/apex-md-logo.png"} alt="" />
-          {title && <h1 className="apx-title">{title}</h1>}
-        </div>
-        {children}
-      </div>
-    </ThemeScope>
+    <FormFrame values={theme?.values} logoUrl={theme?.logoUrl || "/images/apex-md-logo.png"} title={title}>
+      {children}
+    </FormFrame>
   );
 }

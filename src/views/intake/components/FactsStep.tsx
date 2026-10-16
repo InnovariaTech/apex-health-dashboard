@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useSubmitFacts } from "@/hooks/intake/useIntake";
-import { ChoiceList, ThemedQuestion, usePlaceholder } from "@/shared/form-renderer";
+import { ChoiceList, ThemedQuestion, usePlaceholder, FormActions, FormLabel } from "@/shared/form-renderer";
 import type { FactPrompt, FactsStep } from "@/types/intake/intake_types";
 
 /**
@@ -142,17 +142,16 @@ export default function FactsStepView({
 
       {error && <p className="apx-error" role="alert">{error}</p>}
 
-      {/* Width on a wrapper: the theme owns the button's own width. */}
-      <div className="flex">
+      <FormActions>
         <button
           onClick={onSubmit}
           disabled={!allAnswered || submit.isPending}
-          className="apx-button-primary flex-1"
+          className="apx-button-primary"
         >
           {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          Continue
+          <FormLabel name="next" fallback="Continue" />
         </button>
-      </div>
+      </FormActions>
     </>
   );
 }

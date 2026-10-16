@@ -3,6 +3,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import {
   ChoiceList,
   ContentBlocks,
+  FormActions,
+  FormLabel,
   FormQuestion,
   TextAnswer,
   ThemedQuestion,
@@ -250,14 +252,14 @@ export default function QuestionStepView({
 
       {error && <p className="apx-error" role="alert">{error}</p>}
 
-      <div className="apx-actions">
+      <FormActions>
         {step.canGoBack ? (
           <button
             onClick={() => back.mutate()}
             disabled={busy}
             className="apx-button-secondary"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> <FormLabel name="back" fallback="Back" />
           </button>
         ) : (
           <span />
@@ -265,12 +267,12 @@ export default function QuestionStepView({
         <button
           onClick={onContinue}
           disabled={busy || hasUpload}
-          className="apx-button-primary flex-1 sm:flex-none sm:min-w-[160px]"
+          className="apx-button-primary"
         >
           {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          Continue
+          {step.isLast ? <FormLabel name="submit" fallback="Continue" /> : <FormLabel name="next" fallback="Continue" />}
         </button>
-      </div>
+      </FormActions>
     </>
   );
 }

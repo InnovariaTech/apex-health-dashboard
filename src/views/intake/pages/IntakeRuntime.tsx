@@ -5,6 +5,7 @@ import FactsStepView from "@/views/intake/components/FactsStep";
 import QuestionStepView from "@/views/intake/components/QuestionStep";
 import IntakeContentBlocks from "@/views/intake/components/IntakeContentBlocks";
 import IntakeShell from "@/views/intake/components/IntakeShell";
+import { FormActions, FormLabel } from "@/shared/form-renderer";
 import { loadIntakeToken, saveIntakeToken } from "@/lib/intakeToken";
 import { getPendingIntakes } from "@/api/intake/intake";
 import { announceIntakeCompleted } from "@/lib/intakeChannel";
@@ -139,16 +140,16 @@ function CheckoutStepView({
             })}
           </div>
           {chooseError && <p className="apx-error" role="alert">{chooseError}</p>}
-          <div className="flex">
+          <FormActions>
             <button
               onClick={() => void confirmPlan()}
               disabled={!picked || choose.isPending}
-              className="apx-button-primary flex-1"
+              className="apx-button-primary"
             >
               {choose.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              Continue to payment
+              <FormLabel name="pay" fallback="Continue to payment" />
             </button>
-          </div>
+          </FormActions>
         </>
       ) : (
         <>
@@ -164,11 +165,11 @@ function CheckoutStepView({
             </div>
           )}
       {step.checkoutUrl ? (
-        <div className="flex">
-          <a href={step.checkoutUrl} className="apx-button-primary flex-1">
-            Proceed to secure payment
+        <FormActions>
+          <a href={step.checkoutUrl} className="apx-button-primary">
+            <FormLabel name="pay" fallback="Proceed to secure payment" />
           </a>
-        </div>
+        </FormActions>
       ) : (
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="apx-help-text inline-flex items-center gap-2">

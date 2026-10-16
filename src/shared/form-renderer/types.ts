@@ -27,7 +27,12 @@ export interface Theme {
   questionTypes?: Partial<Record<string, ThemeElements>>;
   questions?: Record<string, ThemeElements>;
   identity?: Partial<Record<IdentityThemeField, ThemeElements>>;
+  /** Button texts (rules v3): the form's per key, else the organization's. */
+  labels?: Partial<Record<FormLabelKey, string>>;
 }
+
+/** The buttons whose words a theme may change. */
+export type FormLabelKey = "back" | "next" | "submit" | "pay" | "start";
 
 /** Which properties each element accepts, and its hover/focus states (the backend's rules). */
 export interface ThemeRulesTable {

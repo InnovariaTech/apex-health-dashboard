@@ -103,6 +103,11 @@ export interface QuestionStep {
   content: IntakeContent[];
   progress: IntakeProgress;
   canGoBack: boolean;
+  /**
+   * The last question screen: its button says the theme's "submit" words. Not sent by the backend
+   * yet (asked for); until it is, every screen says "next".
+   */
+  isLast?: boolean;
 }
 
 export interface TerminatedStep {

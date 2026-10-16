@@ -26,9 +26,12 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     paddingX: "24px",
     paddingY: "24px",
     gap: "18px",
+    width: "100%",
     maxWidth: "var(--apx-container-max-width, 560px)",
     shadow: "sm",
   },
+  // The content inside the form box: takes the box's spacing between parts unless themed.
+  step: { gap: "var(--apx-container-gap, 18px)", width: "100%" },
   header: { gap: "10px", textAlign: "left" },
   logo: { height: "32px", maxWidth: "160px" },
   title: {
@@ -60,6 +63,7 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     marginBottom: "6px",
   },
   input: {
+    transition: "150ms",
     fontSize: "14px",
     lineHeight: "1.4",
     color: "var(--apx-color-text, #17140f)",
@@ -74,6 +78,7 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
   },
   placeholder: { color: "#9a938a", fontStyle: "normal", fontWeight: "400" },
   option: {
+    transition: "150ms",
     fontSize: "14px",
     lineHeight: "1.4",
     textAlign: "left",
@@ -98,6 +103,7 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
   optionLabel: {},
   optionHelpText: { fontSize: "12px", color: "var(--apx-color-muted-text, #5f5952)" },
   upload: {
+    transition: "150ms",
     fontSize: "13px",
     color: "var(--apx-color-muted-text, #5f5952)",
     background: "var(--apx-color-background, #faf8f6)",
@@ -132,6 +138,7 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     gap: "8px",
   },
   plan: {
+    transition: "150ms",
     fontSize: "14px",
     color: "var(--apx-color-text, #17140f)",
     background: "var(--apx-color-surface, #ffffff)",
@@ -150,6 +157,7 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     borderColor: "var(--apx-color-primary, #d30704)",
   },
   buttonPrimary: {
+    transition: "150ms",
     fontSize: "14px",
     fontWeight: "700",
     color: "#ffffff",
@@ -163,7 +171,24 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     gap: "8px",
     shadow: "none",
   },
+  // The Back / Next area: the gap between its buttons (layout — attach, arrange — is the frame's).
+  actions: { gap: "10px" },
+  headerButton: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#ffffff",
+    background: "var(--apx-color-primary, #d30704)",
+    borderColor: "var(--apx-color-primary, #d30704)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "9999px",
+    paddingX: "16px",
+    paddingY: "8px",
+    transition: "150ms",
+    shadow: "none",
+  },
   buttonSecondary: {
+    transition: "150ms",
     fontSize: "14px",
     fontWeight: "600",
     color: "var(--apx-color-text, #17140f)",
@@ -200,8 +225,32 @@ export const APEX_FONT_STACK = '"Archivo", "Helvetica Neue", Arial, sans-serif';
 export const APEX_STRUCTURE_CSS = `
 %S { font-family: var(--apx-font-family, ${APEX_FONT_STACK}); container: apx / inline-size; }
 %S .apx-container { display: flex; flex-direction: column; margin-left: auto; margin-right: auto; width: 100%; }
+/* The frame: the page is a column (header bar, the form, the Back/Next bar); left / centre / right
+   place the form box and its content (container.align, step.align). */
+%S { display: flex; flex-direction: column; min-height: var(--apx-frame-min-height, 100vh); }
+%S .apx-frame-body { flex: 1 0 auto; padding: 32px 16px; }
+@container apx (min-width: 640px) { %S .apx-frame-body { padding: 48px 24px; } }
+%S .apx-container[data-align="left"] { margin-left: 0; margin-right: auto; }
+%S .apx-container[data-align="right"] { margin-left: auto; margin-right: 0; }
+%S .apx-step { display: flex; flex-direction: column; margin-left: auto; margin-right: auto; max-width: 100%; }
+%S .apx-step[data-align="left"] { margin-left: 0; margin-right: auto; }
+%S .apx-step[data-align="right"] { margin-left: auto; margin-right: 0; }
+/* The header: a row with three places (logo and button on different sides), then the title. */
 %S .apx-header { display: flex; flex-direction: column; }
+%S .apx-header-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
+%S .apx-header-row > [data-side="left"] { grid-column: 1; justify-self: start; }
+%S .apx-header-row > [data-side="center"] { grid-column: 2; justify-self: center; }
+%S .apx-header-row > [data-side="right"] { grid-column: 3; justify-self: end; }
+%S .apx-header-row > * { grid-row: 1; min-width: 0; }
+/* Across the page: a bar at the top. Reads the header's own variables first, so the theme wins. */
+%S .apx-header[data-attach="page"] {
+  width: 100%; margin-left: auto; margin-right: auto;
+  background: var(--apx-header-background, var(--apx-color-surface, #ffffff));
+  border-bottom: var(--apx-header-border-width, 1px) var(--apx-header-border-style, solid) var(--apx-header-border-color, var(--apx-color-border, #e4dfd9));
+  padding: var(--apx-header-padding-y, 12px) var(--apx-header-padding-x, 20px);
+}
 %S .apx-logo { display: block; width: auto; object-fit: contain; }
+%S .apx-header-button { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 %S .apx-progress { overflow: hidden; }
 %S .apx-progress-bar { height: 100%; transition: width .25s ease; }
 %S .apx-question { display: flex; flex-direction: column; }
@@ -230,13 +279,40 @@ export const APEX_STRUCTURE_CSS = `
   %S .apx-question[data-image] .apx-question-image-row { margin-bottom: var(--apx-question-image-margin-bottom, 12px); }
 }
 %S .apx-options, %S .apx-plans { display: flex; flex-direction: column; gap: 8px; }
-%S .apx-option, %S .apx-plan { display: flex; align-items: flex-start; cursor: pointer; transition: border-color .15s, background-color .15s; }
+%S .apx-option, %S .apx-plan { display: flex; align-items: flex-start; cursor: pointer; transition-property: border-color, background-color, color, box-shadow, transform; }
 %S .apx-option-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 %S .apx-input { display: block; }
 %S textarea.apx-input { min-height: 84px; resize: vertical; }
 %S .apx-upload { display: flex; align-items: center; cursor: pointer; }
+/* Back / Next. arrange: spread (Back left, Next right), grouped left / centre / right, or full width. */
 %S .apx-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-%S .apx-button-primary, %S .apx-button-secondary { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: filter .15s, background-color .15s; }
+%S .apx-actions[data-arrange="left"] { justify-content: flex-start; }
+%S .apx-actions[data-arrange="center"] { justify-content: center; }
+%S .apx-actions[data-arrange="right"] { justify-content: flex-end; }
+%S .apx-actions[data-arrange="stretch"] > * { flex: 1 1 0; }
+%S .apx-actions[data-arrange="spread"] > .apx-button-primary { flex: 1 1 auto; }
+@container apx (min-width: 640px) {
+  %S .apx-actions[data-arrange="spread"] > .apx-button-primary { flex: 0 0 auto; }
+  %S .apx-actions:not([data-arrange="stretch"]) > .apx-button-primary { min-width: 160px; }
+}
+/* A lone button (details page, payment) fills a spread area, as it always has. */
+%S .apx-actions[data-arrange="spread"] > .apx-button-primary:only-child { flex: 1 1 auto; }
+/* Across the page: a bar that stays at the bottom of the screen. The bar carries the area's
+   background, border and shadow; the buttons inside keep its width, spacing and arrangement. */
+%S .apx-actions-bar:empty { display: none; }
+%S .apx-actions-bar {
+  position: sticky; bottom: 0; z-index: 5; margin-top: auto;
+  background: var(--apx-actions-background, var(--apx-color-surface, #ffffff));
+  border-top: var(--apx-actions-border-width, 1px) var(--apx-actions-border-style, solid) var(--apx-actions-border-color, var(--apx-color-border, #e4dfd9));
+  box-shadow: var(--apx-actions-shadow, 0 -6px 18px rgba(23, 20, 15, .06));
+}
+%S .apx-actions-bar > .apx-actions {
+  background: transparent; border: 0; box-shadow: none; width: 100%; margin-left: auto; margin-right: auto;
+  max-width: var(--apx-actions-max-width, var(--apx-container-max-width, 560px));
+  padding: var(--apx-actions-padding-y, 12px) var(--apx-actions-padding-x, 16px);
+}
+%S .apx-button-primary, %S .apx-button-secondary, %S .apx-header-button { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; transition-property: filter, background-color, border-color, color, box-shadow, transform; }
+%S .apx-input, %S .apx-upload { transition-property: border-color, background-color, color, box-shadow, transform; }
 %S .apx-button-primary:hover:not(:disabled) { filter: brightness(1.08); }
 %S .apx-button-primary:disabled, %S .apx-button-secondary:disabled { opacity: .5; cursor: default; }
 %S .apx-content { display: flex; }
@@ -251,7 +327,7 @@ export const APEX_STRUCTURE_CSS = `
 }
 /* A visible keyboard focus ring: outline is not a theme property and is never removed. */
 %S .apx-input:focus-visible, %S .apx-option:focus-visible, %S .apx-plan:focus-visible,
-%S .apx-upload:focus-visible, %S .apx-button-primary:focus-visible, %S .apx-button-secondary:focus-visible {
+%S .apx-upload:focus-visible, %S .apx-button-primary:focus-visible, %S .apx-button-secondary:focus-visible, %S .apx-header-button:focus-visible {
   outline: 2px solid var(--apx-color-primary, #d30704); outline-offset: 2px;
 }
 `;

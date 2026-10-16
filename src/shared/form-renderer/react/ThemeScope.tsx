@@ -36,22 +36,29 @@ const ThemeContext = createContext<ThemeContextValue>({ values: null, vars: them
 
 export function ThemeScope({
   values,
-  rules = THEME_RULES,
+  rules,
   className = "",
+  frameMinHeight,
   children,
 }: {
   /** The merged theme (`theme.values` from a preview, manifest or product response). */
   values: Theme | null | undefined;
   /** Which properties each part accepts; defaults to the copy of the backend's rules. */
-  rules?: ThemeRulesTable | null;
+  rules?: ThemeRulesTable | null | undefined;
   className?: string;
+  /** The page's minimum height (default: the screen). A preview passes its own. */
+  frameMinHeight?: string | undefined;
   children: ReactNode;
 }) {
   // A stable, CSS-safe id so two previews on one page never share a stylesheet.
   const scopeId = `apx-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const scope = `.apx-page[data-apx-scope="${scopeId}"]`;
-  const css = useMemo(() => buildThemeCss(rules, scope), [rules, scope]);
+  const css = useMemo(() => buildThemeCss(rules ?? THEME_RULES, scope), [rules, scope]);
   const vars = useMemo(() => themeToVariables(values), [values]);
+  const style = useMemo(
+    () => varsToStyle(frameMinHeight ? { ...vars.page, "--apx-frame-min-height": frameMinHeight } : vars.page),
+    [vars, frameMinHeight],
+  );
   const font = values?.global?.fontFamily;
 
   useEffect(() => {
@@ -63,11 +70,16 @@ export function ThemeScope({
   return (
     <ThemeContext.Provider value={ctx}>
       <style>{css}</style>
-      <div className={`apx-page ${className}`} data-apx-scope={scopeId} style={varsToStyle(vars.page)}>
+      <div className={`apx-page ${className}`} data-apx-scope={scopeId} style={style}>
         {children}
       </div>
     </ThemeContext.Provider>
   );
+}
+
+/** The theme of the nearest `ThemeScope` (null for the Apex look). */
+export function useThemeValues(): Theme | null {
+  return useContext(ThemeContext).values;
 }
 
 /** A question (or follow-up field): carries its type's and its own theme variables. */

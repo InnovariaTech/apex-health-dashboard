@@ -17,3 +17,4 @@ export * from "./react/TextAnswer";
 export * from "./react/ContentBlocks";
 export * from "./react/UploadNotice";
 export * from "./react/DetailsIntro";
+export * from "./react/FormFrame";
