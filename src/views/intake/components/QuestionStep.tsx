@@ -5,10 +5,13 @@ import {
   ContentBlocks,
   FormActions,
   FormLabel,
+  FormProgress,
   FormQuestion,
+  StepTitle,
   TextAnswer,
   ThemedQuestion,
   UploadNotice,
+  useNextLabel,
 } from "@/shared/form-renderer";
 import { useBack, useSubmitAnswer } from "@/hooks/intake/useIntake";
 import type {
@@ -224,14 +227,9 @@ export default function QuestionStepView({
 
   return (
     <>
-      {step.progress && (
-        <div className="apx-progress">
-          <div
-            className="apx-progress-bar"
-            style={{ width: `${Math.min(100, step.progress.percent)}%` }}
-          />
-        </div>
-      )}
+      {step.progress && <FormProgress percent={step.progress.percent} />}
+
+      <StepTitle title={step.stepTitle} />
 
       <ContentBlocks content={step.content} />
 
@@ -270,9 +268,14 @@ export default function QuestionStepView({
           className="apx-button-primary"
         >
           {submit.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          {step.isLast ? <FormLabel name="submit" fallback="Continue" /> : <FormLabel name="next" fallback="Continue" />}
+          {step.isLast ? <FormLabel name="submit" fallback="Continue" /> : <NextLabel title={step.nextStepTitle} />}
         </button>
       </FormActions>
     </>
   );
+}
+
+/** "Next: <the next section>" when the theme sets `labels.nextWithTitle` (it names the page, not a promise). */
+function NextLabel({ title }: { title?: string | undefined }) {
+  return <>{useNextLabel(title, "Continue")}</>;
 }

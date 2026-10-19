@@ -5,12 +5,14 @@ import {
   identityPlaceholder,
   identityVariables,
   imagePlacement,
+  isHidden,
   loadThemeFont,
   placeholderText,
   questionVariables,
   themeToVariables,
   varsToStyle,
   type ImagePlacement,
+  type ThemePlace,
   type ThemeVariables,
 } from "../theme/themeKit";
 import type { IdentityThemeField, Theme, ThemeRulesTable } from "../types";
@@ -33,6 +35,9 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({ values: null, vars: themeToVariables(null) });
+
+/** The question or details-page field being drawn, so `useHidden` reads its own levels first. */
+const PlaceContext = createContext<ThemePlace>(null);
 
 export function ThemeScope({
   values,
@@ -98,16 +103,19 @@ export function ThemedQuestion({
   children: ReactNode;
 }) {
   const { vars } = useContext(ThemeContext);
+  const place = useMemo(() => ({ type, key: fieldKey }), [type, fieldKey]);
   return (
-    <div
-      className={`apx-question ${className}`}
-      data-type={type}
-      data-key={fieldKey}
-      data-image={imageSide}
-      style={varsToStyle(questionVariables(vars, type, fieldKey))}
-    >
-      {children}
-    </div>
+    <PlaceContext.Provider value={place}>
+      <div
+        className={`apx-question ${className}`}
+        data-type={type}
+        data-key={fieldKey}
+        data-image={imageSide}
+        style={varsToStyle(questionVariables(vars, type, fieldKey))}
+      >
+        {children}
+      </div>
+    </PlaceContext.Provider>
   );
 }
 
@@ -132,10 +140,13 @@ export function ThemedIdentityField({
 }) {
   const { values } = useContext(ThemeContext);
   const style = useMemo(() => varsToStyle(identityVariables(values, field)), [values, field]);
+  const place = useMemo(() => ({ identity: field }), [field]);
   return (
-    <div className={`apx-question ${className}`} data-identity={field} style={style}>
-      {children}
-    </div>
+    <PlaceContext.Provider value={place}>
+      <div className={`apx-question ${className}`} data-identity={field} style={style}>
+        {children}
+      </div>
+    </PlaceContext.Provider>
   );
 }
 
@@ -149,4 +160,14 @@ export function useIdentityPlaceholder(field: IdentityThemeField, fallback: stri
 export function useImagePlacement(fieldKey: string, type: string): ImagePlacement {
   const { values } = useContext(ThemeContext);
   return imagePlacement(values, fieldKey, type);
+}
+
+/**
+ * Whether the theme hides `element` here (rules v5): inside a question or details-page field its
+ * own levels come first. Hidden elements are not drawn; inputs, errors and the buttons that move
+ * the patient on never ask.
+ */
+export function useHidden(element: string): boolean {
+  const { values } = useContext(ThemeContext);
+  return isHidden(values, element, useContext(PlaceContext));
 }

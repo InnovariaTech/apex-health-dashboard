@@ -1,5 +1,7 @@
 // GENERATED from apex-form-renderer/src — do not edit here. Edit there, then run `npm run sync`.
-import { ThemedIdentityField, useIdentityPlaceholder } from "./ThemeScope";
+import { isHidden } from "../theme/themeKit";
+import { ThemedIdentityField, useIdentityPlaceholder, useThemeValues } from "./ThemeScope";
+import { DatePartsWidget } from "./LayoutWidgets";
 import type { IdentityFieldSpec } from "../identity/identityFields";
 
 /**
@@ -13,16 +15,21 @@ export default function IdentityFieldInput({
   onChange,
   onBlur,
   error,
+  dateParts = false,
 }: {
   spec: IdentityFieldSpec;
   value: string;
   onChange: (v: string) => void;
   onBlur?: () => void;
   error?: string | null;
+  /** Date of birth as Month / Day / Year dropdowns (a details-page layout's `dobWidget`). Same `YYYY-MM-DD` value. */
+  dateParts?: boolean | undefined;
 }) {
   const placeholder = useIdentityPlaceholder(spec.field, spec.placeholder ?? "");
+  // The theme may hide the help line (rules v5): this field's `identity` level, then the form's.
+  const help = spec.help && !isHidden(useThemeValues(), "helpText", { identity: spec.field }) ? spec.help : null;
   const id = `identity-${spec.field}`;
-  const describedBy = [spec.help && `${id}-help`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
+  const describedBy = [help && `${id}-help`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
 
   return (
     <ThemedIdentityField field={spec.field} className="gap-1.5">
@@ -30,11 +37,22 @@ export default function IdentityFieldInput({
         {spec.label}
         {spec.optional && <span className="opacity-60" style={{ fontWeight: 400 }}> (optional)</span>}
       </label>
-      {spec.help && (
+      {help && (
         <p className="apx-help-text" id={`${id}-help`}>
-          {spec.help}
+          {help}
         </p>
       )}
+      {dateParts && spec.inputType === "date" ? (
+        <DatePartsWidget
+          value={value}
+          onChange={(v) => {
+            onChange(v);
+            // A complete date counts as leaving the field, so its check shows straight away.
+            if (v) onBlur?.();
+          }}
+          maxYear={new Date().getFullYear()}
+        />
+      ) : (
       <input
         id={id}
         type={spec.inputType}
@@ -46,6 +64,7 @@ export default function IdentityFieldInput({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
       />
+      )}
       {error && (
         <p className="apx-error" id={`${id}-error`} role="alert">
           {error}

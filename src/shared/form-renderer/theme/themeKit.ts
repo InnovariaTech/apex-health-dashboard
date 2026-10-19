@@ -58,8 +58,8 @@ export const TRANSITIONS: Record<string, string> = { none: "0s", fast: "150ms", 
 /** Hover motion presets: fixed, small amounts so nothing can cover content. */
 export const MOTIONS: Record<string, string> = { none: "none", lift: "translateY(-2px)", grow: "scale(1.02)" };
 
-/** Values the frontend reads (words, links, places, layout choices), never written as CSS. */
-export const VALUE_ONLY = new Set(["text", "placement", "attach", "align", "arrange", "link"]);
+/** Values the frontend reads (words, links, places, layout choices, `hidden`), never written as CSS. */
+export const VALUE_ONLY = new Set(["text", "placement", "attach", "align", "arrange", "link", "hidden"]);
 
 const cssValue = (property: string, value: string | number) => {
   const v = String(value);
@@ -76,7 +76,7 @@ function blockVariables(element: string, block: ThemeElementStyle | undefined, o
     if (VALUE_ONLY.has(key) || value === undefined) continue; // read by the layout, not CSS
     if ((key === "hover" || key === "focus") && typeof value === "object") {
       for (const [p, v] of Object.entries(value)) out[`--apx-${kebab(element)}-${kebab(p)}-${key}`] = cssValue(p, v);
-    } else if (typeof value !== "object") {
+    } else if (typeof value === "string" || typeof value === "number") {
       out[`--apx-${kebab(element)}-${kebab(key)}`] = cssValue(key, value);
     }
   }
@@ -129,6 +129,27 @@ export function identityVariables(values: Theme | null | undefined, field: Ident
 export function identityPlaceholder(values: Theme | null | undefined, field: IdentityThemeField, fallback: string): string {
   const t = values?.identity?.[field]?.placeholder?.text;
   return typeof t === "string" ? t : fallback;
+}
+
+/** Where an element is drawn, for the levels below `elements`: a question, or a details-page field. */
+export type ThemePlace = { type: string; key: string } | { identity: IdentityThemeField } | null;
+
+/**
+ * Whether the theme switches an element off (rules v5, `hidden: true`): the most specific level
+ * that says either way wins — `questions.<key>`, then `questionTypes.<type>`, then `elements`
+ * (`identity.<field>`, then `elements`, on the details pages). `false` shows it again. A hidden
+ * element is not drawn at all; parents (`header`, `progress`) are checked by their callers.
+ */
+export function isHidden(values: Theme | null | undefined, element: string, place: ThemePlace = null): boolean {
+  const v = values ?? {};
+  const read = (els?: ThemeElements) => {
+    const h = els?.[element]?.hidden;
+    return typeof h === "boolean" ? h : undefined;
+  };
+  let own: boolean | undefined;
+  if (place && "identity" in place) own = read(v.identity?.[place.identity]);
+  else if (place && "key" in place) own = read(v.questions?.[place.key]) ?? read(v.questionTypes?.[place.type]);
+  return (own ?? read(v.elements)) === true;
 }
 
 export type ImagePlacement = "top" | "middle" | "bottom" | "left" | "right";
@@ -208,6 +229,20 @@ export function formLabel(values: Theme | null | undefined, key: FormLabelKey, f
   return typeof t === "string" && t.trim() ? t : fallback;
 }
 
+/**
+ * The Next button's words when the next page has a title (rules v5): `labels.nextWithTitle` with
+ * `{title}` filled in, if that fits in 40 characters; else `labels.next`, else `fallback`. The
+ * title is a label, not a promise — a condition may still skip that page.
+ */
+export function nextLabel(values: Theme | null | undefined, nextTitle: string | null | undefined, fallback: string): string {
+  const template = values?.labels?.nextWithTitle;
+  if (typeof template === "string" && template.includes("{title}") && nextTitle) {
+    const text = template.replace("{title}", nextTitle);
+    if (text.length <= 40) return text;
+  }
+  return formLabel(values, "next", fallback);
+}
+
 // ── The generated stylesheet ─────────────────────────────────────────────────
 
 /** Two declarations for the shorthand-free padding keys. */
@@ -233,8 +268,11 @@ const HOVER_SELECTORS: Record<string, string> = {
   plan: ".apx-plan:not(.apx-plan-selected):hover",
 };
 
-/** A selected option/plan falls back to the option's own themed value before the base. */
-const PARENT: Record<string, string> = { optionSelected: "option", planSelected: "plan" };
+/**
+ * A selected option/plan falls back to the option's own themed value before the base. The form
+ * title (rules v5) falls back to `title`, which styled it before it had its own element.
+ */
+const PARENT: Record<string, string> = { optionSelected: "option", planSelected: "plan", formTitle: "title" };
 
 /** Properties an element's theme rule leaves to the structure rules (they style a wrapper). */
 const WRAPPER_PROPERTIES: Record<string, string[]> = { questionImage: ["textAlign", "marginBottom"] };

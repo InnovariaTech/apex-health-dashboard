@@ -1,6 +1,7 @@
 // GENERATED from apex-form-renderer/src — do not edit here. Edit there, then run `npm run sync`.
 import type { ReactNode } from "react";
 import type { ChoiceOption } from "../types";
+import { useHidden } from "./ThemeScope";
 
 /**
  * What picking `key` does to a selection: one choice replaces the last; with several allowed, an
@@ -33,6 +34,8 @@ export function ChoiceList({
   /** Shown under a chosen option, e.g. its follow-up field. */
   renderBelow?: (option: ChoiceOption) => ReactNode;
 }) {
+  // Inside its question, so the question's and its type's `hidden` come first (rules v5).
+  const hideHelp = useHidden("optionHelpText");
   return (
     <div className="apx-options" role={multi ? "group" : "radiogroup"}>
       {options.map((o) => {
@@ -49,7 +52,7 @@ export function ChoiceList({
               />
               <span className="apx-option-text">
                 <span className="apx-option-label">{o.label}</span>
-                {o.helpText && <span className="apx-option-help-text">{o.helpText}</span>}
+                {o.helpText && !hideHelp && <span className="apx-option-help-text">{o.helpText}</span>}
               </span>
             </label>
             {on && renderBelow?.(o)}

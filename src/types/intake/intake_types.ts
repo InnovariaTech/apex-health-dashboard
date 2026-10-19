@@ -1,4 +1,5 @@
 import type { ResolvedTheme } from "@/types/intake/theme_types";
+import type { DetailsPage, LayoutNode } from "@/shared/form-renderer";
 /**
  * Patient intake runtime types — the server-driven "fold".
  *
@@ -46,6 +47,7 @@ export interface FieldFollowup {
 export interface FieldOption {
   key: string;
   label: string;
+  helpText?: string;
   /** "None of the above" — clears every other selection. */
   exclusive?: boolean;
   followup?: FieldFollowup;
@@ -103,6 +105,10 @@ export interface QuestionStep {
   content: IntakeContent[];
   progress: IntakeProgress;
   canGoBack: boolean;
+  /** This page's title, drawn above it (`.apx-step-title`); several pages may share one. */
+  stepTitle?: string;
+  /** The next titled page's title when it differs from this one: the "Next: <title>" label. */
+  nextStepTitle?: string;
   /**
    * The last question screen: its button says the theme's "submit" words. Not sent by the backend
    * yet (asked for); until it is, every screen says "next".
@@ -237,6 +243,16 @@ export interface PublicIntakeForm {
   formKey: string;
   title: string;
   theme: ResolvedTheme;
+  /**
+   * The published details pages, in order (Documents/hidden-details-pages-titles.md §2), or null
+   * for one plain page of all five fields. Absent from older backends.
+   */
+  detailsPages?: DetailsPage[] | null;
+  /**
+   * The first details page's tree, kept by the backend for one release for older frontends.
+   * Read only when `detailsPages` is absent; it will be removed.
+   */
+  layout?: LayoutNode | null;
 }
 
 export interface IntakeManifest {

@@ -6,7 +6,8 @@
  */
 
 export type ThemeElementStyle = {
-  [property: string]: string | number | Record<string, string | number> | undefined;
+  /** `hidden` (rules v5) is the one boolean: the element is not drawn. */
+  [property: string]: string | number | boolean | Record<string, string | number> | undefined;
   hover?: Record<string, string | number>;
   focus?: Record<string, string | number>;
 };
@@ -31,8 +32,11 @@ export interface Theme {
   labels?: Partial<Record<FormLabelKey, string>>;
 }
 
-/** The buttons whose words a theme may change. */
-export type FormLabelKey = "back" | "next" | "submit" | "pay" | "start";
+/**
+ * The buttons whose words a theme may change. `nextWithTitle` (rules v5) is a template with
+ * `{title}`, e.g. "Next: {title}"; read it through `nextLabel`, never on its own.
+ */
+export type FormLabelKey = "back" | "next" | "submit" | "pay" | "start" | "nextWithTitle";
 
 /** Which properties each element accepts, and its hover/focus states (the backend's rules). */
 export interface ThemeRulesTable {
@@ -52,6 +56,30 @@ export interface QuestionImage {
   alt: string;
 }
 
+/** What a choice shows as a product card (the `cards` widget). Never a price: see `plan`. */
+export interface OptionCardContent {
+  image?: QuestionImage;
+  badge?: string;
+  subtitle?: string;
+  features?: string[];
+}
+
+/**
+ * The plan a choice sells, as the step serves it: the only price a card may show, so the figure on
+ * screen is the one charged. `available: false` when the plan is archived or gone.
+ */
+export interface OptionPlan {
+  checkoutFormId: string;
+  title: string;
+  cost: number | null;
+  compareAtCost: number | null;
+  currency: string;
+  /** `upfront`: the cost covers every month. `per_cycle`: charged every month. */
+  billingMode: "upfront" | "per_cycle";
+  totalCycles: number | null;
+  available: boolean;
+}
+
 /** A choice as both the patient walk and the builder preview describe it. */
 export interface ChoiceOption {
   key: string;
@@ -59,6 +87,10 @@ export interface ChoiceOption {
   helpText?: string | null;
   /** "None of these": picking it clears the rest, and picking anything else clears it. */
   exclusive?: boolean;
+  /** Drawn by the `cards` widget. */
+  card?: OptionCardContent | null;
+  /** The plan this choice sells, with its live price (added by the server when a step is served). */
+  plan?: OptionPlan | null;
 }
 
 export type ContentSeverity = "info" | "warning" | "crisis";
