@@ -9,7 +9,7 @@ import { ThemeScope, useHidden, useThemeValues } from "./ThemeScope";
  * The page a form sits in (rules v3, "page frame"): the themed page, the header (logo, the
  * organization's header button, the form's title), the form box and the content inside it, and a
  * place for the Back / Next area. Every screen of a walk and the builder's preview use this, so the
- * layout choices (`header.attach`, `logo.align`, `headerButton.align`, `container.align`,
+ * layout choices (`header.attach`, `logo.align`, `headerButton.align`, `container.align`, `container.verticalAlign`,
  * `step.align`, `actions.attach`, `actions.arrange`) are drawn the same everywhere.
  *
  * - `header.attach: page` makes the header a bar across the top of the page, and the title moves to
@@ -86,7 +86,7 @@ function FrameBody({
   return (
     <>
       {pageHeader && header("page")}
-      <div className="apx-frame-body">
+      <div className="apx-frame-body" data-valign={layout.containerVerticalAlign}>
         <div className="apx-container" data-align={layout.containerAlign}>
           {pageHeader ? titleEl : header("form", titleEl)}
           <div className="apx-step" data-align={layout.stepAlign}>

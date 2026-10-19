@@ -276,6 +276,11 @@ export const APEX_STRUCTURE_CSS = `
 %S .apx-frame-body { flex: 1 0 auto; padding: 32px 16px; }
 @container apx (min-width: 640px) { %S .apx-frame-body { padding: 48px 24px; } }
 %S .apx-container[data-align="left"] { margin-left: 0; margin-right: auto; }
+/* Up and down the page (container.verticalAlign): the body fills the frame's height, so its box can
+   sit in the middle or at the bottom. Taller than the screen, it simply starts at the top. */
+%S .apx-frame-body[data-valign="center"], %S .apx-frame-body[data-valign="bottom"] { display: flex; flex-direction: column; }
+%S .apx-frame-body[data-valign="center"] { justify-content: center; }
+%S .apx-frame-body[data-valign="bottom"] { justify-content: flex-end; }
 %S .apx-container[data-align="right"] { margin-left: auto; margin-right: 0; }
 %S .apx-step { display: flex; flex-direction: column; margin-left: auto; margin-right: auto; }
 /* Never wider than the screen, whatever width the theme sets (the more specific selectors beat the
@@ -400,6 +405,11 @@ export const APEX_STRUCTURE_CSS = `
 %S .apx-stack[data-align="center"] .apx-option, %S .apx-stack[data-align="center"] .apx-callout { text-align: left; }
 %S .apx-columns { display: grid; grid-template-columns: var(--apx-columns-template, 1fr 1fr); align-items: start; min-width: 0; }
 %S .apx-columns > * { min-width: 0; }
+/* How the columns line up against each other (columns.verticalAlign; default top). */
+%S .apx-columns[data-valign="center"] { align-items: center; }
+%S .apx-columns[data-valign="bottom"] { align-items: end; }
+%S .apx-columns[data-valign="stretch"] { align-items: stretch; }
+%S .apx-columns[data-valign="stretch"] > .apx-card, %S .apx-columns[data-valign="stretch"] > .apx-stack { height: 100%; }
 %S .apx-columns[data-gap="none"] { gap: 0; }
 %S .apx-columns[data-gap="sm"] { gap: 8px; }
 %S .apx-columns[data-gap="lg"] { gap: 24px; }

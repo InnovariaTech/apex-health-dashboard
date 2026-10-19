@@ -148,6 +148,7 @@ export function PageLayout({
             className="apx-columns"
             data-gap={str(n.gap) ?? "md"}
             data-collapse={str(n.collapse) ?? "mobile"}
+            data-valign={str(n.verticalAlign) ?? "top"}
             style={style}
             {...id}
           >

@@ -190,6 +190,8 @@ export interface FrameLayout {
   /** The header button: shown only when it has both words and an https link. */
   button: { text: string; link: string } | null;
   containerAlign: Side;
+  /** Where the form box sits up and down the page (rules v6). */
+  containerVerticalAlign: "top" | "center" | "bottom";
   stepAlign: Side;
   actionsAttach: Attach;
   arrange: Arrange;
@@ -217,6 +219,7 @@ export function frameLayout(values: Theme | null | undefined): FrameLayout {
     buttonAlign,
     button,
     containerAlign: pick(el.container?.align, SIDES, "center"),
+    containerVerticalAlign: pick(el.container?.verticalAlign, ["top", "center", "bottom"] as const, "top"),
     stepAlign: pick(el.step?.align, SIDES, "center"),
     actionsAttach: pick(el.actions?.attach, ["form", "page"] as const, "form"),
     arrange: pick(el.actions?.arrange, ["spread", "left", "center", "right", "stretch"] as const, "spread"),

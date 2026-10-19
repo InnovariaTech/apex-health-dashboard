@@ -4,8 +4,9 @@ import { kebab } from "./themeKit";
 
 /**
  * Which theme properties each form part accepts — a copy of the backend's rules
- * (`packages/modules/branding/theme.rules.ts`, `GET /admin/branding/rules`, version 5:
+ * (`packages/modules/branding/theme.rules.ts`, `GET /admin/branding/rules`, version 6:
  * page frame, hover effects, the layout elements, `hidden`, `formTitle` and `stepTitle`,
+ * `container.verticalAlign`,
  * generated from `describeRules()` on 2026-10-19). That route
  * is admin-only, so the patient app carries the table. When the backend bumps the rules version,
  * regenerate this from `describeRules()`. A property missing here simply isn't themed (the Apex
@@ -14,7 +15,7 @@ import { kebab } from "./themeKit";
 
 const TABLE: Record<string, { p: string[]; s: Record<string, string[]> }> = {
   page: { p: ["color", "background", "borderColor"], s: {} },
-  container: { p: ["color", "background", "borderColor", "borderWidth", "borderStyle", "borderRadius", "paddingX", "paddingY", "gap", "marginBottom", "width", "maxWidth", "shadow", "align"], s: {} },
+  container: { p: ["color", "background", "borderColor", "borderWidth", "borderStyle", "borderRadius", "paddingX", "paddingY", "gap", "marginBottom", "width", "maxWidth", "shadow", "align", "verticalAlign"], s: {} },
   step: { p: ["color", "background", "borderColor", "borderWidth", "borderStyle", "borderRadius", "paddingX", "paddingY", "gap", "marginBottom", "width", "maxWidth", "align", "textAlign"], s: {} },
   header: { p: ["fontSize", "fontWeight", "fontStyle", "textAlign", "lineHeight", "letterSpacing", "textTransform", "color", "background", "borderColor", "borderWidth", "borderStyle", "borderRadius", "paddingX", "paddingY", "gap", "marginBottom", "attach", "maxWidth", "height", "shadow", "hidden"], s: {} },
   logo: { p: ["marginBottom", "height", "maxWidth", "align", "hidden"], s: {} },
@@ -50,13 +51,13 @@ const TABLE: Record<string, { p: string[]; s: Record<string, string[]> }> = {
 };
 
 /** Values the frontend reads (words, links, places, layout), never turned into CSS. */
-const NOT_CSS = new Set(["text", "placement", "attach", "align", "arrange", "link", "hidden"]);
+const NOT_CSS = new Set(["text", "placement", "attach", "align", "verticalAlign", "arrange", "link", "hidden"]);
 
 const variableFor = (element: string, property: string, state?: string) =>
   `--apx-${kebab(element)}-${kebab(property)}${state ? `-${state}` : ""}`;
 
 export const THEME_RULES: ThemeRulesTable = {
-  version: 5,
+  version: 6,
   elements: Object.fromEntries(
     Object.entries(TABLE).map(([element, { p, s }]) => [
       element,
