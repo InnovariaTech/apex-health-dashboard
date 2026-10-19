@@ -242,6 +242,9 @@ export const APEX_BASE: Record<string, Record<string, string>> = {
     borderRadius: "var(--apx-radius, 12px)",
     paddingX: "16px",
     paddingY: "14px",
+    // Here, not only in the structure rules: the theme rule's `gap` would otherwise fall back to
+    // `unset` and run the label into the value ("Your BMI isEnter your weight…").
+    gap: "6px",
   },
   columns: { gap: "12px" },
 };
